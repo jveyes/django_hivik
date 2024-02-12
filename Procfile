@@ -1,0 +1,1 @@
+web: gunicorn DJANGO_HIVIK.wsgi --log-file -
