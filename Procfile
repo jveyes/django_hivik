@@ -1,1 +1,1 @@
-web: gunicorn django_hivik.wsgi --log-file -
+web: gunicorn hivik.wsgi --log-file -
