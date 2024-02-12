@@ -1,1 +1,1 @@
-web: gunicorn hivik.wsgi --log-file -
+web: gunicorn hivik2.wsgi --log-file -
