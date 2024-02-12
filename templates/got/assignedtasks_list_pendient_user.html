@@ -1,0 +1,36 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}Mis actividades{% endblock %}
+
+{% block content %}
+
+<table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#OT</th>
+        <th scope="col">Sistema</th>
+        <th scope="col">Descripción</th>
+        <th scope="col">Fecha de finalización</th>
+        {% if perms.got.can_see_completely %}<th scope="col"></th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+        {% if task_list %}
+            {% for act in task_list %}
+            <tr>
+                <td>OT-{{act.ot.num_ot}}</td>
+                <td>{{act.ot.system}}</td>
+                <td><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+                <td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date}}</td>
+                {% if perms.got.can_see_completely %}<td><a href="{% url 'got:reschedule-task' act.id %}">reprogramar</a></td>{% endif %}
+            </tr>
+            {% endfor %}
+		{% else %}
+			<p>No hay actividades pendientes.</p>
+    	{% endif %}
+    </tbody>
+  </table>
+
+
+
+{% endblock %}

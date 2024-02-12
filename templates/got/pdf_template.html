@@ -1,0 +1,88 @@
+{% load static %}
+<html>
+<head>
+</head>
+    
+<body>
+    <!-- Content for Static Frame 'header_frame' -->
+    <div id="header_content">
+        <img src="static\got\Logo.png" style="width: 200px; height: auto;">
+        <h3>Reporte Orden de trabajo #{{ ot.num_ot }}</h3>
+    </div>
+    
+    <!-- HTML Content -->
+    <table>
+        <tr>
+            <td><strong>Fecha:</strong> {{ot.creation_date}}</td>
+            <td><strong>Estado:</strong> {{ot.get_state_display}}</td>
+        </tr>
+        <tr>
+            <td><strong>Supervisor: </strong>{{ ot.super.first_name }} {{ ot.super.last_name }}</td>
+            <td><strong>Departamento: </strong> Mantenimiento</td>
+        </tr>
+        <tr>
+            <td><strong>Descripción: </strong></td>
+            <td>{{ot.description}}</td>
+        </tr>
+    </table>
+    
+    <hr>
+        
+    <h3>ACTIVIDADES REALIZADAS</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Actividad</th>
+                <th>Responsable</th>
+                <th>Fecha</th>
+                <th>Tiempo Total(Dias)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for act in ot.task_set.all %}
+                <tr style="padding-top: 5px;">
+                    <td style="width: 5%; text-align: center;">{{ forloop.counter }}</td>
+                    <td style="width: 65%;">{{ act.description }}</td>
+                    <td style="text-align: center;">{{ act.responsible.first_name }} {{ act.responsible.last_name }}</td>
+                    <td style="text-align: center;">{{ act.start_date|date:"d/m/Y" }}</td>
+                    <td style="text-align: center; width: 5%;">{{ act.men_time }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h3>Novedades</h3>
+
+    <div>
+        {% for act in ot.task_set.all %}
+            {% if act.news %}
+                <div>
+                    <p>{{act.news}}</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <hr>
+    
+    <h3>Evidencias</h3>
+
+    <div>
+        {% for act in ot.task_set.all %}
+            {% if act.evidence %}
+                <div>
+                    <img src="{{ act.evidence.path }}">
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+
+        
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}{{ asset.name }}{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Supervisor: </th>
+                <td>{{asset.supervisor}}</td>
+            </tr>
+            <tr>
+                <th>Ubicación: </th>
+                <td>{{asset.location}}</td>
+            </tr>
+            <tr>
+                <th>Estado: </th>
+                <td>{{asset.get_state_display}}</td>
+            </tr>    
+        </tbody>
+    </table>
+
+    <div class="container">
+    {% if asset.system_set.all %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+              <th scope="col">Grupo constructivo</th>
+              <th scope="col">Nombre</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+                {% for sys in asset.system_set.all %}
+                    <tr>
+                        <th scope="row">{{sys.gruop}}</th>
+                        <td>{{sys.name}}</td>
+                    </tr>
+                {% endfor %}
+          </tbody>
+      </table>
+    {% else %}
+      <p>No hay sistemas registrados.</p>
+    {% endif %}
+    </div>
+
+{% endblock %}

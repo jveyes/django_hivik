@@ -1,0 +1,47 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}Detalle de actividad{% endblock %}
+
+{% block content %}
+
+
+
+<div class="container">
+    <a class="btn btn-primary" role="button" href="{% url 'got:task-update' task.id %}">
+        Modificar
+    </a>
+<table class="table">
+    <tbody>
+        <tr>
+            <th>Fecha: </th>
+            <td>{{task.start_date}}</td>
+        </tr>
+        <tr>
+            <th>Responsable: </th>
+            <td>{{task.responsible.first_name}} {{task.responsible.last_name}}</td>
+        </tr>
+        <tr>
+            <th>Estado: </th>
+            <td>{% if task.finished %}Completado{%else%}Pendiente{% endif %}</td>
+        </tr>
+        <tr>
+            <th>Descripción: </th>
+            <td>{{task.description}}</td>
+        </tr> 
+        <tr>
+            <th>Novedades: </th>
+            <td>{{task.news}}</td>
+        </tr>         
+    </tbody>
+</table>
+
+{% if task.evidence %}
+    
+        <h4>Evidencia de actividad</h4>
+        <img src="{{ task.evidence.url }}" style="width: 50%; height: auto;">
+    
+{% endif %}
+</div>
+
+
+{% endblock %}

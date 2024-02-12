@@ -1,0 +1,36 @@
+{% extends "registration/base_generic_log.html" %}
+
+
+{% block content %}
+  
+
+	{% if form.errors %}
+		<p>Su nombre de usuario y contraseña no coinciden. Inténtalo de nuevo.</p>
+	{% endif %}
+
+	<form method="post" action="{% url 'login' %}">{% csrf_token %}
+    	<div class="mb-3">
+      		<label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label_tag }}</label>
+      		<input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}">
+    	</div>
+  
+    	<div class="mb-3">
+      		<label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label_tag }}</label>
+      		<input type="password" class="form-control" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}">
+    	</div>
+  
+    	<div class="mb-3 form-check">
+      		<button type="submit" class="btn btn-primary">Ingresar</button>
+      		<input type="hidden" name="next" value="{{ next }}">
+    	</div>
+    
+  	</form>
+
+  	{# Asume que configura la vista de restablecimiento de contraseña en su URLconf #}
+  	<p><a href="{% url 'password_reset' %}">¿Olvidó su contraseña?</a></p>
+
+
+  
+{% endblock %}
+
+

@@ -1,0 +1,105 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}Detalle de OT-{{ot.num_ot}}{% endblock %} 
+
+{% block content %}
+
+<table class="table">
+    <tbody>
+        <tr>
+            <th>Fecha: </th>
+            <td>{{ot.creation_date}}</td>
+        </tr>
+        <tr>
+            <th>Supervisor: </th>
+            <td>{{ot.super.first_name}} {{ot.super.last_name}}</td>
+        </tr>
+        <tr>
+            <th>Estado: </th>
+            <td>{{ot.get_state_display}}</td>
+        </tr>
+        <tr>
+            <th>Sistema: </th>
+            <td>{{ot.system}}</td>
+        </tr>    
+        <tr>
+            <th>Descripción: </th>
+            <td>{{ot.description}}</td>
+        </tr>        
+    </tbody>
+</table>
+<div class="d-flex justify-content-end">
+    <div class="btn-group">
+        <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
+        <a href="{% url 'got:ot-update' ot.num_ot %}" class="btn btn-outline-primary">Actualizar</a>
+        <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
+    </div>
+</div>
+
+<h4>Actividades</h4>
+
+<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
+    Crear Actividad
+</button>
+  
+
+<div class="container">
+    {% if ot.task_set.all %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Novedades</th>
+                <th scope="col">Responsable</th>
+                <th scope="col">Editar</th>
+                <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for act in ot.task_set.all %}
+                <tr>
+                    <th scope="row">{{forloop.counter}}</th>
+                    <td><a href="{% url 'got:task-detail' act.id %}"> {{ act.description }}</a></td>
+                    <td>{{ act.news }}</td>
+                    <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
+                    <td>
+                        <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
+                    </td>
+                    <td>
+                        <a class="" href="{% url 'got:task-delete' act.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                    </td>
+                </tr>
+            {% endfor %}
+            
+          </tbody>
+        </table>
+    {% else %}
+        <p>No hay actividades registradas.</p>
+    {% endif %}
+    </div>
+
+
+    <div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="activityModalLabel">Crear Actividad</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="post" action="{{ ot.get_absolute_url }}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <table>
+                  {{ task_form.as_table }}
+                </table>
+                <button type="submit" class="btn btn-primary">Agregar Actividad</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+
+{% endblock %}
