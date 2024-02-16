@@ -162,3 +162,5 @@ cython_debug/
 *.bak
 
 *.sqlite3
+
+static/

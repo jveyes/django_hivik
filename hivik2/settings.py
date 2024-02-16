@@ -162,3 +162,14 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
+# settings.py
+
+import cloudinary
+          
+cloudinary.config( 
+  cloud_name = "dis3mhk98", 
+  api_key = "163165281694231", 
+  api_secret = "zX8XE35PFJfi5WATk94SUTlwS_0" 
+)
+
+
