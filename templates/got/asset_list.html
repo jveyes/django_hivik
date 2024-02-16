@@ -18,7 +18,7 @@
             {% for asset in asset_list %}
             <tr>
                 <td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
-                <td>{{asset.supervisor}}</td>
+                <td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
                 <td>{{asset.location}}</td>
                 <td>{{asset.get_state_display}}</td>
             </tr>

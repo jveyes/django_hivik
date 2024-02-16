@@ -160,3 +160,6 @@ DATABASES['default'].update(db_from_env)
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
