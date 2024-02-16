@@ -149,7 +149,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_TMP = os.path.join(BASE_DIR, 'static')
 
 os.makedirs(STATIC_TMP, exist_ok=True)
-os.makedirs(STATIC_TMP, exist_ok=True)
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
