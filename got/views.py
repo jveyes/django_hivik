@@ -48,20 +48,11 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            tasks = Task.objects.filter(finished=False).order_by('start_date')
+            return Task.objects.filter(finished=False).order_by('start_date')
         else: 
-            tasks = Task.objects.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
+            return Task.objects.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
-        paginator = Paginator(tasks, self.paginate_by)
-        page_number = self.request.GET.get('page', 1)
 
-        try: 
-            current_page = Paginator.page(page_number)
-
-        except EmptyPage:
-            current_page = paginator.page(paginator.num_pages)
-
-        return current_page
     
 
 # Equipos
