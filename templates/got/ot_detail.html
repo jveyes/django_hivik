@@ -4,6 +4,7 @@
 
 {% block content %}
 
+<!-- Informacion basica -->
 <table class="table">
     <tbody>
         <tr>
@@ -28,6 +29,8 @@
         </tr>        
     </tbody>
 </table>
+
+<!-- Opciones (generar reportte/ actualizar/ Eliminar) -->
 <div class="d-flex justify-content-end">
     <div class="btn-group">
         <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
@@ -35,6 +38,7 @@
         <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
     </div>
 </div>
+
 
 <h4>Actividades</h4>
 
@@ -99,7 +103,5 @@
           </div>
         </div>
       </div>
-      
-
 
 {% endblock %}

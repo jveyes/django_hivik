@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-#uuzkn6=^^16hmq^^3csx$l)@q+3itn=wmxtt4a@rnxt9iqfxi
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -159,7 +159,3 @@ DATABASES['default'].update(db_from_env)
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-X_FRAME_OPTIONS = 'SAMEORIGIN'
-
-

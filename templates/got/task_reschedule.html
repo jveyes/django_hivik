@@ -4,11 +4,10 @@
 
 {% block content %}
     <div class="container">
-    <p>Responsable: {{task.responsible.first_name}} {{task.responsible.last_name}}</p>
-    <p{% if activity.is_overdue %} class="text-danger"{% endif %}>Fecha de vencimiento: {{final_date}}</p>
+        <p>Responsable: {{task.responsible.first_name}} {{task.responsible.last_name}}</p>
+    <p {% if activity.is_overdue %}class="text-danger"{% endif %}>Fecha de vencimiento: {{final_date}}</p>
 
-    <form action="" method="POST">
-        {% csrf_token %}
+    <form action="" method="POST">{% csrf_token %}
         <table>
         {{ form.as_table }}
         </table>

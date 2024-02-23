@@ -3,13 +3,12 @@
 {% block header %}Eliminar Orden de trabajo{% endblock %}
 
 {% block content %}
-<div class="container">
-<p>¿Estas seguro que deseas eliminar la orden de trabajo: <strong>{{ ot }}?</strong></p>
+	<div class="container">
+		<p>¿Estas seguro que deseas eliminar la orden de trabajo: <strong>{{ ot }}?</strong></p>
 
-<form action="" method="POST">
-  {% csrf_token %}
-  <input type="submit" action="" value="Si, Eliminar." />
-</form>
-</div>
+		<form action="" method="POST">{% csrf_token %}
+  			<input type="submit" action="" value="Si, Eliminar." />
+		</form>
+	</div>
 
 {% endblock %}

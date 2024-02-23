@@ -3,10 +3,13 @@ from . import views
 
 app_name = 'got'
 
+'''
+13
+'''
 urlpatterns = [
     path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
-    path("assets/", views.AssetsListView.as_view(), name="assets-list"), 
-    path("assets/<int:pk>/", views.AssetsDetailView.as_view(), name="assets-detail"),
+    path("assets/", views.AssetsListView.as_view(), name="asset-list"), 
+    path("assets/<int:pk>/", views.AssetsDetailView.as_view(), name="asset-detail"),
     path("ots/", views.OtListView.as_view(), name="ot-list"), 
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"), 
     path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"), 

@@ -3,42 +3,46 @@ from django.core.exceptions import ValidationError
 from .models import Task, Ot, Asset, System
 from django.contrib.auth.models import User, Group
 import datetime
+from django.contrib.auth import get_user_model
 
 
 # Formulario para filtrar busqueda de las Ordenes de trabajo
 class OtsDescriptionFilterForm(forms.Form):
-     description = forms.CharField(
-          widget=forms.TextInput(attrs={
-               'class': 'form-control',
-               'placeholder': '',
-               'aria-label': 'Username',
-               'aria-describedby': 'addon-wrapping',
-               }),
-          label='Filtro'
-     )
+      description = forms.CharField(
+           	widget=forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '',
+		        'aria-label': 'Username',
+        		'aria-describedby': 'addon-wrapping',
+        	}),
+        	label='Filtro'
+		)
 
 
 # clase para mostrar nombre y apellido de los usuarios en los formularios
 class UserChoiceField(forms.ModelChoiceField):
-    def label_from_instance(self, obj):
-        return f'{obj.first_name} {obj.last_name}'
+	def label_from_instance(self, obj):
+            return f'{obj.first_name} {obj.last_name}'
 
 
 # Personalizar widget para que aparezca calendario
 class XYZ_DateInput(forms.DateInput):
-     input_type = 'date'
+	input_type = 'date'
 
-     def __init__(self, **kwargs):
-          kwargs['format'] = '%Y-%m-%d'
-          super().__init__(**kwargs)
+	def __init__(self, **kwargs):
+            kwargs['format'] = '%Y-%m-%d'
+            super().__init__(**kwargs)
     
 
 # Formulario para reprogramar una actividad 
 class RescheduleTaskForm(forms.ModelForm):
+        '''
+        Formulario ubicado en "assignedtasks_list_pendient_user.html"
+        '''
         news = forms.CharField(
-             widget=forms.Textarea(attrs={'rows': 4}),
-             required=False,
-             label = 'Novedades'
+            widget=forms.Textarea(attrs={'rows': 4}),
+        	required=False,
+            label = 'Novedades'
         )
 
         def clean_start_date(self):
@@ -63,6 +67,9 @@ class RescheduleTaskForm(forms.ModelForm):
 
 # Formulario para crear un nuevo activo
 class AssetsForm(forms.ModelForm):
+     '''
+     (inactivo)
+     '''
      super = UserChoiceField(
           queryset=User.objects.all(), label='Supervisor',
      )
@@ -83,7 +90,9 @@ class AssetsForm(forms.ModelForm):
 
 # Formulario para crear un sistema
 class SysForm(forms.ModelForm):
-
+     '''
+     (inactivo)
+     '''
      class Meta:
           model = System
           exclude = ['assets',]
@@ -118,7 +127,6 @@ class ActForm(forms.ModelForm):
           queryset=User.objects.all(),
           label='Responsable',
      )
-     # evidence = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control'}))
 
      class Meta:
         model = Task
@@ -137,5 +145,3 @@ class ActForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
-
-

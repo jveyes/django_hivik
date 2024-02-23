@@ -1,15 +1,15 @@
 from django.db import models
 from django.urls import reverse
-from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from datetime import date, timedelta
+
+from django.core.validators import RegexValidator
 
 
 class Asset(models.Model):
     '''
-    Activos de la empresa
+    Activos (v1.0)
     '''
-
     STATUS = (
         ('m', 'Mantenimiento'),
         ('o', 'Operacion'),
@@ -31,7 +31,7 @@ class Asset(models.Model):
         return self.name
     
     def get_absolute_url(self):
-        return reverse('got:assets-detail', args=[str(self.id)])
+        return reverse('got:asset-detail', args=[str(self.id)])
     
     class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
@@ -39,8 +39,8 @@ class Asset(models.Model):
 
 class System(models.Model):
     '''
-    Sistema agrupados de cada activo, relacion directa con activos y vinulo con ordenes 
-    de trabajo
+    Sistema agrupados de cada activo, relacion directa con activos y vinculo con ordenes 
+    de trabajo (v1.0)
     '''
     name = models.CharField(max_length=50)
     gruop = models.IntegerField()
@@ -52,11 +52,29 @@ class System(models.Model):
     def __str__(self):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)
 
+class Component(models.Model):
+    '''
+    Momentaneamente seran componentes rotativos (inactivo)
+    '''
+    horometro = models.IntegerField(default=0)
+    name = models.CharField(max_length=50)
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return self.name
+
+class Ruta(models.Model):
+    '''
+    (inactivo)
+    '''
+    name = models.CharField(max_length=50)
+    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    frecuency = models.IntegerField()
+
 class Ot(models.Model):
     '''
-    Ordenes de trabajo
+    Ordenes de trabajo (v1.0)
     '''
-
     STATUS = (
         ('a', 'Abierto'),
         ('x', 'En ejecucion'),
@@ -85,9 +103,10 @@ class Ot(models.Model):
 
 class Task(models.Model):
     '''
-    Actividades que se deben realizar de cada orden de trabajo
+    Actividades (v1.0)
     '''
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE)
+    ruta = models.ForeignKey(Ruta, on_delete=models.SET_NULL, null=True, blank=True)
     responsible = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,

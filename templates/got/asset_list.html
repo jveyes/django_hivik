@@ -16,17 +16,17 @@
     <tbody>
         {% if asset_list %}
             {% for asset in asset_list %}
-            <tr>
-                <td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
-                <td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
-                <td>{{asset.location}}</td>
-                <td>{{asset.get_state_display}}</td>
-            </tr>
+				<tr>
+					<td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
+					<td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
+					<td>{{asset.location}}</td>
+					<td>{{asset.get_state_display}}</td>
+				</tr>
             {% endfor %}
         {% else %}
-          <p>No hay equipos registrados.</p>
+        	<p>No hay equipos registrados.</p>
         {% endif %}
     </tbody>
-  </table>
+</table>
 
 {% endblock %}
