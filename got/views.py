@@ -53,7 +53,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
             tasks = Task.objects.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
         paginator = Paginator(tasks, self.paginate_by)
-        page_number = self.request.GET.get('page')
+        page_number = self.request.GET.get('page', 1)
 
         try: 
             current_page = Paginator.page(page_number)
