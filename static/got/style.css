@@ -4,10 +4,6 @@
     
 }
 
-body {
-  background-color: #B2BFCA;
-}
-
 a {
   text-decoration: none; /* Elimina la línea de abajo */
   color: black; /* Color del texto */
@@ -30,29 +26,4 @@ td, th {
   padding: 10px;
 }
   
-/* styles.css o tu_archivo.css */
-.table-responsive {
-  overflow-x: auto;
-  white-space: nowrap;
-  max-width: 100%; /* Hace que la tabla sea responsive */
-}
 
-.table-responsive table {
-  width: auto;
-  margin-bottom: 0; /* Evita que se aplique el margin inferior a la tabla */
-}
-
-.table-responsive th:first-child,
-.table-responsive td:first-child {
-  position: -webkit-sticky;
-  position: sticky;
-  left: 0;
-  background-color: white;
-  z-index: 1;
-}
-
-.table-responsive th,
-.table-responsive td {
-  min-width: 100px; /* Ajusta el ancho mínimo de las celdas */
-  width: 100px; /* Ajusta el ancho de las celdas */
-}
