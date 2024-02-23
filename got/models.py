@@ -51,6 +51,9 @@ class System(models.Model):
 
     def __str__(self):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)
+    
+    class Meta:
+        ordering = ['asset__name', 'group', 'name']
 
 class Component(models.Model):
     '''
