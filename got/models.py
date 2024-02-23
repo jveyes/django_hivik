@@ -53,7 +53,7 @@ class System(models.Model):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)
     
     class Meta:
-        ordering = ['asset__name', 'group', 'name']
+        ordering = ['asset__name', 'gruop']
 
 class Component(models.Model):
     '''
