@@ -4,8 +4,6 @@
 
 {% block content %}
 
-{{task.ot.num_ot}}
-
 <div class="container">
     <a class="btn btn-primary" role="button" href="{% url 'got:finish-task' task.id %}">
         Modificar
@@ -15,7 +13,7 @@
         OT - {{task.ot.num_ot}}
     </a>
     {% endif %}
-    
+
 <table class="table">
     <tbody>
         <tr>
