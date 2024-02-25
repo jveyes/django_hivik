@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 # Autenticacion de usuario y permisos
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Group, User
 
 # Vistas genericas basadas en clases
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -14,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, Ot, Task
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -32,13 +33,25 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     '''
     Vista generica basada en clases que muestra las actividades en ejecucion de cada
     cada miembro de serport (v1.0)
+
+    v1.1 se le agrega opciones de filtrado por equipos y personal
+
     '''
     model = Task
     template_name = 'got/assignedtasks_list_pendient_user.html'
-    paginate_by = 10
-
+    paginate_by = 15     
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        info_filter = Asset.objects.all()
+        context['asset'] = info_filter
+
+        serport_group = Group.objects.get(name='serport_members')
+
+        users_in_group = serport_group.user_set.all()
+
+        context['serport_members'] = users_in_group
 
         for obj in context['task_list']:
             time = obj.men_time
@@ -47,13 +60,22 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
+        queryset = Task.objects.all()
+
+        asset_id = self.request.GET.get('asset_id')
+        responsable_id = self.request.GET.get('responsable')
+        
+        if asset_id:
+            queryset = queryset.filter(ot__system__asset_id=asset_id)
+        if responsable_id:
+            queryset = queryset.filter(responsible=responsable_id)
+
         if self.request.user.is_staff:
-            return Task.objects.filter(finished=False).order_by('start_date')
+            queryset = queryset.filter(finished=False).order_by('start_date')
         else: 
-            return Task.objects.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
+            queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
-
-    
+        return queryset
 
 # Equipos
 class AssetsListView(LoginRequiredMixin, generic.ListView):
@@ -61,7 +83,7 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
     Vista generica para mostrar el listado de los centros de costos (v1.0)
     '''
     model = Asset
-    paginate_by = 10
+    paginate_by = 15
 
 
 # Detalle de equipos y listado de sistemas
@@ -78,7 +100,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     Vista generica para listado de ordenes de trabajo (v1.0)
     '''
     model = Ot
-    paginate_by = 10
+    paginate_by = 15
 
     # Formulario para filtrar Ots según descripción
     def get_context_data(self, **kwargs):
@@ -154,7 +176,7 @@ def reschedule_task(request, pk):
 
     else:
         proposed_reschedule_date = date.today() + timedelta(weeks=1)
-        form =RescheduleTaskForm(initial={'proposed_date': proposed_reschedule_date,})
+        form = RescheduleTaskForm(initial={'proposed_date': proposed_reschedule_date,})
     
     return render(request, 'got/task_reschedule.html', {'form': form, 'task': act, 'final_date': final_date})
 
@@ -218,3 +240,27 @@ def report_pdf(request, num_ot):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+
+def finish_task(request, pk):
+    '''
+    Vista formulario para finalizar actividades (v1.1)
+    '''
+    act = get_object_or_404(Task, pk=pk)
+
+    time = act.men_time
+    final_date = act.start_date + timedelta(days=time)
+
+    if request.method == 'POST':
+        form = UpdateTaskForm(request.POST)
+
+        if form.is_valid():
+            act.news = form.cleaned_data['news']
+            act.finished = form.cleaned_data['finished']
+            act.save()
+            return HttpResponseRedirect(reverse('got:my-tasks'))
+
+    else:
+        form = UpdateTaskForm()
+    
+    return render(request, 'got/task_finish_form.html', {'form': form, 'task': act, 'final_date': final_date})

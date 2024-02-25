@@ -3,13 +3,44 @@
 {% block head %}Mis actividades{% endblock %}
 
 {% block content %}
+<div class="container">
+<!-- Opciones de filtrado -->
 
+<!-- Enlace sin filtros -->
+<div class="btn-group" role="group">
+	<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Filtrar por equipo
+    </button>
+    <ul class="dropdown-menu">
+      	<li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
+	  	{% for a in asset %}
+      		<li><a href="{% url 'got:my-tasks' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
+		{% endfor %}
+    </ul>
+</div>
+
+{%  if request.user.is_staff %}
+<div class="btn-group" role="group">
+	<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      Filtrar por taller
+    </button>
+    <ul class="dropdown-menu">
+      	<li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
+		{% for u in serport_members %}
+			<li><a href="{% url 'got:my-tasks' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u }}</a></li>
+		{% endfor %}
+    </ul>
+</div>
+{% endif %}
+</div>
+<!-- Inicio tabla de actividades -->
 <table class="table">
     <thead>
       	<tr>
         	<th scope="col">#OT</th>
         	<th scope="col">Sistema</th>
         	<th scope="col">Descripción</th>
+			<th scope="col">Fecha de Inicio</th>
         	<th scope="col">Fecha de finalización</th>
         	{% if perms.got.can_see_completely %}<th scope="col"></th>{% endif %}
     	</tr>
@@ -21,6 +52,7 @@
 					<td>OT-{{act.ot.num_ot}}</td>
 					<td>{{act.ot.system}}</td>
 					<td><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.start_date}}</td>
 					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date}}</td>
 					{% if perms.got.can_see_completely %}<td><a href="{% url 'got:reschedule-task' act.id %}">reprogramar</a></td>{% endif %}
 				</tr>

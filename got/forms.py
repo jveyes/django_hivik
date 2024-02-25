@@ -17,7 +17,7 @@ class OtsDescriptionFilterForm(forms.Form):
         	}),
         	label='Filtro'
 		)
-
+      
 
 # clase para mostrar nombre y apellido de los usuarios en los formularios
 class UserChoiceField(forms.ModelChoiceField):
@@ -63,6 +63,30 @@ class RescheduleTaskForm(forms.ModelForm):
             widgets = {
                  'start_date': forms.DateInput(attrs={'type': 'date'}),
             }
+            
+
+# Formulario para reprogramar una actividad 
+class UpdateTaskForm(forms.ModelForm):
+        '''
+        Formulario ubicado en "assignedtasks_list_pendient_user.html"
+        '''
+        news = forms.CharField(
+            widget=forms.Textarea(attrs={'rows': 4}),
+        	required=False,
+            label = 'Novedades'
+        )
+        class Meta:
+            model = Task
+            fields = ['news', 'evidence', 'finished']
+            labels = {
+                  'news': 'Novedades',
+                  'evidence': 'Evidencia',
+                  'finished': 'Finalizar'
+                }
+            widgets = {
+            'responsible': forms.Select(attrs={'class': 'form-control'}),
+            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+        }
 
 
 # Formulario para crear un nuevo activo

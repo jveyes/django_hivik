@@ -4,11 +4,18 @@
 
 {% block content %}
 
+{{task.ot.num_ot}}
 
 <div class="container">
-    <a class="btn btn-primary" role="button" href="{% url 'got:task-update' task.id %}">
+    <a class="btn btn-primary" role="button" href="{% url 'got:finish-task' task.id %}">
         Modificar
     </a>
+    {%  if request.user.is_staff %}
+    <a class="btn btn-primary" role="button" href="{% url 'got:ot-detail' task.ot.num_ot %}">
+        OT - {{task.ot.num_ot}}
+    </a>
+    {% endif %}
+    
 <table class="table">
     <tbody>
         <tr>

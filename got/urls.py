@@ -20,4 +20,5 @@ urlpatterns = [
     path('task/<int:pk>/update/', views.TaskUpdate.as_view(), name='task-update'), 
     path('task/<int:pk>/delete/', views.TaskDelete.as_view(), name='task-delete'),
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report' ),
+    path("task/<int:pk>/finish/", views.finish_task, name='finish-task'), 
 ]
