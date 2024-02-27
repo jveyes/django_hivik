@@ -59,7 +59,7 @@
                 {% for ot in ot_list %}
                 <tr>
                     <th scope="row">OT-{{ot.num_ot}}</td>
-                    <td>{{ot.creation_date}}</td>
+                    <td>{{ot.creation_date|date:"d/m/Y"}}</td>
                     <td><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
                     <td>{{ot.system}}</td>
                     <td>{{ot.super.first_name}} {{ot.super.last_name}}</td>

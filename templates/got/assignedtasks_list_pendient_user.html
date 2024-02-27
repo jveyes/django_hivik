@@ -54,8 +54,8 @@
 					<td>{{act.ot.system.asset}}/{{act.ot.system.name}}</td>
 					<td class="{% if act.is_overdue %}text-danger{% endif %}"><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
 					<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-					<td>{{act.start_date}}</td>
-					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date}}</td>
+					<td>{{act.start_date|date:"d/m/Y"}}</td>
+					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
 					{% if perms.got.can_see_completely %}<td><a href="{% url 'got:reschedule-task' act.id %}">reprogramar</a></td>{% endif %}
 				</tr>
             {% endfor %}
