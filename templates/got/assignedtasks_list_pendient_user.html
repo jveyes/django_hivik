@@ -27,7 +27,7 @@
     <ul class="dropdown-menu">
       	<li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
 		{% for u in serport_members %}
-			<li><a href="{% url 'got:my-tasks' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u }}</a></li>
+			<li><a href="{% url 'got:my-tasks' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
 		{% endfor %}
     </ul>
 </div>
@@ -51,8 +51,8 @@
             {% for act in task_list %}
 				<tr>
 					<td>OT-{{act.ot.num_ot}}</td>
-					<td>{{act.ot.system}}</td>
-					<td><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+					<td>{{act.ot.system.asset}}/{{act.ot.system.name}}</td>
+					<td class="{% if act.is_overdue %}text-danger{% endif %}"><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
 					<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
 					<td>{{act.start_date}}</td>
 					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date}}</td>

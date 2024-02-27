@@ -3,18 +3,40 @@
 {% block head %}Listado de Ordenes de trabajo{% endblock %}
 
 {% block content %}
-
+    <section class="container d-flex justify-content-between flex-wrap align-items-center">
     <div>
         <a class="btn btn-primary space" href="{% url 'got:ot-create' %}">Crear OT</a>
     </div>
 
+    <div class="btn-group" role="group" aria-label="Estado de OT">
+        <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
+        <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
+
+        <input type="radio" class="btn-check" name="state" id="abierto" autocomplete="off" {% if request.GET.state == 'a' %}checked{% endif %}>
+        <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}?state=a'">Abierto</label>
+      
+        <input type="radio" class="btn-check" name="state" id="ejecucion" autocomplete="off" {% if request.GET.state == 'x' %}checked{% endif %}>
+        <label class="btn btn-outline-primary" for="ejecucion" onclick="window.location.href='{% url 'got:ot-list' %}?state=x'">En ejecución</label>
+      
+        <input type="radio" class="btn-check" name="state" id="finalizado" autocomplete="off" {% if request.GET.state == 'f' %}checked{% endif %}>
+        <label class="btn btn-outline-primary" for="finalizado" onclick="window.location.href='{% url 'got:ot-list' %}?state=f'">Finalizado</label>
+        
+        <input type="radio" class="btn-check" name="state" id="cancelado" autocomplete="off" {% if request.GET.state == 'c' %}checked{% endif %}>
+        <label class="btn btn-outline-primary" for="cancelado" onclick="window.location.href='{% url 'got:ot-list' %}?state=c'">Cancelado</label>
+    </div>
+    
+
+    <div style="padding: 10px 0">
     <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
         <div class="input-group flex-nowrap" style="width: 500px;">
-            <span class="input-group-text" id="addon-wrapping">Buscar</span>
+            <span class="input-group-text" id="addon-wrapping">Descripción</span>
             {{ form.description }}
             <input type="submit" value="Buscar" class="btn btn-primary">
         </div>  
     </form>
+    </div>
+
+    </section>
       
     {% if request.GET.description %}
         <h5>Resultados de búsqueda para: "{{ request.GET.description }}"</h5>

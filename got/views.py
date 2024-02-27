@@ -110,11 +110,18 @@ class OtListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         form = OtsDescriptionFilterForm(self.request.GET)
+        queryset = Ot.objects.all()
+        state = self.request.GET.get('state')
+
+        if state:
+            queryset = queryset.filter(state=state)
+
         if form.is_valid():
             description = form.cleaned_data.get('description', '')
             queryset = Ot.objects.filter(description__icontains=description)
             return queryset
-        return Ot.objects.all()
+        
+        return queryset
 
 
 # Detalle de orden de trabajo - generalidades, listado de actividades y reporte
