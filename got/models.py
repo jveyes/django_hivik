@@ -59,43 +59,43 @@ class System(models.Model):
     class Meta:
         ordering = ['asset__name', 'gruop']
 
-class Component(models.Model):
-    '''
-    Momentaneamente seran componentes rotativos (inactivo)
-    '''
-    STATUS = (
-        ('m', 'Mantenimiento'),
-        ('o', 'Operativo'),
-        ('x', 'Fuera de servicio')
-    )
+# class Component(models.Model):
+#     '''
+#     Momentaneamente seran componentes rotativos (inactivo)
+#     '''
+#     STATUS = (
+#         ('m', 'Mantenimiento'),
+#         ('o', 'Operativo'),
+#         ('x', 'Fuera de servicio')
+#     )
 
-    name = models.CharField(max_length=50)
-    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True)
-    date_inv = models.DateField(null=True, blank=True)
-    code = models.CharField(primary_key=True, max_length=50)
-    location_int = models.CharField(max_length=50, null=True, blank=True)
-    area = models.CharField(max_length=50, null=True, blank=True)
-    model = models.CharField(max_length=50, null=True, blank=True)
-    serial = models.CharField(max_length=50, null=True, blank=True)
-    marca = models.CharField(max_length=50, null=True, blank=True)
-    fabricante = models.CharField(max_length=50, null=True, blank=True)
-    feature = models.TextField()
-    state = models.CharField(choices=STATUS)
+#     name = models.CharField(max_length=50)
+#     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True)
+#     date_inv = models.DateField(null=True, blank=True)
+#     code = models.CharField(primary_key=True, max_length=50)
+#     location_int = models.CharField(max_length=50, null=True, blank=True)
+#     area = models.CharField(max_length=50, null=True, blank=True)
+#     model = models.CharField(max_length=50, null=True, blank=True)
+#     serial = models.CharField(max_length=50, null=True, blank=True)
+#     marca = models.CharField(max_length=50, null=True, blank=True)
+#     fabricante = models.CharField(max_length=50, null=True, blank=True)
+#     feature = models.TextField()
+#     state = models.CharField(choices=STATUS)
 
     
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
-    class Meta:
-        ordering = ['name', 'code']
+#     class Meta:
+#         ordering = ['name', 'code']
 
-class Ruta(models.Model):
-    '''
-    (inactivo)
-    '''
-    name = models.CharField(max_length=50)
-    component = models.ForeignKey(Component, on_delete=models.CASCADE)
-    frecuency = models.IntegerField()
+# class Ruta(models.Model):
+#     '''
+#     (inactivo)
+#     '''
+#     name = models.CharField(max_length=50)
+#     component = models.ForeignKey(Component, on_delete=models.CASCADE)
+#     frecuency = models.IntegerField()
 
 class Ot(models.Model):
     '''
@@ -132,7 +132,7 @@ class Task(models.Model):
     Actividades (v1.0)
     '''
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE)
-    ruta = models.ForeignKey(Ruta, on_delete=models.SET_NULL, null=True, blank=True)
+    # ruta = models.ForeignKey(Ruta, on_delete=models.SET_NULL, null=True, blank=True)
     responsible = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
