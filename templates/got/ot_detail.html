@@ -67,7 +67,7 @@
                     <td><a href="{% url 'got:task-detail' act.id %}"> {{ act.description }}</a></td>
                     <td>{{ act.news }}</td>
                     <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-                    <td>{% if task.finished %}Completado{%else%}Pendiente{% endif %}</td>
+                    <td>{% if act.finished %}Completado{%else%}Pendiente{% endif %}</td>
                     <td>
                         <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
                     </td>
