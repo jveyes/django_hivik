@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Asset, System, Ot, Task#, Component, Ruta
+from .models import Asset, System, Ot, Task, Component, Ruta
 
 # Register models.
 class OtAdmin(admin.ModelAdmin):
@@ -48,7 +48,7 @@ class TaskAdmin(admin.ModelAdmin):
     )
 
 admin.site.register(Asset)
-# admin.site.register(Ruta)
-# admin.site.register(Component)
+admin.site.register(Ruta)
+admin.site.register(Component)
 admin.site.register(System)
 admin.site.register(Ot, OtAdmin)
