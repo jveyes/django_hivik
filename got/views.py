@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, Ot, Task
+from .models import Asset, System, Ot, Task
 from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm
 
 # Librerias auxiliares
@@ -92,6 +92,13 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
     Vista generica para mostrar detalle de activos (v1.0)
     '''
     model = Asset
+
+
+class SysDetailView(LoginRequiredMixin, generic.DetailView):
+    '''
+    Vista generica para mostrar componentes (v1.2)
+    '''
+    model = System
 
 
 # Ordenes de trabajo

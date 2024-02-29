@@ -1,0 +1,29 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}{{ system }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if system.component_set.all %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Grupo</th>
+                <th scope="col">Nombre</th>
+            </tr>
+        </thead>
+        <tbody>           
+            {% for com in system.component_set.all %}
+                <tr>
+                    <th scope="row">{{com.name}}</th>
+                    <td><a href="{{ sys.get_absolute_url }}">{{com.code}}</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <p>No hay sistemas registrados.</p>
+    {% endif %}
+    </div>
+{% endblock %}

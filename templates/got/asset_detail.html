@@ -3,6 +3,7 @@
 {% block head %}{{ asset.name }}{% endblock %}
 
 {% block content %}
+    <div class="container">
     <table class="table">
         <tbody>
             <tr>
@@ -19,13 +20,14 @@
             </tr> 
         </tbody>
     </table>
+    </div>
 
     <div class="container">
         {% if asset.system_set.all %}
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th scope="col">Grupo constructivo</th>
+                    <th scope="col">Grupo</th>
                     <th scope="col">Nombre</th>
                 </tr>
             </thead>
@@ -33,7 +35,7 @@
                 {% for sys in asset.system_set.all %}
                     <tr>
                         <th scope="row">{{sys.gruop}}</th>
-                        <td>{{sys.name}}</td>
+                        <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
                     </tr>
                 {% endfor %}
             </tbody>

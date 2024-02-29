@@ -10,6 +10,7 @@ urlpatterns = [
     path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
     path("assets/", views.AssetsListView.as_view(), name="asset-list"), 
     path("assets/<int:pk>/", views.AssetsDetailView.as_view(), name="asset-detail"),
+    path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
     path("ots/", views.OtListView.as_view(), name="ot-list"), 
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"), 
     path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"), 

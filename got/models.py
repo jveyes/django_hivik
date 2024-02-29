@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
+from django.utils import timezone
 
 from django.core.validators import RegexValidator
 
@@ -52,6 +53,9 @@ class System(models.Model):
     def __str__(self):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)
     
+    def get_absolute_url(self):
+        return reverse('got:sys-detail', args=[str(self.id)])
+    
     class Meta:
         ordering = ['asset__name', 'gruop']
 
@@ -59,12 +63,31 @@ class Component(models.Model):
     '''
     Momentaneamente seran componentes rotativos (inactivo)
     '''
-    horometro = models.IntegerField(default=0)
+    STATUS = (
+        ('m', 'Mantenimiento'),
+        ('o', 'Operativo'),
+        ('x', 'Fuera de servicio')
+    )
+
     name = models.CharField(max_length=50)
-    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True)
+    date_inv = models.DateField(default=timezone.now, null=True, blank=True)
+    code = models.CharField(primary_key=True, max_length=50)
+    location_int = models.CharField(max_length=50, null=True, blank=True)
+    area = models.CharField(max_length=50, null=True, blank=True, default="null")
+    model = models.CharField(max_length=50, null=True, blank=True, default="null")
+    serial = models.CharField(max_length=50, null=True, blank=True, default="null")
+    marca = models.CharField(max_length=50, null=True, blank=True, default="null")
+    fabricante = models.CharField(max_length=50, null=True, blank=True, default="null")
+    feature = models.TextField(default="null")
+    state = models.CharField(choices=STATUS, default='m')
+
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['name', 'code']
 
 class Ruta(models.Model):
     '''
