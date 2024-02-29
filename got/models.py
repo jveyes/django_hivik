@@ -59,7 +59,7 @@ class System(models.Model):
     class Meta:
         ordering = ['asset__name', 'gruop']
 
-class Component(models.Model):
+class Equipo(models.Model):
     '''
     Momentaneamente seran componentes rotativos (inactivo)
     '''
@@ -89,12 +89,12 @@ class Component(models.Model):
     class Meta:
         ordering = ['name', 'code']
 
-class Ruta(models.Model):
+class Rut(models.Model):
     '''
     (inactivo)
     '''
     name = models.CharField(max_length=50)
-    component = models.ForeignKey(Component, on_delete=models.CASCADE)
+    component = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     frecuency = models.IntegerField()
 
 class Ot(models.Model):
