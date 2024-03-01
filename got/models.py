@@ -96,6 +96,7 @@ class Rut(models.Model):
     name = models.CharField(max_length=50)
     component = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     frecuency = models.IntegerField()
+    code = models.CharField(primary_key=True, max_length=50)
 
 class Ot(models.Model):
     '''

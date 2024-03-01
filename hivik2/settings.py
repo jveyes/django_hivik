@@ -159,3 +159,8 @@ DATABASES['default'].update(db_from_env)
 
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+os.environ['CURL_CA_BUNDLE'] = ''
+
+import certifi
+os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
