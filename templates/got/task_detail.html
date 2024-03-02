@@ -42,7 +42,7 @@
 {% if task.evidence %}
     
         <h4>Evidencia de actividad</h4>
-        <img src="{{ task.evidence.url }}" style="width: 50%; height: auto;">
+        <img src="{{MEDIA_URL}}{{ task.evidence.name }}" style="width: 50%; height: auto;">
     
 {% endif %}
 </div>

@@ -26,7 +26,7 @@ class Asset(models.Model):
         blank=True
     )
     location = models.CharField(max_length=50)
-    state = models.CharField(choices=STATUS, default='m')
+    state = models.CharField(choices=STATUS, default='m', max_length=50)
 
     def __str__(self):
         return self.name
@@ -80,7 +80,7 @@ class Equipo(models.Model):
     marca = models.CharField(max_length=50, null=True, blank=True)
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
-    state = models.CharField(choices=STATUS)
+    state = models.CharField(choices=STATUS, max_length=50)
 
     
     def __str__(self):
@@ -89,7 +89,7 @@ class Equipo(models.Model):
     class Meta:
         ordering = ['name', 'code']
 
-class Rut(models.Model):
+class Ruta(models.Model):
     '''
     (inactivo)
     '''
@@ -97,6 +97,7 @@ class Rut(models.Model):
     component = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     frecuency = models.IntegerField()
     code = models.CharField(primary_key=True, max_length=50)
+    intervention_date = models.DateField()
 
 class Ot(models.Model):
     '''
@@ -119,7 +120,7 @@ class Ot(models.Model):
         null = True,
         blank = True
     )
-    state = models.CharField(choices=STATUS, default='a')
+    state = models.CharField(choices=STATUS, default='a', max_length=50)
 
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
@@ -142,7 +143,7 @@ class Task(models.Model):
     )
     description = models.TextField()
     news = models.TextField(blank=True, null=True)
-    evidence = models.ImageField(upload_to='evidencias', null=True, blank=True)
+    evidence = models.ImageField(upload_to='media/', null=True, blank=True)
     start_date = models.DateField()
     men_time = models.IntegerField(default=1)
     finished = models.BooleanField()
