@@ -139,6 +139,12 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+import dj_database_url
+
+# Configuración de la base de datos
+DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
+
+
 LOGIN_REDIRECT_URL = '/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
