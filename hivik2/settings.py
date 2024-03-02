@@ -158,9 +158,14 @@ db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
 
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-os.environ['CURL_CA_BUNDLE'] = ''
-
-import certifi
-os.environ['REQUESTS_CA_BUNDLE'] = certifi.where()
+AWS_ACCESS_KEY_ID = 'AKIAYS2NTXT562AU74PQ'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'hivik'
+AWS_S3_SIGNATURE_NAME = 's3v4'
+AWS_S3_REGION_NAME = 'us-east-2'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
