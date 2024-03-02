@@ -74,7 +74,7 @@
         {% for act in ot.task_set.all %}
             {% if act.evidence %}
                 <div>
-                    <img src="{{ act.evidence.path }}">
+                    <img src="{{ act.evidence.url }}">
                 </div>
             {% endif %}
         {% endfor %}

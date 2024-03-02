@@ -149,9 +149,6 @@ os.makedirs(STATIC_TMP, exist_ok=True)
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
-
-
 # AWS_ACCESS_KEY_ID = 'AKIAYS2NTXT562AU74PQ'
 # AWS_SECRET_ACCESS_KEY = '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'
 # AWS_STORAGE_BUCKET_NAME = 'hivik'
