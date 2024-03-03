@@ -22,7 +22,12 @@
     </table>
     </div>
 
+
+
     <div class="container">
+        <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
+            Crear nuevo sistema
+        </button>
         {% if asset.system_set.all %}
         <table class="table table-striped">
             <thead>
@@ -36,6 +41,9 @@
                     <tr>
                         <th scope="row">{{sys.gruop}}</th>
                         <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
+                        <td>
+                        <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -46,4 +54,23 @@
         {% endif %}
     </div>
 
+    <div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="sysModalLabel">Crear nuevo sistema</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method="post" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                <table>
+                  {{ sys_form.as_table }}
+                </table>
+                <button type="submit" class="btn btn-primary">Agregar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 {% endblock %}

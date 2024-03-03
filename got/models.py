@@ -45,10 +45,7 @@ class System(models.Model):
     '''
     name = models.CharField(max_length=50)
     gruop = models.IntegerField()
-    asset = models.ForeignKey(
-        Asset,
-        on_delete = models.CASCADE,
-    )
+    asset = models.ForeignKey(Asset, on_delete = models.CASCADE)
 
     def __str__(self):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)

@@ -14,8 +14,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, System, Ot, Task
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm
+from .models import Asset, System, Ot, Task, Equipo
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -93,12 +93,48 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     model = Asset
 
+    # Formulario para crear, modificar o eliminar actividades
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['sys_form'] = SysForm()
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        asset = self.get_object()
+        sys_form = SysForm(request.POST)
+
+        if sys_form.is_valid():
+            sys = sys_form.save(commit=False)
+            sys.asset = asset
+            sys.save()
+            return redirect(request.path)
+        else:
+            return render(request, self.template_name, {'asset': asset, 'sys_form': sys_form})
+
 
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     Vista generica para mostrar componentes (v1.2)
     '''
     model = System
+
+    # Formulario para crear, modificar o eliminar actividades
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['equipo_form'] = EquipoForm()
+        return context
+    
+    def post(self, request, *args, **kwargs):
+        sys = self.get_object()
+        equipo_form = EquipoForm(request.POST, request.FILES)
+
+        if equipo_form.is_valid():
+            eq = equipo_form.save(commit=False)
+            eq.system = sys
+            eq.save()
+            return redirect(request.path)
+        else:
+            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form})
 
 
 # Ordenes de trabajo
@@ -237,6 +273,38 @@ class TaskDelete(DeleteView):
     success_url = reverse_lazy('got:ot-list')
 
 
+class SysUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = System
+    form_class = SysForm
+    # template_name = 'got/task_form.html' 
+    http_method_names = ['get', 'post']
+
+
+class SysDelete(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = System
+    
+    def get_success_url(self):
+        asset_code = self.object.asset.id
+        success_url = reverse_lazy('got:asset-detail', kwargs={'pk': asset_code})
+        return success_url
+
+class EquipoDelete(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = Equipo
+    
+    def get_success_url(self):
+        sys_code = self.object.system.id
+        success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
+        return success_url
+
 # Reportes
 def report_pdf(request, num_ot):
     '''
@@ -266,7 +334,7 @@ def finish_task(request, pk):
     final_date = act.start_date + timedelta(days=time)
 
     if request.method == 'POST':
-        form = UpdateTaskForm(request.POST)
+        form = UpdateTaskForm(request.POST, request.FILES)
 
         if form.is_valid():
             act.news = form.cleaned_data['news']

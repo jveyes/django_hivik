@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Task, Ot, Asset, System
+from .models import Task, Ot, Asset, System, Equipo
 from django.contrib.auth.models import User, Group
 import datetime
 from django.contrib.auth import get_user_model
@@ -71,9 +71,9 @@ class UpdateTaskForm(forms.ModelForm):
         Formulario ubicado en "assignedtasks_list_pendient_user.html"
         '''
         news = forms.CharField(
-            widget=forms.Textarea(attrs={'rows': 4}),
+          widget=forms.Textarea(attrs={'rows': 4}),
         	required=False,
-            label = 'Novedades'
+          label = 'Novedades'
         )
         class Meta:
             model = Task
@@ -115,11 +115,11 @@ class AssetsForm(forms.ModelForm):
 # Formulario para crear un sistema
 class SysForm(forms.ModelForm):
      '''
-     (inactivo)
+     v2.1
      '''
      class Meta:
           model = System
-          exclude = ['assets',]
+          exclude = ['asset',]
           labels = {
                 'name': 'Sistema',
                 'gruop': 'Grupo constructivo',
@@ -169,3 +169,28 @@ class ActForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+class EquipoForm(forms.ModelForm):
+
+     class Meta:
+          model = Equipo
+          exclude = ['system']
+          labels = {
+               'name': 'Nombre',
+               'date_inv': 'Fecha de ingreso al inventario',
+               'code': 'Codigo interno',
+               'location_int': 'Ubicacion interna (Opcional)',
+               'area': 'Area',
+               'model': 'Modelo',
+               'serial': '# Serial',
+               'marca': 'Marca',
+               'fabricante': 'Fabricante',
+               'feature': 'Caracteristicas',
+               'state': 'Estado',
+               'imagen': 'Imagen'
+          }
+          widgets = {
+            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+          }

@@ -4,20 +4,25 @@
 
 {% block content %}
 
+<div class="container">
+    <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#comModal">
+        Crear nuevo componente
+    </button>
+</div>
 {% if system.equipos.all %}
 {% for equipo in system.equipos.all %}
 <div class="container mt-5">
     <div class="row">
         <!-- Información General del Equipo (Lado Izquierdo) -->
         <div class="col-md-6">
-            <h2>{{equipo.name}}</h2>
-            <p>Modelo: {{equipo.model}}</p>
-            <p>Marca: {{equipo.marca}}</p>
-            <p>Serial: {{equipo.serial}}</p>
-            <p>Area: {{equipo.area}}</p>
-            <p>Fecha ingreso al inventario: {{equipo.date_inv}}</p>
-            <p>codigo interno: {{equipo.code}}</p>
-            <p>Estado: {{equipo.get_state_display}}</p>
+            <h2>{{equipo.name}}</h2><a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+            <p><strong>Modelo:</strong>  {{equipo.model}}</p>
+            <p><strong>Marca:</strong>  {{equipo.marca}}</p>
+            <p><strong>Serial:</strong> {{equipo.serial}}</p>
+            <p><strong>Area:</strong> {{equipo.area}}</p>
+            <p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
+            <p><strong>codigo interno:</strong> {{equipo.code}}</p>
+            <p><strong>Estado:</strong> {{equipo.get_state_display}}</p>
         </div>
         <!-- Imagen del Equipo (Lado Derecho) -->
         <div class="col-md-6">
@@ -40,8 +45,25 @@
 <p>No hay equipos registrados.</p>
 {% endif %}
 
-                    <!-- <th scope="row"></th>
-                    <td><a href="{{ sys.get_absolute_url }}">{{com.code}}</a></td> -->
+<div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="comModalLabel">Crear nuevo componente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="post" action="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <table>
+              {{ equipo_form.as_table }}
+            </table>
+            <button type="submit" class="btn btn-primary">Agregar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
 {% endblock %}
