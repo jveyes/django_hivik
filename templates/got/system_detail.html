@@ -13,7 +13,7 @@
             </tr>
         </thead>
         <tbody>           
-            {% for com in system.equipo_set.all %}
+            {% for com in system.equipos.all %}
                 <tr>
                     <th scope="row">{{com.name}}</th>
                     <td><a href="{{ sys.get_absolute_url }}">{{com.code}}</a></td>

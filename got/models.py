@@ -70,7 +70,7 @@ class Equipo(models.Model):
     )
 
     name = models.CharField(max_length=50)
-    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True)
+    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
     date_inv = models.DateField(null=True, blank=True)
     code = models.CharField(primary_key=True, max_length=50)
     location_int = models.CharField(max_length=50, null=True, blank=True)
@@ -98,6 +98,8 @@ class Ruta(models.Model):
     frecuency = models.IntegerField()
     code = models.CharField(primary_key=True, max_length=50)
     intervention_date = models.DateField()
+
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='rutas')
 
 class Ot(models.Model):
     '''

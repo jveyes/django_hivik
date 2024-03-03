@@ -16,7 +16,8 @@ import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.contrib.staticfiles.middleware.StaticFilesMiddleware',
+
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -85,10 +88,10 @@ WSGI_APPLICATION = 'hivik2.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "hivik",
-        "USER": "postgres",
-        "PASSWORD": "07221127",
-        "HOST": "127.0.0.1",
+        "NAME": "d4t897a08a91m",
+        "USER": "ezxjhovwzvuxlt",
+        "PASSWORD": "edd77cabb0e571eb17d99e1a0722886dbf243e2da86d56f4c338055f6bd291d0",
+        "HOST": "ec2-35-172-26-41.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
 }
@@ -126,8 +129,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -139,18 +140,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
-# import dj_database_url
 
-# # Configuración de la base de datos
-# DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
-
-import dj_database_url
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
-
-
-# db_from_env = dj_database_url.config(conn_max_age=500)
-# DATABASES['default'].update(db_from_env)
 
 LOGIN_REDIRECT_URL = '/'
 
@@ -161,15 +151,6 @@ os.makedirs(STATIC_TMP, exist_ok=True)
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# AWS_ACCESS_KEY_ID = 'AKIAYS2NTXT562AU74PQ'
-# AWS_SECRET_ACCESS_KEY = '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'
-# AWS_STORAGE_BUCKET_NAME = 'hivik'
-# AWS_S3_SIGNATURE_NAME = 's3v4'
-# AWS_S3_REGION_NAME = 'us-east-2'
-# AWS_S3_FILE_OVERWRITE = False
-# AWS_DEFAULT_ACL = None
-# AWS_S3_VERITY = True STATICFILES_STORAGE = 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
