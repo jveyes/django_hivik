@@ -3,27 +3,45 @@
 {% block head %}{{ system }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    {% if system.component_set.all %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Grupo</th>
-                <th scope="col">Nombre</th>
-            </tr>
-        </thead>
-        <tbody>           
-            {% for com in system.equipos.all %}
-                <tr>
-                    <th scope="row">{{com.name}}</th>
-                    <td><a href="{{ sys.get_absolute_url }}">{{com.code}}</a></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    {% else %}
-    <p>No hay sistemas registrados.</p>
-    {% endif %}
+{% if system.equipos.all %}
+{% for equipo in system.equipos.all %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Información General del Equipo (Lado Izquierdo) -->
+        <div class="col-md-6">
+            <h2>{{equipo.name}}</h2>
+            <p>Modelo: {{equipo.model}}</p>
+            <p>Marca: {{equipo.marca}}</p>
+            <p>Serial: {{equipo.serial}}</p>
+            <p>Area: {{equipo.area}}</p>
+            <p>Fecha ingreso al inventario: {{equipo.date_inv}}</p>
+            <p>codigo interno: {{equipo.code}}</p>
+            <p>Estado: {{equipo.get_state_display}}</p>
+        </div>
+        <!-- Imagen del Equipo (Lado Derecho) -->
+        <div class="col-md-6">
+            <img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
+            <!-- La clase "img-fluid" hace que la imagen sea responsiva y se ajuste al ancho del contenedor -->
+        </div>
     </div>
+    <!-- Información Específica del Equipo -->
+    <div class="row mt-3">
+        <div class="col-md-12">
+            <h4>Información Específica del Equipo</h4>
+            <p>Fabricante: {{equipo.fabricante}}</p>
+            <p>Especificaciones: {{equipo.feature}}</p>
+        </div>
+    </div>
+    <!-- Repite la estructura para más equipos si es necesario -->
+</div>
+{% endfor %}
+{% else %}
+<p>No hay equipos registrados.</p>
+{% endif %}
+
+                    <!-- <th scope="row"></th>
+                    <td><a href="{{ sys.get_absolute_url }}">{{com.code}}</a></td> -->
+
+
 {% endblock %}

@@ -70,7 +70,6 @@ class Equipo(models.Model):
     )
 
     name = models.CharField(max_length=50)
-    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
     date_inv = models.DateField(null=True, blank=True)
     code = models.CharField(primary_key=True, max_length=50)
     location_int = models.CharField(max_length=50, null=True, blank=True)
@@ -81,8 +80,10 @@ class Equipo(models.Model):
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
     state = models.CharField(choices=STATUS, max_length=50)
+    imagen = models.ImageField(upload_to='media/', null=True, blank=True)
 
-    
+    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
+
     def __str__(self):
         return self.name
     
