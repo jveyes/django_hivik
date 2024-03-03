@@ -15,7 +15,9 @@
     <div class="row">
         <!-- Información General del Equipo (Lado Izquierdo) -->
         <div class="col-md-6">
-            <h2>{{equipo.name}}</h2><a class="" href="{% url 'got:equipo-delete' equipo.system.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+            <h2>{{equipo.name}}</h2>
+            <a class="" href="{% url 'got:equipo-delete' equipo.system.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+            <a class="" href="{% url 'got:equipo-update' equipo.system.id %}"><i class="bi bi-pen"></i></a>
             <p><strong>Modelo:</strong>  {{equipo.model}}</p>
             <p><strong>Marca:</strong>  {{equipo.marca}}</p>
             <p><strong>Serial:</strong> {{equipo.serial}}</p>
@@ -25,10 +27,12 @@
             <p><strong>Estado:</strong> {{equipo.get_state_display}}</p>
         </div>
         <!-- Imagen del Equipo (Lado Derecho) -->
+        {% if equipos.imagen %}
         <div class="col-md-6">
             <img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
             <!-- La clase "img-fluid" hace que la imagen sea responsiva y se ajuste al ancho del contenedor -->
         </div>
+        {% endif %}
     </div>
     <!-- Información Específica del Equipo -->
     <div class="row mt-3">
