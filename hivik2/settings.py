@@ -82,16 +82,16 @@ WSGI_APPLICATION = 'hivik2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": "hivik",
-#         "USER": "postgres",
-#         "PASSWORD": "07221127",
-#         "HOST": "127.0.0.1",
-#         "DATABASE_PORT": "5432",
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "hivik",
+        "USER": "postgres",
+        "PASSWORD": "07221127",
+        "HOST": "127.0.0.1",
+        "DATABASE_PORT": "5432",
+    }
+}
 
 
 
@@ -139,11 +139,18 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
 
+# import dj_database_url
+
+# # Configuración de la base de datos
+# DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
+
 import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(db_from_env)
 
-# Configuración de la base de datos
-DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
 
+# db_from_env = dj_database_url.config(conn_max_age=500)
+# DATABASES['default'].update(db_from_env)
 
 LOGIN_REDIRECT_URL = '/'
 
