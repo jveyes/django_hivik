@@ -16,8 +16,8 @@
         <!-- Información General del Equipo (Lado Izquierdo) -->
         <div class="col-md-6">
             <h2>{{equipo.name}}</h2>
-            <a class="" href="{% url 'got:equipo-delete' equipo.system.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-            <a class="" href="{% url 'got:equipo-update' equipo.system.id %}"><i class="bi bi-pen"></i></a>
+            <a class="" href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+            <a class="" href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
             <p><strong>Modelo:</strong>  {{equipo.model}}</p>
             <p><strong>Marca:</strong>  {{equipo.marca}}</p>
             <p><strong>Serial:</strong> {{equipo.serial}}</p>
