@@ -25,5 +25,12 @@ table {
 td, th {
   padding: 10px;
 }
+
+.ema-container{
+  display: flex;
+  justify-content: space-between;
+  width: 400px;
+  align-items: center;
+}
   
 
