@@ -133,7 +133,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq.system = sys
             eq.save()
             sys_detail_url = reverse('got:sys-detail', args=[sys.pk])
-            return redirect(request.path)
+            return redirect('/')
         else:
             return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form})
 

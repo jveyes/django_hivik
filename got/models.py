@@ -127,6 +127,9 @@ class Ot(models.Model):
     
     def get_absolute_url(self):
         return reverse('got:ot-detail', args=[str(self.num_ot)])
+    
+    class Meta:
+        ordering = ['num_ot']
 
 
 class Task(models.Model):
