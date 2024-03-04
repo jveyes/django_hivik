@@ -288,6 +288,9 @@ class SysDelete(DeleteView):
     Vista formulario para eliminar actividades
     '''
     model = System
+
+    
+    success_url = reverse_lazy('got:ot-list')
     
     def get_success_url(self):
         asset_code = self.object.asset.id

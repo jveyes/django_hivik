@@ -87,6 +87,9 @@ class Equipo(models.Model):
     class Meta:
         ordering = ['name', 'code']
 
+    def get_absolute_url(self):
+        return reverse('got:sys-detail', args=[self.system.id])
+
 class Ruta(models.Model):
     '''
     (inactivo)
