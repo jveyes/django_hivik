@@ -51,7 +51,7 @@ class System(models.Model):
         return '%s - %s - %s' % (self.asset, self.gruop, self.name)
     
     def get_absolute_url(self):
-        return reverse('got:sys-detail', args=[str(self.id)])
+        return reverse('got:sys-detail', args=[self.id])
     
     class Meta:
         ordering = ['asset__name', 'gruop']
