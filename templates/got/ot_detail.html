@@ -85,6 +85,21 @@
     {% endif %}
     </div>
 
+    <!-- Botones para navegar entre OTs -->
+    <div class="d-flex justify-content-between mt-4">
+        {% if ot.get_previous_by_creation_date %}
+            <a href="{% url 'got:ot-detail' ot.get_previous_by_creation_date.num_ot %}" class="btn btn-outline-primary">
+                OT Anterior
+            </a>
+        {% endif %}
+        
+        {% if ot.get_next_by_creation_date %}
+            <a href="{% url 'got:ot-detail' ot.get_next_by_creation_date.num_ot %}" class="btn btn-outline-primary">
+                OT Siguiente
+            </a>
+        {% endif %}
+    </div>
+
 
     <div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
