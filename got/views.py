@@ -150,12 +150,18 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = OtsDescriptionFilterForm
+  
+        info_filter = Asset.objects.all()
+        context['asset'] = info_filter
+
         return context
 
     def get_queryset(self):
         form = OtsDescriptionFilterForm(self.request.GET)
         queryset = Ot.objects.all()
         state = self.request.GET.get('state')
+        asset_id = self.request.GET.get('asset_id')
+        responsable_id = self.request.GET.get('responsable')
 
         if state:
             queryset = queryset.filter(state=state)
@@ -164,7 +170,12 @@ class OtListView(LoginRequiredMixin, generic.ListView):
             description = form.cleaned_data.get('description', '')
             queryset = Ot.objects.filter(description__icontains=description)
             return queryset
-        
+
+        if asset_id:
+            queryset = queryset.filter(system__asset_id=asset_id)
+        if responsable_id:
+            queryset = queryset.filter(super=responsable_id)
+
         return queryset
 
 

@@ -8,6 +8,36 @@
         <a class="btn btn-primary space" href="{% url 'got:ot-create' %}">Crear OT</a>
     </div>
 
+    {% block content %}
+    <div class="container">
+    <!-- Opciones de filtrado -->
+
+    <!-- Enlace sin filtros -->
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Filtrar por equipo
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
+            {% for a in asset %}
+                <li><a href="{% url 'got:ot-list' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Filtrar por taller
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
+            {% for u in serport_members %}
+                <li><a href="{% url 'got:ot-list' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    </div>
+
     <div class="btn-group" role="group" aria-label="Estado de OT">
         <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
         <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>

@@ -23,7 +23,9 @@
             <p><strong>Modelo:</strong>  {{equipo.model}}</p>
             <p><strong>Marca:</strong>  {{equipo.marca}}</p>
             <p><strong>Serial:</strong> {{equipo.serial}}</p>
+            {% if equipo.area %}
             <p><strong>Area:</strong> {{equipo.area}}</p>
+            {% endif %}
             <p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
             <p><strong>codigo interno:</strong> {{equipo.code}}</p>
             <p><strong>Estado:</strong> {{equipo.get_state_display}}</p>

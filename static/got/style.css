@@ -28,9 +28,17 @@ td, th {
 
 .ema-container{
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   width: 400px;
   align-items: center;
 }
-  
 
+.ema {
+  width: 35px;
+}
+
+.ema:hover {
+  cursor: pointer;
+  color: yellowgreen;
+}
+  
