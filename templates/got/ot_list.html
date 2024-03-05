@@ -30,7 +30,7 @@
         </button>
         <ul class="dropdown-menu">
             <li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
-            {% for u in serport_members %}
+            {% for u in super_members %}
                 <li><a href="{% url 'got:ot-list' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
             {% endfor %}
         </ul>
