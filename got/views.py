@@ -153,8 +153,12 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
-        return context
+        super_group = Group.objects.get(name='super_members')
+        users_in_group = super_group.user_set.all()
+        context['super_members'] = users_in_group
 
+        return context
+    
     def get_queryset(self):
         form = OtsDescriptionFilterForm(self.request.GET)
         queryset = Ot.objects.all()
