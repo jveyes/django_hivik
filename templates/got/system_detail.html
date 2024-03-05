@@ -9,45 +9,49 @@
         Crear nuevo componente
     </button>
 </div>
+
 {% if system.equipos.all %}
 {% for equipo in system.equipos.all %}
-<div class="container mt-5">
-    <div class="row">
-        <!-- Información General del Equipo (Lado Izquierdo) -->
-        <div class="col-md-6">
-            <h2>{{equipo.name}}</h2>
-            <div class="ema-container">
-                <a class="ema" href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-                <a class="ema" href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
-            </div>
-            <p><strong>Modelo:</strong>  {{equipo.model}}</p>
-            <p><strong>Marca:</strong>  {{equipo.marca}}</p>
-            <p><strong>Serial:</strong> {{equipo.serial}}</p>
-            {% if equipo.area %}
-            <p><strong>Area:</strong> {{equipo.area}}</p>
-            {% endif %}
-            <p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
-            <p><strong>codigo interno:</strong> {{equipo.code}}</p>
-            <p><strong>Estado:</strong> {{equipo.get_state_display}}</p>
-        </div>
-        <!-- Imagen del Equipo (Lado Derecho) -->
-        {% if equipo.imagen %}
-        <div class="col-md-6">
-            <img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
-            <!-- La clase "img-fluid" hace que la imagen sea responsiva y se ajuste al ancho del contenedor -->
-        </div>
-        {% endif %}
-    </div>
-    <!-- Información Específica del Equipo -->
-    <div class="row mt-3">
-        <div class="col-md-12">
-            <h4>Información Específica del Equipo</h4>
-            <p>Fabricante: {{equipo.fabricante}}</p>
-            <p>Especificaciones: {{equipo.feature}}</p>
-        </div>
-    </div>
-    <!-- Repite la estructura para más equipos si es necesario -->
-</div>
+
+	<div class="container mt-5">
+    	<div class="row">
+        	<!-- Información General del Equipo -->
+        	<div class="col-md-6">
+				<div>
+            		<h2>{{equipo.name}}</h2>
+                	<a href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                	<a href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
+            	</div>
+            	
+				<p><strong>Modelo:</strong>  {{equipo.model}}</p>
+            	<p><strong>Marca:</strong>  {{equipo.marca}}</p>
+            	<p><strong>Serial:</strong> {{equipo.serial}}</p>
+            	{% if equipo.area %}
+            		<p><strong>Area:</strong> {{equipo.area}}</p>
+            	{% endif %}
+            	<p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
+            	<p><strong>codigo interno:</strong> {{equipo.code}}</p>
+            	<p><strong>Estado:</strong> {{equipo.get_state_display}}</p>
+				<h4><strong>Información Específica del Equipo</strong></h4>
+          		<p><strong>Fabricante:</strong> {{equipo.fabricante}}</p>
+          		<p><strong>Especificaciones:</strong> {{equipo.feature}}</p>
+        	</div>
+    		<!-- <div class="row mt">
+      			<div class="col-md-12">
+          			
+      			</div>
+			</div> -->
+  			{% if equipo.imagen %}
+  				<div class="col-md-6">
+      				<img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
+      				<!-- La clase "img-fluid" hace que la imagen sea responsiva y se ajuste al ancho del contenedor -->
+  				</div>
+  			{% endif %}
+    	</div>
+
+    	<!-- Repite la estructura para más equipos si es necesario -->
+	</div>
+
 {% endfor %}
 {% else %}
 <p>No hay equipos registrados.</p>
