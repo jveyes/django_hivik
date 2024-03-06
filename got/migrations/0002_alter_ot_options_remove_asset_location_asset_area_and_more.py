@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
             name='start_date',
             field=models.DateField(blank=True, null=True),
         ),
-
+        
         migrations.AlterField(
             model_name='task',
             name='ruta',

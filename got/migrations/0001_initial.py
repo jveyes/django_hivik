@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('date_inv', models.DateField(blank=True, null=True)),
                 ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
-                ('location', models.CharField(blank=True, max_length=50, null=True)),
+                ('location_int', models.CharField(blank=True, max_length=50, null=True)),
                 ('model', models.CharField(blank=True, max_length=50, null=True)),
                 ('serial', models.CharField(blank=True, max_length=50, null=True)),
                 ('marca', models.CharField(blank=True, max_length=50, null=True)),

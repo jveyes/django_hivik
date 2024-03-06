@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, System, Ot, Task, Equipo
+from .models import Asset, System, Ot, Task, Equipo, Ruta
 from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm
 
 # Librerias auxiliares
@@ -132,9 +132,15 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq = equipo_form.save(commit=False)
             eq.system = sys
             eq.save()
-            return redirect(sys.get_absolute_url())
+            return redirect(request.path)
         else:
             return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form})
+        
+class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
+    '''
+    Vista generica para mostrar Equipos con sus rutinas (v3.0)
+    '''
+    model = Equipo
 
 
 # Ordenes de trabajo

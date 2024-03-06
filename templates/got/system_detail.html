@@ -29,9 +29,6 @@
 				<p><strong>Modelo:</strong>  {{equipo.model}}</p>
             	<p><strong>Marca:</strong>  {{equipo.marca}}</p>
             	<p><strong>Serial:</strong> {{equipo.serial}}</p>
-            	{% if equipo.area %}
-            		<p><strong>Area:</strong> {{equipo.area}}</p>
-            	{% endif %}
             	<p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
             	<p><strong>codigo interno:</strong> {{equipo.code}}</p>
             	<p><strong>Estado:</strong> {{equipo.get_state_display}}</p>
@@ -39,11 +36,6 @@
           		<p><strong>Fabricante:</strong> {{equipo.fabricante}}</p>
           		<p><strong>Especificaciones:</strong> {{equipo.feature}}</p>
         	</div>
-    		<!-- <div class="row mt">
-      			<div class="col-md-12">
-          			
-      			</div>
-			</div> -->
   			{% if equipo.imagen %}
   				<div class="col-md-6">
       				<img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
