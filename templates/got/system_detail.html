@@ -22,6 +22,7 @@
         	<div class="col-md-6">
 				<div>
             		<h2>{{equipo.name}}</h2>
+                	<p><a href="{% url 'got:equipo-detail' equipo.code %}">Rutinas</a></p>
                 	<a href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
                 	<a href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
             	</div>
