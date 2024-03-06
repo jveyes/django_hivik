@@ -18,6 +18,14 @@ class Asset(models.Model):
         ('x', 'Fuera de servicio')
     )
 
+    AREA = (
+        ('b', 'Buceo'),
+        ('a', 'Artefactos Navales'),
+        ('o', 'Oceanografia'),
+        ('l', 'Locativo'),
+        ('v', 'Vehiculos')
+    )
+
     name = models.CharField(max_length=50)
     supervisor = models.ForeignKey(
         User,
@@ -25,7 +33,7 @@ class Asset(models.Model):
         null=True,
         blank=True
     )
-    location = models.CharField(max_length=50)
+    area = models.CharField(choices=AREA, default='a', max_length=50)
     state = models.CharField(choices=STATUS, default='m', max_length=50)
 
     def __str__(self):
@@ -69,8 +77,7 @@ class Equipo(models.Model):
     name = models.CharField(max_length=50)
     date_inv = models.DateField(null=True, blank=True)
     code = models.CharField(primary_key=True, max_length=50)
-    location_int = models.CharField(max_length=50, null=True, blank=True)
-    area = models.CharField(max_length=50, null=True, blank=True)
+    location = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
     serial = models.CharField(max_length=50, null=True, blank=True)
     marca = models.CharField(max_length=50, null=True, blank=True)
@@ -95,7 +102,7 @@ class Ruta(models.Model):
     (inactivo)
     '''
     name = models.CharField(max_length=50)
-    component = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     frecuency = models.IntegerField()
     code = models.CharField(primary_key=True, max_length=50)
     intervention_date = models.DateField()
@@ -139,8 +146,8 @@ class Task(models.Model):
     '''
     Actividades (v1.0)
     '''
-    ot = models.ForeignKey(Ot, on_delete=models.CASCADE)
-    # ruta = models.ForeignKey(Ruta, on_delete=models.SET_NULL, null=True, blank=True)
+    ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
+    ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, null=True, blank=True)
     responsible = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -150,8 +157,8 @@ class Task(models.Model):
     description = models.TextField()
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(upload_to='media/', null=True, blank=True)
-    start_date = models.DateField()
-    men_time = models.IntegerField(default=1)
+    start_date = models.DateField(null=True, blank=True)
+    men_time = models.IntegerField(default=0)
     finished = models.BooleanField()
 
     def __str__(self):

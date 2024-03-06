@@ -63,7 +63,40 @@ class Migration(migrations.Migration):
                 ('men_time', models.IntegerField(default=1)),
                 ('finished', models.BooleanField()),
                 ('ot', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.ot')),
+                ('ruta', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.ruta')),
                 ('responsible', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+
+        migrations.CreateModel(
+            name='Equipo',
+            fields=[
+                ('name', models.CharField(max_length=50)),
+                ('date_inv', models.DateField(blank=True, null=True)),
+                ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('location', models.CharField(blank=True, max_length=50, null=True)),
+                ('model', models.CharField(blank=True, max_length=50, null=True)),
+                ('serial', models.CharField(blank=True, max_length=50, null=True)),
+                ('marca', models.CharField(blank=True, max_length=50, null=True)),
+                ('fabricante', models.CharField(blank=True, max_length=50, null=True)),
+                ('feature', models.TextField()),
+                ('state', models.CharField(choices=[('m', 'Mantenimiento'), ('o', 'Operativo'), ('x', 'Fuera de servicio')], max_length=50)),
+                ('imagen', models.ImageField(blank=True, null=True, upload_to='media/')),
+                ('system', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='equipos', to='got.system')),
+            ],
+            options={
+                'ordering': ['name', 'code'],
+            },
+        ),
+
+        migrations.CreateModel(
+            name='Ruta',
+            fields=[
+                ('name', models.CharField(max_length=50)),
+                ('frecuency', models.IntegerField()),
+                ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('intervention_date', models.DateField()),
+                ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.equipo')),
             ],
         ),
     ]
