@@ -19,7 +19,7 @@
 				<tr>
 					<td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
 					<td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
-					<td>{{asset.area}}</td>
+					<td>{{asset.get_area_display}}</td>
 					<td>{{asset.get_state_display}}</td>
 				</tr>
             {% endfor %}
