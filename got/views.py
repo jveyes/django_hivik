@@ -221,16 +221,18 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         task_form = ActForm(request.POST, request.FILES)
         state_form = FinishOtForm(request.POST)
 
-        if state_form.is_valid():
-            ot.state ='Finalizado'
-            ot.save()
-            return redirect(ot.get_absolute_url())
+        if 'finish_ot' in request.POST:
+            if state_form.is_valid():
+                ot.state ='Finalizado'
+                ot.save()
+                return redirect(ot.get_absolute_url())
 
-        if task_form.is_valid():
-            act = task_form.save(commit=False)
-            act.ot = ot
-            act.save()
-            return redirect(act.get_absolute_url())
+        elif 'submit_task' in request.POST:
+            if task_form.is_valid():
+                act = task_form.save(commit=False)
+                act.ot = ot
+                act.save()
+                return redirect(act.get_absolute_url())
         else:
             return render(request, self.template_name, {'ot': ot, 'task_form': task_form, 'state_form': state_form})
 
