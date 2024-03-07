@@ -15,7 +15,7 @@
 <form method="post" action="{% url 'got:ot-detail' ot.num_ot %}">
     {% csrf_token %}
     {{ state_form.as_p }}
-    <button type="submit" class="btn btn-primary">Finalizar</button>
+    <button type="submit" class="btn btn-primary" name="finish_ot">Finalizar</button>
 </form>
 {% endif %}
 {% endif %}
@@ -134,7 +134,7 @@
                 <table>
                   {{ task_form.as_table }}
                 </table>
-                <button type="submit" class="btn btn-primary">Agregar Actividad</button>
+                <button type="submit" class="btn btn-primary" name="submit_task">Agregar Actividad</button>
               </form>
             </div>
           </div>
