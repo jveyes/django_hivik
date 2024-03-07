@@ -31,10 +31,11 @@ class Asset(models.Model):
     
     # Propiedades adicionales para artefactos navales
     bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
-    eslora = models.IntegerField(default=0, null=True, blank=True)
-    manga = models.IntegerField(default=0, null=True, blank=True)
-    puntal = models.IntegerField(default=0, null=True, blank=True)
-    calado_maximo = models.IntegerField(default=0, null=True, blank=True)
+    eslora = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
+    
+    manga = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
+    puntal = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
+    calado_maximo = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
     deadweight = models.IntegerField(default=0, null=True, blank=True)
     arqueo_bruto = models.IntegerField(default=0, null=True, blank=True)
     arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
