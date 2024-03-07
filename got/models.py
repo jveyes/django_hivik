@@ -11,12 +11,6 @@ class Asset(models.Model):
     '''
     Activos (v1.0)
     '''
-    STATUS = (
-        ('m', 'Mantenimiento'),
-        ('o', 'Operacion'),
-        ('d', 'Dique'),
-        ('x', 'Fuera de servicio')
-    )
 
     AREA = (
         ('b', 'Buceo'),
@@ -34,7 +28,17 @@ class Asset(models.Model):
         blank=True
     )
     area = models.CharField(choices=AREA, default='a', max_length=50)
-    state = models.CharField(choices=STATUS, default='m', max_length=50)
+    
+    # Propiedades adicionales para artefactos navales
+    bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
+    eslora = models.IntegerField(default=0, null=True, blank=True)
+    manga = models.IntegerField(default=0, null=True, blank=True)
+    puntal = models.IntegerField(default=0, null=True, blank=True)
+    calado_maximo = models.IntegerField(default=0, null=True, blank=True)
+    deadweight = models.IntegerField(default=0, null=True, blank=True)
+    arqueo_bruto = models.IntegerField(default=0, null=True, blank=True)
+    arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
+    espacio_libre_cubierta = models.IntegerField(default=0, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -120,6 +124,12 @@ class Ot(models.Model):
         ('c', 'Cancelado'),
     )
 
+    TIPO_MTTO = (
+        ('p', 'Preventivo'),
+        ('c', 'Correctivo'),
+        ('m', 'Modificativo'),
+    )
+
     creation_date = models.DateField(auto_now=True)
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
@@ -131,6 +141,7 @@ class Ot(models.Model):
         blank = True
     )
     state = models.CharField(choices=STATUS, default='a', max_length=50)
+    tipo_mtto = models.CharField(choices=TIPO_MTTO, default='c', max_length=50)
 
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
