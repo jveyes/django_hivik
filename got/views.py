@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -84,6 +84,14 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
     '''
     model = Asset
     paginate_by = 15
+    
+    def get_queryset(self):
+        queryset = Asset.objects.all()
+        area = self.request.GET.get('area')
+
+        if area:
+            queryset = queryset.filter(area=area)
+        return queryset
 
 
 # Detalle de equipos y listado de sistemas
@@ -199,11 +207,24 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['task_form'] = ActForm()
+        context['state_form'] = FinishOtForm()
+
+        # Agregar lógica para determinar el estado global de las tareas
+        ot = self.get_object()
+        all_tasks_finished = ot.task_set.filter(finished=False).exists()
+        context['all_tasks_finished'] = not all_tasks_finished
+
         return context
     
     def post(self, request, *args, **kwargs):
         ot = self.get_object()
         task_form = ActForm(request.POST, request.FILES)
+        state_form = FinishOtForm(request.POST)
+
+        if state_form.is_valid():
+            ot.state ='Finalizado'
+            ot.save()
+            return redirect(ot.get_absolute_url())
 
         if task_form.is_valid():
             act = task_form.save(commit=False)
@@ -211,7 +232,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             act.save()
             return redirect(act.get_absolute_url())
         else:
-            return render(request, self.template_name, {'ot': ot, 'task_form': task_form})
+            return render(request, self.template_name, {'ot': ot, 'task_form': task_form, 'state_form': state_form})
 
 
 # Detalle de actividades

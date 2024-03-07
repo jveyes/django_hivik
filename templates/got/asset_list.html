@@ -4,13 +4,41 @@
 
 {% block content %}
 
+    <!-- Enlace sin filtros -->
+    <div class="btn-group" role="group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Filtrar por area
+        </button>
+        <ul class="dropdown-menu">
+            <li><a href="{% url 'got:asset-list' %}">Mostrar todas</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=a">Artefactos Navales</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
+        </ul>
+    </div>
+
+	{% if request.GET.area %}
+		{% if request.GET.area == 'a' %}
+        <h4>Artefactos Navales</h4>
+		{% elif request.GET.area == 'b' %}
+        <h4>Buceo</h4>
+		{% elif request.GET.area == 'o' %}
+        <h4>Oceanografia</h4>
+		{% elif request.GET.area == 'l' %}
+        <h4>Locativo</h4>
+		{% elif request.GET.area == 'v' %}
+        <h4>Vehiculos</h4>
+		{% endif %}
+    {% endif %}
+
 <table class="table">
     <thead>
     	<tr>
         	<th scope="col">Nombre</th>
         	<th scope="col">Supervisor</th>
         	<th scope="col">Área</th>
-        	<th scope="col">Estado</th>
       	</tr>
     </thead>
     <tbody>
@@ -20,7 +48,6 @@
 					<td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
 					<td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
 					<td>{{asset.get_area_display}}</td>
-					<td>{{asset.get_state_display}}</td>
 				</tr>
             {% endfor %}
         {% else %}

@@ -4,6 +4,22 @@
 
 {% block content %}
 
+<div class="container">
+
+<!-- Existen actividades -->
+{% if ot.task_set.all %} 
+<!-- Estan finalizadas esas actividades -->
+{% if all_tasks_finished %}
+<!-- Se encuentra en estado de ejecucion -->
+{% if ot.state == 'x' %}
+<form method="post" action="{% url 'got:ot-detail' ot.num_ot %}">
+    {% csrf_token %}
+    {{ state_form.as_p }}
+    <button type="submit" class="btn btn-primary">Finalizar</button>
+</form>
+{% endif %}
+{% endif %}
+{% endif %}
 <!-- Informacion basica -->
 <table class="table">
     <tbody>
@@ -30,6 +46,9 @@
     </tbody>
 </table>
 
+
+
+
 <!-- Opciones (generar reportte/ actualizar/ Eliminar) -->
 <div class="d-flex justify-content-end">
     <div class="btn-group">
@@ -38,8 +57,9 @@
         <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
     </div>
 </div>
+</div>
 
-
+<div class="container">
 <h4>Actividades</h4>
 
 <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
@@ -47,7 +67,7 @@
 </button>
   
 
-<div class="container">
+
     {% if ot.task_set.all %}
         <table class="table table-striped">
             <thead>

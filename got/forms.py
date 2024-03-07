@@ -89,29 +89,6 @@ class UpdateTaskForm(forms.ModelForm):
         }
 
 
-# Formulario para crear un nuevo activo
-class AssetsForm(forms.ModelForm):
-     '''
-     (inactivo)
-     '''
-     super = UserChoiceField(
-          queryset=User.objects.all(), label='Supervisor',
-     )
-
-     class Meta:
-          model = Asset
-          fields = '__all__'
-          labels = {
-                'name': 'Equipo',
-                'supervisor': 'Supervisor',
-                'location': 'Ubicación',
-                'state': 'Estado',
-          }
-          widgets = {
-               'super': forms.Select(attrs={'class': 'form-control'}),
-          }
-
-
 # Formulario para crear un sistema
 class SysForm(forms.ModelForm):
      '''
@@ -137,12 +114,20 @@ class OtForm(forms.ModelForm):
           exclude = ['creations_date', 'num_ot']
           labels = {
                'description': 'Description',
-                'system': 'Sistema',
-                'state': 'Estado',
+               'system': 'Sistema',
+               'state': 'Estado',
           }
           widgets = {
                'super': forms.Select(attrs={'class': 'form-control'}),
           }
+
+
+class FinishOtForm(forms.Form):
+     finish = forms.BooleanField(
+          widget=forms.HiddenInput(),
+          required=False,
+          initial=True,
+     )
 
 
 # Formulario para crear una actividad
@@ -193,3 +178,25 @@ class EquipoForm(forms.ModelForm):
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
           }
+
+# Formulario para crear un nuevo activo
+# class AssetsForm(forms.ModelForm):
+#      '''
+#      (inactivo)
+#      '''
+#      super = UserChoiceField(
+#           queryset=User.objects.all(), label='Supervisor',
+#      )
+
+#      class Meta:
+#           model = Asset
+#           fields = '__all__'
+#           labels = {
+#                 'name': 'Equipo',
+#                 'supervisor': 'Supervisor',
+#                 'location': 'Ubicación',
+#                 'state': 'Estado',
+#           }
+#           widgets = {
+#                'super': forms.Select(attrs={'class': 'form-control'}),
+#           }

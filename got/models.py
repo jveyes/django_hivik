@@ -140,7 +140,7 @@ class Ot(models.Model):
         null = True,
         blank = True
     )
-    state = models.CharField(choices=STATUS, default='a', max_length=50)
+    state = models.CharField(choices=STATUS, default='x', max_length=50)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, default='c', max_length=50)
 
     def __str__(self):
