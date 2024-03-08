@@ -39,8 +39,8 @@ urlpatterns = [
     path("task/<int:pk>/finish/", views.finish_task, name='finish-task'), 
 
     # Rutinas
-    path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'), 
-    path('ruta/<str:pk>/delete/', views.TaskDelete.as_view(), name='ruta-delete'),
+    # path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'), 
+    # path('ruta/<int:pk>/delete/', views.RutaDelete.as_view(), name='ruta-delete'),
 
 
     # Reportes
