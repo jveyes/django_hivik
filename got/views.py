@@ -14,7 +14,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, System, Ot, Task, Equipo#, Ruta
+from .models import Asset, System, Ot, Task, Equipo, Ruta
 from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm
 
 # Librerias auxiliares
@@ -358,24 +358,24 @@ class EquipoDelete(DeleteView):
         return success_url
 
 
-# class RutaUpdate(UpdateView):
-#     '''
-#     Vista formulario para actualizar una actividad
-#     '''
-#     model = Ruta
-#     form_class = SysForm
+class RutaUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Ruta
+    form_class = SysForm
 
 
-# class RutaDelete(DeleteView):
-#     '''
-#     Vista formulario para eliminar actividades
-#     '''
-#     model = Ruta
+class RutaDelete(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = Ruta
     
-#     def get_success_url(self):
-#         sys_code = self.object.system.id
-#         success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
-#         return success_url
+    def get_success_url(self):
+        sys_code = self.object.system.id
+        success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
+        return success_url
 
 
 # Reportes
