@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Task, Ot, Asset, System, Equipo
+from .models import Task, Ot, System, Equipo
 from django.contrib.auth.models import User, Group
 import datetime
 from django.contrib.auth import get_user_model
@@ -99,7 +99,9 @@ class SysForm(forms.ModelForm):
           exclude = ['asset',]
           labels = {
                 'name': 'Sistema',
-                'gruop': 'Grupo constructivo',
+                'gruop': 'Grupo',
+                'location': 'Ubicación',
+                'state': 'Estado'
           }
 
 
@@ -116,6 +118,7 @@ class OtForm(forms.ModelForm):
                'description': 'Description',
                'system': 'Sistema',
                'state': 'Estado',
+               'tipo_mtto': 'Tipo de mantenimiento'
           }
           widgets = {
                'super': forms.Select(attrs={'class': 'form-control'}),
@@ -139,7 +142,7 @@ class ActForm(forms.ModelForm):
 
      class Meta:
         model = Task
-        exclude = ['ot']
+        exclude = ['ot', 'ruta']
         labels = {
             'description': 'Descripción',
             'news': 'Novedades',
@@ -164,13 +167,11 @@ class EquipoForm(forms.ModelForm):
                'name': 'Nombre',
                'date_inv': 'Fecha de ingreso al inventario',
                'code': 'Codigo interno',
-               'location': 'Ubicacion interna (Opcional)',
                'model': 'Modelo',
                'serial': '# Serial',
                'marca': 'Marca',
                'fabricante': 'Fabricante',
                'feature': 'Caracteristicas',
-               'state': 'Estado',
                'imagen': 'Imagen'
           }
           widgets = {
@@ -178,25 +179,3 @@ class EquipoForm(forms.ModelForm):
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
           }
-
-# Formulario para crear un nuevo activo
-# class AssetsForm(forms.ModelForm):
-#      '''
-#      (inactivo)
-#      '''
-#      super = UserChoiceField(
-#           queryset=User.objects.all(), label='Supervisor',
-#      )
-
-#      class Meta:
-#           model = Asset
-#           fields = '__all__'
-#           labels = {
-#                 'name': 'Equipo',
-#                 'supervisor': 'Supervisor',
-#                 'location': 'Ubicación',
-#                 'state': 'Estado',
-#           }
-#           widgets = {
-#                'super': forms.Select(attrs={'class': 'form-control'}),
-#           }

@@ -72,6 +72,8 @@
                 <tr>
                     <th scope="col">Grupo</th>
                     <th scope="col">Nombre</th>
+                    <th scope="col">Ubicación</th>
+                    <th scope="col">Estado</th>
                 </tr>
             </thead>
             <tbody>           
@@ -82,6 +84,8 @@
                         <td>
                         <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
                         </td>
+                        <td>{{ sys.location }}</td>
+                        <td>{{ sys.get_state_display }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

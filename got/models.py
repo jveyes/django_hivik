@@ -56,8 +56,18 @@ class System(models.Model):
     Sistema agrupados de cada activo, relacion directa con activos y vinculo con ordenes 
     de trabajo (v1.0)
     '''
+
+    STATUS = (
+        ('m', 'Mantenimiento'),
+        ('o', 'Operativo'),
+        ('x', 'Fuera de servicio')
+    )
+
     name = models.CharField(max_length=50)
     gruop = models.IntegerField()
+    location = models.CharField(max_length=50, default="Cartagena", null=True, blank=True)
+    state = models.CharField(choices=STATUS, default='m', max_length=50)
+
     asset = models.ForeignKey(Asset, on_delete = models.CASCADE)
 
     def __str__(self):
@@ -73,25 +83,18 @@ class Equipo(models.Model):
     '''
     Momentaneamente seran componentes rotativos (inactivo)
     '''
-    STATUS = (
-        ('m', 'Mantenimiento'),
-        ('o', 'Operativo'),
-        ('x', 'Fuera de servicio')
-    )
 
     name = models.CharField(max_length=50)
     date_inv = models.DateField(null=True, blank=True)
     code = models.CharField(primary_key=True, max_length=50)
-    location = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
     serial = models.CharField(max_length=50, null=True, blank=True)
     marca = models.CharField(max_length=50, null=True, blank=True)
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
-    state = models.CharField(choices=STATUS, max_length=50)
     imagen = models.ImageField(upload_to='media/', null=True, blank=True)
 
-    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
+    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='components')
 
     def __str__(self):
         return self.name
@@ -106,13 +109,14 @@ class Ruta(models.Model):
     '''
     (inactivo)
     '''
-    name = models.CharField(max_length=50)
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     frecuency = models.IntegerField()
     code = models.CharField(primary_key=True, max_length=50)
     intervention_date = models.DateField()
-
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='rutas')
+
+    def __str__(self):
+        return '%s - %s' % (self.code, self.equipo)
+
 
 class Ot(models.Model):
     '''
