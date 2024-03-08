@@ -48,6 +48,9 @@ class Asset(models.Model):
         return reverse('got:asset-detail', args=[str(self.id)])
     
     class Meta:
+        ordering = ['area', 'name']
+    
+    class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
 
 
