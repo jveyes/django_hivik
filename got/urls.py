@@ -38,6 +38,11 @@ urlpatterns = [
     path('task/<int:pk>/delete/', views.TaskDelete.as_view(), name='task-delete'),
     path("task/<int:pk>/finish/", views.finish_task, name='finish-task'), 
 
+    # Rutinas
+    path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'), 
+    path('ruta/<str:pk>/delete/', views.TaskDelete.as_view(), name='ruta-delete'),
+
+
     # Reportes
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report' ),
 ]

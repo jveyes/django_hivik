@@ -320,7 +320,6 @@ class SysDelete(DeleteView):
     '''
     model = System
 
-    
     success_url = reverse_lazy('got:ot-list')
     
     def get_success_url(self):
@@ -357,6 +356,27 @@ class EquipoDelete(DeleteView):
         sys_code = self.object.system.id
         success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
         return success_url
+
+
+class RutaUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Ruta
+    form_class = SysForm
+
+
+class RutaDelete(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = Ruta
+    
+    def get_success_url(self):
+        sys_code = self.object.system.id
+        success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
+        return success_url
+
 
 # Reportes
 def report_pdf(request, num_ot):

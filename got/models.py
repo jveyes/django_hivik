@@ -109,10 +109,18 @@ class Ruta(models.Model):
     '''
     (inactivo)
     '''
-    frecuency = models.IntegerField()
     code = models.CharField(primary_key=True, max_length=50)
+    frecuency = models.IntegerField()
     intervention_date = models.DateField()
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='rutas')
+
+    @property
+    def next_date(self):
+        return self.intervention_date + timedelta(days=self.frecuency)
+    
+    @property
+    def is_overdue(self):
+        return date.today() >= self.next_date
 
     def __str__(self):
         return '%s - %s' % (self.code, self.equipo)

@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Task, Ot, System, Equipo
-from django.contrib.auth.models import User, Group
+from .models import Task, Ot, System, Equipo, Ruta
+from django.contrib.auth.models import User
 import datetime
 from django.contrib.auth import get_user_model
 
@@ -178,4 +178,19 @@ class EquipoForm(forms.ModelForm):
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+          }
+
+
+class RutaForm(forms.ModelForm):
+
+     class Meta:
+          model = Ruta
+          exclude = ['equipo']
+          labels = {
+               'code': 'Codigo interno',
+               'frecuency': 'Fecha de ingreso al inventario',
+               'intervention_date': 'Fecha ultima intervención'
+          }
+          widgets = {
+            'intervention_date': XYZ_DateInput(format=['%Y-%m-%d'],),
           }
