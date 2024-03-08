@@ -84,6 +84,9 @@
                         <td>{{ sys.location }}</td>
                         <td>{{ sys.get_state_display }}</td>
                         <td>
+                            <a class="" href="{% url 'got:sys-update' sys.id %}"><i class="bi bi-pen"></i></a>
+                        </td>
+                        <td>
                         <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
                         </td>
                     </tr>

@@ -16,11 +16,12 @@ urlpatterns = [
 
     # Systems
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
-    path('sys/<str:pk>/update/', views.EquipoUpdate.as_view(), name='equipo-update'), 
+    path('sys/<int:pk>/update/', views.SysUpdate.as_view(), name='sys-update'), 
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
     # Equipos
     path('equipo/<str:pk>/', views.EquipoDetailView.as_view(), name='equipo-detail'),
+    path('equipo/<str:pk>/update/', views.EquipoUpdate.as_view(), name='equipo-update'), 
     path('equipo/<str:pk>/delete/', views.EquipoDelete.as_view(), name='equipo-delete'),
 
     # Ots

@@ -338,6 +338,15 @@ class EquipoUpdate(UpdateView):
     template_name = 'got/equipo_form.html' 
     http_method_names = ['get', 'post']
 
+
+class SysUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = System
+    form_class = SysForm
+
+
 class EquipoDelete(DeleteView):
     '''
     Vista formulario para eliminar actividades
