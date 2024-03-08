@@ -94,7 +94,7 @@ class Equipo(models.Model):
     feature = models.TextField()
     imagen = models.ImageField(upload_to='media/', null=True, blank=True)
 
-    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='components')
+    system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
 
     def __str__(self):
         return self.name
