@@ -40,7 +40,7 @@ urlpatterns = [
 
     # Rutinas
     path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'), 
-    path('ruta/<int:pk>/delete/', views.RutaDelete.as_view(), name='ruta-delete'),
+    path('ruta/<str:pk>/delete/', views.RutaDelete.as_view(), name='ruta-delete'),
 
 
     # Reportes

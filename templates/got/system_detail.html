@@ -22,7 +22,6 @@
         	<div class="col-md-6">
 				<div>
             		<h2>{{equipo.name}}</h2>
-                	<p><a href="{% url 'got:equipo-detail' equipo.code %}">Rutinas</a></p>
                 	<a href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
                 	<a href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
             	</div>
@@ -52,6 +51,51 @@
 {% else %}
 <p>No hay equipos registrados.</p>
 {% endif %}
+
+<div class="container mt-5">
+
+    <div class="container">
+        <!-- <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
+            Crear nuevo sistema
+        </button> -->
+        <h2>Rutinas de mantenimiento</h2>
+        {% if system.rutas.all %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Codigo</th>
+                    <th scope="col">Frecuencia (días)</th>
+                    <th scope="col">Fecha de ultima intervención</th>
+                    <th scope="col">Fecha proxima intervención</th>
+                </tr>
+            </thead>
+            <tbody>           
+                {% for ruta in system.rutas.all %}
+                    <tr>
+                        <th scope="row">{{ruta.code}}</th>
+                        <td><a href="">{{ruta.frecuency}}</a></td>
+                        <td>{{ ruta.intervention_date }}</td>
+                        <td>{{ ruta.next_date }}</td>
+                        <td>
+                            <a class="" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
+                        </td>
+                        <td>
+                        <a class="" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% else %}
+        <p>No hay rutinas registrados.</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
+
 
 <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

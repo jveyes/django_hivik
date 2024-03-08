@@ -114,7 +114,7 @@ class Ruta(models.Model):
     code = models.CharField(primary_key=True, max_length=50)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
-    system = models.ForeignKey(System, default=1, on_delete=models.CASCADE, related_name='rutas')
+    system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
 
     @property
     def next_date(self):
