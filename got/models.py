@@ -46,12 +46,10 @@ class Asset(models.Model):
     
     def get_absolute_url(self):
         return reverse('got:asset-detail', args=[str(self.id)])
-    
-    class Meta:
-        ordering = ['area', 'name']
-    
+
     class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
+        ordering = ['area', 'name']
 
 
 class System(models.Model):
