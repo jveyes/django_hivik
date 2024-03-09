@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -130,19 +130,26 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['equipo_form'] = EquipoForm()
+        context['ruta_form'] = RutaForm()
         return context
     
     def post(self, request, *args, **kwargs):
         sys = self.get_object()
         equipo_form = EquipoForm(request.POST, request.FILES)
+        ruta_form = EquipoForm(request.POST)
 
         if equipo_form.is_valid():
             eq = equipo_form.save(commit=False)
             eq.system = sys
             eq.save()
             return redirect(request.path)
+        elif ruta_form.is_valid():
+            rut = ruta_form.save(commit=False)
+            rut.system = sys
+            rut.save()
+            return redirect(request.path)
         else:
-            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form})
+            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'ruta_form': ruta_form})
         
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
     '''
@@ -314,6 +321,7 @@ class TaskDelete(DeleteView):
     model = Task
     success_url = reverse_lazy('got:ot-list')
 
+
 class SysDelete(DeleteView):
     '''
     Vista formulario para eliminar actividades
@@ -363,7 +371,7 @@ class RutaUpdate(UpdateView):
     Vista formulario para actualizar una actividad
     '''
     model = Ruta
-    form_class = SysForm
+    form_class = RutaForm
 
 
 class RutaDelete(DeleteView):

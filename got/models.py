@@ -81,9 +81,6 @@ class System(models.Model):
         ordering = ['asset__name', 'gruop']
 
 class Equipo(models.Model):
-    '''
-    Momentaneamente seran componentes rotativos (inactivo)
-    '''
 
     name = models.CharField(max_length=50)
     date_inv = models.DateField(null=True, blank=True)
@@ -126,6 +123,9 @@ class Ruta(models.Model):
 
     def __str__(self):
         return '%s - %s' % (self.code, self.system)
+    
+    def get_absolute_url(self):
+        return reverse('got:sys-detail', args=[str(self.system.id)])
 
 
 class Ot(models.Model):

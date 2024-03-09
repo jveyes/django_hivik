@@ -3,10 +3,9 @@ from django.core.exceptions import ValidationError
 from .models import Task, Ot, System, Equipo, Ruta
 from django.contrib.auth.models import User
 import datetime
-from django.contrib.auth import get_user_model
 
 
-# Formulario para filtrar busqueda de las Ordenes de trabajo
+# Form 1: filtrar busqueda de las Ordenes de trabajo
 class OtsDescriptionFilterForm(forms.Form):
       description = forms.CharField(
            	widget=forms.TextInput(attrs={
@@ -19,13 +18,13 @@ class OtsDescriptionFilterForm(forms.Form):
 		)
       
 
-# clase para mostrar nombre y apellido de los usuarios en los formularios
+# Clase 1: mostrar nombre y apellido de los usuarios en los formularios
 class UserChoiceField(forms.ModelChoiceField):
 	def label_from_instance(self, obj):
             return f'{obj.first_name} {obj.last_name}'
 
 
-# Personalizar widget para que aparezca calendario
+# Clase 2: Personalizar widget para que aparezca calendario
 class XYZ_DateInput(forms.DateInput):
 	input_type = 'date'
 
@@ -34,7 +33,7 @@ class XYZ_DateInput(forms.DateInput):
             super().__init__(**kwargs)
     
 
-# Formulario para reprogramar una actividad 
+# Form 2: Reprogramar actividades 
 class RescheduleTaskForm(forms.ModelForm):
         '''
         Formulario ubicado en "assignedtasks_list_pendient_user.html"
@@ -65,7 +64,7 @@ class RescheduleTaskForm(forms.ModelForm):
             }
             
 
-# Formulario para reprogramar una actividad 
+# Form 3: Actualizar actividad 
 class UpdateTaskForm(forms.ModelForm):
         '''
         Formulario ubicado en "assignedtasks_list_pendient_user.html"
@@ -89,7 +88,7 @@ class UpdateTaskForm(forms.ModelForm):
         }
 
 
-# Formulario para crear un sistema
+# Form 4: Crear nuevo sistema
 class SysForm(forms.ModelForm):
      '''
      v2.1
@@ -105,7 +104,7 @@ class SysForm(forms.ModelForm):
           }
 
 
-# Formulario para crear una orden de trabajo
+# Form 5: Crear nueva orden de trabajo
 class OtForm(forms.ModelForm):
      super = UserChoiceField(
           queryset=User.objects.all(), label='Supervisor',
@@ -124,7 +123,7 @@ class OtForm(forms.ModelForm):
                'super': forms.Select(attrs={'class': 'form-control'}),
           }
 
-
+# Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
      finish = forms.BooleanField(
           widget=forms.HiddenInput(),
@@ -133,7 +132,7 @@ class FinishOtForm(forms.Form):
      )
 
 
-# Formulario para crear una actividad
+# Form 7: Crear nueva actividad
 class ActForm(forms.ModelForm):
      responsible = UserChoiceField(
           queryset=User.objects.all(),
@@ -158,6 +157,8 @@ class ActForm(forms.ModelForm):
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
+
+# Form 8: Crear/editar nuevo equipo
 class EquipoForm(forms.ModelForm):
 
      class Meta:
@@ -181,14 +182,15 @@ class EquipoForm(forms.ModelForm):
           }
 
 
+#  Form 9: Crear/editar nueva ruta
 class RutaForm(forms.ModelForm):
 
      class Meta:
           model = Ruta
-          exclude = ['equipo']
+          exclude = ['system']
           labels = {
                'code': 'Codigo interno',
-               'frecuency': 'Fecha de ingreso al inventario',
+               'frecuency': 'Frecuencia',
                'intervention_date': 'Fecha ultima intervención'
           }
           widgets = {
