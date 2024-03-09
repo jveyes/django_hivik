@@ -109,7 +109,8 @@ class Ruta(models.Model):
     '''
     (inactivo)
     '''
-    code = models.CharField(primary_key=True, max_length=50)
+    code = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, default='nombre-rutina')
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
