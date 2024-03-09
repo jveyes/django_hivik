@@ -91,6 +91,7 @@ class Equipo(models.Model):
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
     imagen = models.ImageField(upload_to='media/', null=True, blank=True)
+    manual_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
 
     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
 

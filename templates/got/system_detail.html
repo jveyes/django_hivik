@@ -35,6 +35,11 @@
 				<h4><strong>Información Específica del Equipo</strong></h4>
           		<p><strong>Fabricante:</strong> {{equipo.fabricante}}</p>
           		<p><strong>Especificaciones:</strong> {{equipo.feature}}</p>
+				{% if equipo.manual_pdf %}
+  				<p>
+      				<a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a>
+				</p>
+  			{% endif %}
         	</div>
   			{% if equipo.imagen %}
   				<div class="col-md-6">
@@ -61,9 +66,8 @@
         <h2>Rutinas de mantenimiento</h2>
 
 		<div class="container">
-			<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#rutaModal">
-				Crear nuevoa rutina
-			</button>
+			<a href="{% url 'got:ruta-create' system.id %}">Crear nueva rutina</a>
+
 		</div>
         {% if system.rutas.all %}
         <table class="table table-striped">
@@ -112,27 +116,6 @@
             {% csrf_token %}
             <table>
               {{ equipo_form.as_table }}
-            </table>
-            <button type="submit" class="btn btn-primary">Agregar</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  <div class="modal fade" id="rutaModal" tabindex="-1" aria-labelledby="rutaModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="rutaModalLabel">Crear nueva rutina</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="post" action="">
-            {% csrf_token %}
-            <table>
-              {{ ruta_form.as_table }}
             </table>
             <button type="submit" class="btn btn-primary">Agregar</button>
           </form>

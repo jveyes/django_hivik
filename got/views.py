@@ -130,26 +130,26 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['equipo_form'] = EquipoForm()
-        context['ruta_form'] = RutaForm()
+        # context['ruta_form'] = RutaForm()
         return context
     
     def post(self, request, *args, **kwargs):
         sys = self.get_object()
         equipo_form = EquipoForm(request.POST, request.FILES)
-        ruta_form = EquipoForm(request.POST)
+        # ruta_form = EquipoForm(request.POST)
 
         if equipo_form.is_valid():
             eq = equipo_form.save(commit=False)
             eq.system = sys
             eq.save()
             return redirect(request.path)
-        elif ruta_form.is_valid():
-            rut = ruta_form.save(commit=False)
-            rut.system = sys
-            rut.save()
-            return redirect(request.path)
+        # elif ruta_form.is_valid():
+        #     rut = ruta_form.save(commit=False)
+        #     rut.system = sys
+        #     rut.save()
+        #     return redirect(request.path)
         else:
-            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'ruta_form': ruta_form})
+            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, })#'ruta_form': ruta_form
         
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
     '''
@@ -286,6 +286,33 @@ class OtCreate(CreateView):
     '''
     model = Ot
     form_class = OtForm
+
+
+class RutaCreate(CreateView):
+    '''
+    Vista formulario para crear ordenes de trabajo (v1.0)
+    '''
+    model = Ruta
+    form_class = RutaForm
+
+    def form_valid(self, form):
+        # Obtener el valor del parámetro pk desde la URL
+        pk = self.kwargs['pk']
+
+        # Obtener el objeto System relacionado con el pk
+        system = get_object_or_404(System, pk=pk)
+
+        # Establecer el valor del campo system en el formulario
+        form.instance.system = system
+
+        # Llamar al método form_valid de la clase base
+        return super().form_valid(form)
+
+    def get_success_url(self):
+
+        ruta = self.object
+        # Redirigir a la vista de detalle del objeto recién creado
+        return reverse('got:sys-detail', args=[ruta.system.id])
 
 
 class OtUpdate(UpdateView):

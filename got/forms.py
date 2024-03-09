@@ -173,12 +173,14 @@ class EquipoForm(forms.ModelForm):
                'marca': 'Marca',
                'fabricante': 'Fabricante',
                'feature': 'Caracteristicas',
-               'imagen': 'Imagen'
+               'imagen': 'Imagen',
+               'manual_pdf': 'Manual'
           }
           widgets = {
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
           }
 
 
