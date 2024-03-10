@@ -107,8 +107,8 @@
 
     <!-- Botones para navegar entre OTs -->
     <div class="d-flex justify-content-between mt-4">
-        {% if ot.get_previous_by_creation_date %}
-            <a href="{% url 'got:ot-detail' ot.get_previous_by_creation_date.num_ot %}" class="btn btn-outline-primary">
+        {% if ot.get_previous_by_num_ot %}
+            <a href="{% url 'got:ot-detail' ot.get_previous_by_num_ot.num_ot %}" class="btn btn-outline-primary">
                 OT Anterior
             </a>
         {% endif %}

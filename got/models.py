@@ -147,7 +147,7 @@ class Ot(models.Model):
         ('m', 'Modificativo'),
     )
 
-    creation_date = models.DateField(auto_now=True)
+    creation_date = models.DateField(auto_now=True, auto_now_add=False)
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
     system = models.ForeignKey(System, on_delete=models.CASCADE)
@@ -159,6 +159,8 @@ class Ot(models.Model):
     )
     state = models.CharField(choices=STATUS, default='x', max_length=50)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, default='c', max_length=50)
+    info_contratista_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
+
 
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
@@ -167,7 +169,7 @@ class Ot(models.Model):
         return reverse('got:ot-detail', args=[str(self.num_ot)])
     
     class Meta:
-        ordering = ['num_ot']
+        ordering = ['-num_ot']
 
 
 class Task(models.Model):
