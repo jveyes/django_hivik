@@ -22,7 +22,7 @@ from datetime import timedelta, date
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.db.models import Q, F, ExpressionWrapper, fields
-from django.db import models
+from django.db.models.functions import Now
 from django.core.paginator import Paginator, EmptyPage
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -290,29 +290,12 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     model = Task
 
 
-class RutaManager(models.Manager):
-    def get_queryset(self):
-        return super().get_queryset().extra(
-            select={'next_date': 'intervention_date + INTERVAL frecuency DAY'}
-        ).order_by('next_date')
-
-
 class RutaListView(LoginRequiredMixin, generic.ListView):
     '''
     Vista generica para mostrar el listado de los centros de costos (v1.0)
     '''
     model = Ruta
     paginate_by = 15
-    object = RutaManager()
-    # ordering = ['next_date']
-    
-    # def get_queryset(self):
-    #     queryset = Asset.objects.all()
-    #     area = self.request.GET.get('area')
-
-    #     if area:
-    #         queryset = queryset.filter(area=area)
-    #     return queryset
 
 
 # ------------------------------------- Formularios -------------------------------------------
