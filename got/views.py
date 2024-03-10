@@ -340,6 +340,7 @@ class OtCreate(CreateView):
     '''
     model = Ot
     form_class = OtForm
+    http_method_names = ['get', 'post']
 
 
 class RutaCreate(CreateView):
@@ -375,6 +376,7 @@ class OtUpdate(UpdateView):
     '''
     model = Ot
     form_class = OtForm
+    http_method_names = ['get', 'post']
 
 
 class OtDelete(DeleteView):
