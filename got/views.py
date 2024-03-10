@@ -260,7 +260,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
                 # Adjuntar el PDF almacenado en el campo info_contratista_pdf
                 if ot.info_contratista_pdf:
                     pdf_filename_stored = f'OT_{ot.num_ot}_Contratista.pdf'
-                    email.attach_file(ot.info_contratista_pdf.path, 'application/pdf', pdf_filename_stored)
+                    email.attach(pdf_filename_stored, ot.info_contratista_pdf.read(), 'application/pdf')
 
                 email.send()
 
