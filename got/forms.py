@@ -117,7 +117,8 @@ class OtForm(forms.ModelForm):
                'description': 'Description',
                'system': 'Sistema',
                'state': 'Estado',
-               'tipo_mtto': 'Tipo de mantenimiento'
+               'tipo_mtto': 'Tipo de mantenimiento',
+               'info_contratista_pdf': 'Informe externo'
           }
           widgets = {
                'super': forms.Select(attrs={'class': 'form-control'}),

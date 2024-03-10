@@ -42,7 +42,13 @@
         <tr>
             <th>Descripción: </th>
             <td>{{ot.description}}</td>
-        </tr>        
+        </tr>
+        {% if equipo.manual_pdf %}
+            <tr>
+                <th>Informe externo: </th>
+                <td><a href="{{ ot.info_contratista_pdf.url }}" target="_blank">Ver PDF</a></td>
+            </tr>
+        {% endif %}
     </tbody>
 </table>
 

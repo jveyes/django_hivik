@@ -255,6 +255,13 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
                 pdf_filename = f'OT_{ot.num_ot}_Detalle.pdf'
                 email = EmailMessage(subject, message, from_email, [to_email])
                 email.attach(pdf_filename, pdf_content, 'application/pdf')
+
+                # Adjuntar informe externo
+                if ot.info_contratista_pdf:
+                    pdf_content = self.generate_pdf_content(ot)
+                    pdf_filename = f'OT_{ot.num_ot}_Detalle.pdf'
+                    email.attach(pdf_filename, pdf_content, 'application/pdf')
+
                 email.send()
 
             return redirect(ot.get_absolute_url())
