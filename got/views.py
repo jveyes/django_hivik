@@ -250,17 +250,17 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
                 from_email = settings.EMAIL_HOST_USER
                 to_email = supervisor_email
 
-                # Adjuntar el PDF al correo
-                pdf_content = self.generate_pdf_content(ot)
-                pdf_filename = f'OT_{ot.num_ot}_Detalle.pdf'
                 email = EmailMessage(subject, message, from_email, [to_email])
-                email.attach(pdf_filename, pdf_content, 'application/pdf')
 
-                # Adjuntar informe externo
+                # Adjuntar el PDF al correo
+                pdf_content_dynamic = self.generate_pdf_content(ot)
+                pdf_filename_dynamic = f'OT_{ot.num_ot}_Detalle.pdf'
+                email.attach(pdf_filename_dynamic, pdf_content_dynamic, 'application/pdf')
+
+                # Adjuntar el PDF almacenado en el campo info_contratista_pdf
                 if ot.info_contratista_pdf:
-                    pdf_content = self.generate_pdf_content(ot)
-                    pdf_filename = f'OT_{ot.num_ot}_Detalle.pdf'
-                    email.attach(pdf_filename, pdf_content, 'application/pdf')
+                    pdf_filename_stored = f'OT_{ot.num_ot}_Contratista.pdf'
+                    email.attach_file(ot.info_contratista_pdf.path, 'application/pdf', pdf_filename_stored)
 
                 email.send()
 

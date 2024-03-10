@@ -122,6 +122,8 @@ class OtForm(forms.ModelForm):
           }
           widgets = {
                'super': forms.Select(attrs={'class': 'form-control'}),
+               'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+
           }
 
 # Form 6: Finalizar actividad
