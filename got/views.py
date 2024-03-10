@@ -15,15 +15,19 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm
 
 # Librerias auxiliares
 from datetime import timedelta, date
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, F, ExpressionWrapper, fields
+from django.db import models
 from django.core.paginator import Paginator, EmptyPage
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from io import BytesIO
+from django.conf import settings
 
 
 # ----------------------------------- Main views ------------------------------------------
@@ -76,6 +80,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
         return queryset
+
 
 # Equipos
 class AssetsListView(LoginRequiredMixin, generic.ListView):
@@ -130,26 +135,28 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['equipo_form'] = EquipoForm()
-        # context['ruta_form'] = RutaForm()
+        context['task_form'] = RutActForm()
         return context
     
     def post(self, request, *args, **kwargs):
         sys = self.get_object()
         equipo_form = EquipoForm(request.POST, request.FILES)
-        # ruta_form = EquipoForm(request.POST)
+        task_form = RutActForm(request.POST)
+        ruta_actual = Ruta.objects.filter(system=sys).first()
 
         if equipo_form.is_valid():
             eq = equipo_form.save(commit=False)
             eq.system = sys
             eq.save()
             return redirect(request.path)
-        # elif ruta_form.is_valid():
-        #     rut = ruta_form.save(commit=False)
-        #     rut.system = sys
-        #     rut.save()
-        #     return redirect(request.path)
+        elif task_form.is_valid():
+            task = task_form.save(commit=False)
+            task.ruta = ruta_actual
+            task.finished = False
+            task.save()
+            return redirect(request.path)
         else:
-            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, })#'ruta_form': ruta_form
+            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'task_form': task_form})
         
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
     '''
@@ -227,10 +234,29 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         ot = self.get_object()
         task_form = ActForm(request.POST, request.FILES)
         state_form = FinishOtForm(request.POST)
+        
 
         if 'finish_ot' in request.POST and state_form.is_valid():
             ot.state ='Finalizado'
             ot.save()
+
+            supervisor = ot.system.asset.supervisor
+            if supervisor and supervisor.email:
+                supervisor_email = supervisor.email
+
+                # Enviar correo electrónico al finalizar la OT
+                subject = f'Orden de Trabajo {ot.num_ot} Finalizada'
+                message = render_to_string('got/ot_finished_email.txt', {'ot': ot})
+                from_email = settings.EMAIL_HOST_USER
+                to_email = supervisor_email
+
+                # Adjuntar el PDF al correo
+                pdf_content = self.generate_pdf_content(ot)
+                pdf_filename = f'OT_{ot.num_ot}_Detalle.pdf'
+                email = EmailMessage(subject, message, from_email, [to_email])
+                email.attach(pdf_filename, pdf_content, 'application/pdf')
+                email.send()
+
             return redirect(ot.get_absolute_url())
 
         elif 'submit_task' in request.POST and task_form.is_valid():
@@ -240,6 +266,20 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             return redirect(act.get_absolute_url())
         
         return render(request, self.template_name, {'ot': ot, 'task_form': task_form, 'state_form': state_form})
+    
+    def generate_pdf_content(self, ot):
+        '''
+        Función para generar el contenido del PDF
+        '''
+        template_path = 'got/pdf_template.html'
+        context = {'ot': ot}
+        template = get_template(template_path)
+        html = template.render(context)
+        pdf_content = BytesIO()
+
+        pisa.CreatePDF(html, dest=pdf_content)
+
+        return pdf_content.getvalue()
 
 
 # Detalle de actividades
@@ -248,6 +288,31 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     Detalle de actividades (v1.0)
     '''
     model = Task
+
+
+class RutaManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().extra(
+            select={'next_date': 'intervention_date + INTERVAL frecuency DAY'}
+        ).order_by('next_date')
+
+
+class RutaListView(LoginRequiredMixin, generic.ListView):
+    '''
+    Vista generica para mostrar el listado de los centros de costos (v1.0)
+    '''
+    model = Ruta
+    paginate_by = 15
+    object = RutaManager()
+    # ordering = ['next_date']
+    
+    # def get_queryset(self):
+    #     queryset = Asset.objects.all()
+    #     area = self.request.GET.get('area')
+
+    #     if area:
+    #         queryset = queryset.filter(area=area)
+    #     return queryset
 
 
 # ------------------------------------- Formularios -------------------------------------------

@@ -59,49 +59,73 @@
 
 <div class="container mt-5">
 
-    <div class="container">
-        <!-- <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
-            Crear nuevo sistema
-        </button> -->
-        <h2>Rutinas de mantenimiento</h2>
-
+	<div class="container mt-5">
 		<div class="container">
-			<a href="{% url 'got:ruta-create' system.id %}">Crear nueva rutina</a>
+			<h2>Rutinas de mantenimiento</h2>
+			<div class="container">
+				<a href="{% url 'got:ruta-create' system.id %}">Crear nueva rutina</a>
+			</div>
+	
+			{% if system.rutas.all %}
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Codigo</th>
+						<th scope="col">Frecuencia (días)</th>
+						<th scope="col">Fecha de ultima intervención</th>
+						<th scope="col">Fecha proxima intervención</th>
+						<th scope="col">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for ruta in system.rutas.all %}
+					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}">
+						<th scope="row">{{ ruta.name }}</th>
+						<td>{{ ruta.frecuency }}</td>
+						<td>{{ ruta.intervention_date }}</td>
+						<td>{{ ruta.next_date }}</td>
+						<td><a class="" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
+							<a class="" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="5">
+							<div id="collapse{{ ruta.code }}" class="collapse">
+								<p><strong>
+									<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
+										<i class="bi bi-clipboard2-plus-fill"></i>
+									</button>
+									Actividades: </strong></p>
+								
 
+								
+
+								{% if ruta.task_set.all %}
+								<ol>
+									{% for task in ruta.task_set.all %}
+									<li>{{ task.description }} <a class="" href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+									{% if task.news %}
+									<ul style="list-style-type: none;">
+										<li>{{ task.news }}</li>
+									</ul>
+									{% endif %}
+									{% endfor %}
+								</ol>
+								{% else %}
+								<p>No hay actividades registradas.</p>
+								{% endif %}
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<p>No hay rutinas registradas.</p>
+			{% endif %}
 		</div>
-        {% if system.rutas.all %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">Codigo</th>
-                    <th scope="col">Frecuencia (días)</th>
-                    <th scope="col">Fecha de ultima intervención</th>
-                    <th scope="col">Fecha proxima intervención</th>
-                </tr>
-            </thead>
-            <tbody>           
-                {% for ruta in system.rutas.all %}
-                    <tr>
-                        <th scope="row">{{ruta.name}}</th>
-                        <td><a href="">{{ruta.frecuency}}</a></td>
-                        <td>{{ ruta.intervention_date }}</td>
-                        <td>{{ ruta.next_date }}</td>
-                        <td>
-                            <a class="" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
-                        </td>
-                        <td>
-                        <a class="" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-        {% else %}
-        <p>No hay rutinas registrados.</p>
-        {% endif %}
-    </div>
-</div>
+	</div>
+	
 
 
 <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
@@ -124,5 +148,24 @@
     </div>
   </div>
 
+  <!-- Modal para crear nueva actividad -->
+<div class="modal fade" id="createActivityModal" tabindex="-1" aria-labelledby="createActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createActivityModalLabel">Crear Nueva Actividad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario para crear nueva actividad -->
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {{ task_form.as_p }}
+                    <button type="submit" class="btn btn-primary">Crear Actividad</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

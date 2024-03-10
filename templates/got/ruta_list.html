@@ -1,0 +1,74 @@
+{% extends "got/base_generic.html" %}
+
+{% block head %}Rutinas de mantenimiento{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+	<div class="container mt-5">
+		<div class="container">
+	
+			{% if ruta_list %}
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">Codigo</th>
+						<th scope="col">Frecuencia (días)</th>
+						<th scope="col">Fecha de ultima intervención</th>
+						<th scope="col">Fecha proxima intervención</th>
+						<th scope="col">Acciones</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for ruta in ruta_list %}
+					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}">
+						<th scope="row">{{ ruta.name }}</th>
+						<td>{{ ruta.frecuency }}</td>
+						<td>{{ ruta.intervention_date }}</td>
+						<td>{{ ruta.next_date }}</td>
+						<td><a class="" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
+							<a class="" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="5">
+							<div id="collapse{{ ruta.code }}" class="collapse">
+								<p><strong>
+									<!-- <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
+										<i class="bi bi-clipboard2-plus-fill"></i>
+									</button> -->
+									Actividades: </strong></p>
+								
+
+								
+
+								{% if ruta.task_set.all %}
+								<ol>
+									{% for task in ruta.task_set.all %}
+									 <li>{{ task.description }} <!-- <a class="" href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li> -->
+									{% if task.news %}
+									<ul style="list-style-type: none;">
+										<li>{{ task.news }}</li>
+									</ul>
+									{% endif %}
+									{% endfor %}
+								</ol>
+								{% else %}
+								<p>No hay actividades registradas.</p>
+								{% endif %}
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% else %}
+			<p>No hay rutinas registradas.</p>
+			{% endif %}
+		</div>
+	</div>
+
+
+
+{% endblock %}

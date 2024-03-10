@@ -1,0 +1,17 @@
+Asunto: Orden de Trabajo Finalizada
+
+Estimado/a Capitan {{ot.system.asset.name}},
+
+La Orden de Trabajo con el número {{ ot.num_ot }} ha sido finalizada con éxito.
+
+Detalles de la Orden de Trabajo:
+- Fecha de creación: {{ ot.creation_date }}
+- Supervisor: {{ ot.super.first_name }} {{ ot.super.last_name }}
+- Estado: {{ ot.get_state_display }}
+- Sistema: {{ ot.system }}
+- Descripción: {{ ot.description }}
+
+Gracias por su atención.
+
+Atentamente,
+Dto. Mantenimiento

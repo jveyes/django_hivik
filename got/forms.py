@@ -140,22 +140,37 @@ class ActForm(forms.ModelForm):
      )
 
      class Meta:
-        model = Task
-        exclude = ['ot', 'ruta']
-        labels = {
-            'description': 'Descripción',
-            'news': 'Novedades',
-            'evidence': 'Evidencia',
-            'start_date': 'Fecha de inicio',
-            'men_time': 'Tiempo de ejecución (Dias)',
-            'finished': 'Finalizado',
-        }
-        widgets = {
-            'responsible': forms.Select(attrs={'class': 'form-control'}),
-            'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
-        }
+          model = Task
+          exclude = ['ot', 'ruta']
+          labels = {
+               'description': 'Descripción',
+               'news': 'Novedades',
+               'evidence': 'Evidencia',
+               'start_date': 'Fecha de inicio',
+               'men_time': 'Tiempo de ejecución (Dias)',
+               'finished': 'Finalizado',
+          }
+          widgets = {
+               'responsible': forms.Select(attrs={'class': 'form-control'}),
+               'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
+               'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+          }
+
+     
+class RutActForm(forms.ModelForm):
+     class Meta:
+          model = Task
+          fields = ['description', 'news']
+          labels = {
+               'description': 'Descripción',
+               'news': 'Suministros',
+          }
+          widgets = {
+               'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'news': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+          }
+
 
 
 # Form 8: Crear/editar nuevo equipo
