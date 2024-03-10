@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
 from django.core.validators import RegexValidator
 
@@ -147,7 +149,7 @@ class Ot(models.Model):
         ('m', 'Modificativo'),
     )
 
-    creation_date = models.DateField(auto_now=True, auto_now_add=False)
+    creation_date = models.DateField(auto_now_add=True)
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
     system = models.ForeignKey(System, on_delete=models.CASCADE)

@@ -1,8 +1,8 @@
 Asunto: Orden de Trabajo Finalizada
 
-Estimado/a Capitan {{ot.system.asset.name}},
+Estimado/a {{ot.system.asset.name}},
 
-La Orden de Trabajo con el número {{ ot.num_ot }} ha sido finalizada con éxito.
+La Orden de Trabajo con el número {{ ot.num_ot }} ha sido finalizada.
 
 Detalles de la Orden de Trabajo:
 - Fecha de creación: {{ ot.creation_date }}

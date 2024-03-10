@@ -62,10 +62,11 @@
 <div class="container">
 <h4>Actividades</h4>
 
+{% if ot.state == 'x' %}
 <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
     Crear Actividad
 </button>
-  
+{% endif %}
 
 
     {% if ot.task_set.all %}
@@ -103,21 +104,6 @@
     {% else %}
         <p>No hay actividades registradas.</p>
     {% endif %}
-    </div>
-
-    <!-- Botones para navegar entre OTs -->
-    <div class="d-flex justify-content-between mt-4">
-        {% if ot.get_previous_by_num_ot %}
-            <a href="{% url 'got:ot-detail' ot.get_previous_by_num_ot.num_ot %}" class="btn btn-outline-primary">
-                OT Anterior
-            </a>
-        {% endif %}
-        
-        {% if ot.get_next_by_creation_date %}
-            <a href="{% url 'got:ot-detail' ot.get_next_by_creation_date.num_ot %}" class="btn btn-outline-primary">
-                OT Siguiente
-            </a>
-        {% endif %}
     </div>
 
 

@@ -39,7 +39,7 @@
 
     <div class="btn-group" role="group" aria-label="Estado de OT">
         <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
-        <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
+        <label class="btn btn-outline-primary" for="Todos" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
 
         <input type="radio" class="btn-check" name="state" id="abierto" autocomplete="off" {% if request.GET.state == 'a' %}checked{% endif %}>
         <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}?state=a'">Abierto</label>

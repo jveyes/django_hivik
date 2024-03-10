@@ -289,13 +289,12 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     model = Task
 
+@permission_required('got.can_see_completely')
+def RutaListView(request):
 
-class RutaListView(LoginRequiredMixin, generic.ListView):
-    '''
-    Vista generica para mostrar el listado de los centros de costos (v1.0)
-    '''
-    model = Ruta
-    paginate_by = 15
+    ruta = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+    return render(request, 'got/ruta_list.html', {'ruta_list': ruta})
+
 
 
 # ------------------------------------- Formularios -------------------------------------------
