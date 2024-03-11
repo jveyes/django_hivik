@@ -13,10 +13,10 @@
     </button>
 </div>
 
+<!-- Equipos -->
 {% if system.equipos.all %}
 {% for equipo in system.equipos.all %}
-
-	<div class="container mt-5">
+	<section class="container mt-5">
     	<div class="row">
         	<!-- Información General del Equipo -->
         	<div class="col-md-6">
@@ -50,23 +50,22 @@
     	</div>
 
     	<!-- Repite la estructura para más equipos si es necesario -->
-	</div>
-
+		
+	</section>
 {% endfor %}
 {% else %}
-<p>No hay equipos registrados.</p>
+	<section class="container mt-5">
+		<p>No hay equipos registrados.</p>
+	</section>
 {% endif %}
 
-<div class="container mt-5">
-
-	<div class="container mt-5">
-		<div class="container">
-			<h2>Rutinas de mantenimiento</h2>
-			<div class="container">
-				<a href="{% url 'got:ruta-create' system.id %}">Crear nueva rutina</a>
-			</div>
+<!-- Rutinas -->
+<section class="container mt-5">
+	<div>
+		<h2>Rutinas de mantenimiento</h2>
+		<a href="{% url 'got:ruta-create' system.id %}" class="btn btn-secondary">Crear nueva rutina</a>
 	
-			{% if system.rutas.all %}
+		{% if system.rutas.all %}
 			<table class="table table-striped">
 				<thead>
 					<tr>
@@ -84,71 +83,71 @@
 						<td>{{ ruta.frecuency }}</td>
 						<td>{{ ruta.intervention_date }}</td>
 						<td>{{ ruta.next_date }}</td>
-						<td><a class="" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
-							<a class="" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+						<td>
+							<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
+							<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
 						</td>
 					</tr>
 					<tr>
-						<td colspan="5">
+						<td colspan="4">
 							<div id="collapse{{ ruta.code }}" class="collapse">
-								<p><strong>
-									<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
-										<i class="bi bi-clipboard2-plus-fill"></i>
-									</button>
-									Actividades: </strong></p>
-								
-
-								
+								<h3>Actividades:</h3>
 
 								{% if ruta.task_set.all %}
 								<ol>
 									{% for task in ruta.task_set.all %}
-									<li>{{ task.description }} <a class="" href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
-									{% if task.news %}
-									<ul style="list-style-type: none;">
-										<li>{{ task.news }}</li>
-									</ul>
-									{% endif %}
+										<li>{{ task.description }} <a href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+										{% if task.news %}
+												<p>{{ task.news }}</p>
+										{% endif %}
 									{% endfor %}
 								</ol>
 								{% else %}
-								<p>No hay actividades registradas.</p>
+									<p>No hay actividades registradas.</p>
 								{% endif %}
+							</div>
+						</td>
+						<td colspan="1">
+							<div id="collapse{{ ruta.code }}" class="collapse">
+								<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
+									<i class="bi bi-clipboard2-plus-fill"></i>
+								</button>
 							</div>
 						</td>
 					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
-			{% else %}
+		{% else %}
 			<p>No hay rutinas registradas.</p>
-			{% endif %}
-		</div>
+		{% endif %}
 	</div>
+</section>
+
 	
-
-
+<!-- Modales -->
+<!-- Formulario modal para Componentes -->
 <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="comModalLabel">Crear nuevo componente</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="post" action="" enctype="multipart/form-data">
-            {% csrf_token %}
-            <table>
-              {{ equipo_form.as_table }}
-            </table>
-            <button type="submit" class="btn btn-primary">Agregar</button>
-          </form>
-        </div>
-      </div>
+      	<div class="modal-content">
+        	<div class="modal-header">
+          		<h5 class="modal-title" id="comModalLabel">Crear nuevo componente</h5>
+          		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        	</div>
+        	<div class="modal-body">
+          		<form method="post" action="" enctype="multipart/form-data">{% csrf_token %}
+            		<table>
+              			{{ equipo_form.as_table }}
+            		</table>
+            		<button type="submit" class="btn btn-primary">Agregar</button>
+          		</form>
+        	</div>
+    	</div>
     </div>
-  </div>
+</div>
 
-  <!-- Modal para crear nueva actividad -->
+
+<!-- Modal para crear nueva actividad -->
 <div class="modal fade" id="createActivityModal" tabindex="-1" aria-labelledby="createActivityModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -157,15 +156,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <!-- Formulario para crear nueva actividad -->
                 <form method="post" action="" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ task_form.as_p }}
-                    <button type="submit" class="btn btn-primary">Crear Actividad</button>
+                    <button type="submit" class="btn btn-primary">Crear</button>
                 </form>
             </div>
         </div>
     </div>
-</div>
 
 {% endblock %}

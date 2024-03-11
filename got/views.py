@@ -64,7 +64,8 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        queryset = Task.objects.all()
+        # queryset = Task.objects.all()
+        queryset = Task.objects.filter(ot__isnull=False) 
 
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
