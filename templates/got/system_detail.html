@@ -89,9 +89,12 @@
 						</td>
 					</tr>
 					<tr>
-						<td colspan="4">
+						<td colspan="5">
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
+								<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
+									<i class="bi bi-clipboard2-plus-fill"></i>
+								</button>
 
 								{% if ruta.task_set.all %}
 								<ol>
@@ -106,13 +109,6 @@
 								{% else %}
 									<p>No hay actividades registradas.</p>
 								{% endif %}
-							</div>
-						</td>
-						<td colspan="1">
-							<div id="collapse{{ ruta.code }}" class="collapse">
-								<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
-									<i class="bi bi-clipboard2-plus-fill"></i>
-								</button>
 							</div>
 						</td>
 					</tr>
