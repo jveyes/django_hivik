@@ -300,8 +300,15 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
 @permission_required('got.can_see_completely')
 def RutaListView(request):
 
-    ruta = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
-    return render(request, 'got/ruta_list.html', {'ruta_list': ruta})
+    assets = Asset.objects.all()
+
+    area_filter = request.GET.get('area_filter')
+    if area_filter:
+        ruta = sorted(Ruta.objects.filter(system__asset__area=area_filter), key=lambda t:t.next_date)
+    else:
+        ruta = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+
+    return render(request, 'got/ruta_list.html', {'ruta_list': ruta, 'assets': assets, 'area_filter': area_filter})
 
 
 

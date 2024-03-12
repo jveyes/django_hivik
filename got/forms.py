@@ -164,14 +164,17 @@ class ActForm(forms.ModelForm):
 class RutActForm(forms.ModelForm):
      class Meta:
           model = Task
-          fields = ['description', 'news']
+          fields = ['description', 'news', 'responsible']
           labels = {
                'description': 'Descripción',
                'news': 'Suministros',
+               'responsible': 'Responsable',
           }
           widgets = {
                'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
                'news': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'responsible': forms.Select(attrs={'class': 'form-control'}),
+
           }
 
 

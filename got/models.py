@@ -3,8 +3,6 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.utils import timezone
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
 
 from django.core.validators import RegexValidator
 
@@ -122,8 +120,20 @@ class Ruta(models.Model):
         return self.intervention_date + timedelta(days=self.frecuency)
     
     @property
-    def is_overdue(self):
-        return date.today() >= self.next_date
+    def percentage_remaining(self):
+        days_remaining = (self.next_date - date.today()).days
+        return int((days_remaining / self.frecuency) * 100)
+
+    @property
+    def maintenance_status(self):
+        percentage = self.percentage_remaining
+
+        if 25 <= percentage <= 100:
+            return 'c'
+        elif 5 <= percentage <= 26:
+            return 'p'
+        else:
+            return 'v' 
 
     def __str__(self):
         return '%s - %s' % (self.code, self.system)

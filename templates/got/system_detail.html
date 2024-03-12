@@ -78,7 +78,7 @@
 				</thead>
 				<tbody>
 					{% for ruta in system.rutas.all %}
-					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}">
+					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{% else %}table-danger{% endif %}">
 						<th scope="row">{{ ruta.name }}</th>
 						<td>{{ ruta.frecuency }}</td>
 						<td>{{ ruta.intervention_date }}</td>
@@ -97,9 +97,10 @@
 								<ol>
 									{% for task in ruta.task_set.all %}
 										<li>{{ task.description }} <a href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
-										{% if task.news %}
-												<p>{{ task.news }}</p>
-										{% endif %}
+										<ul style="list-style-type: none;">
+											<li>{{ task.responsible.first_name }} {{ task.responsible.last_name }}</li>
+											<li>{{ task.news }}</li>
+										</ul>
 									{% endfor %}
 								</ol>
 								{% else %}
