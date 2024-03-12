@@ -92,6 +92,8 @@
 						<td colspan="5">
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
+
+								<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary">Crear nueva rutina</a>
 								<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
 									<i class="bi bi-clipboard2-plus-fill"></i>
 								</button>
@@ -143,23 +145,5 @@
     </div>
 </div>
 
-
-<!-- Modal para crear nueva actividad -->
-<div class="modal fade" id="createActivityModal" tabindex="-1" aria-labelledby="createActivityModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createActivityModalLabel">Crear Nueva Actividad</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ task_form.as_p }}
-                    <button type="submit" class="btn btn-primary">Crear</button>
-                </form>
-            </div>
-        </div>
-    </div>
 
 {% endblock %}

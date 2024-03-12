@@ -143,22 +143,24 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         sys = self.get_object()
         equipo_form = EquipoForm(request.POST, request.FILES)
         task_form = RutActForm(request.POST)
-        ruta_actual = Ruta.objects.filter(system=sys).first()
 
         if equipo_form.is_valid():
             eq = equipo_form.save(commit=False)
             eq.system = sys
             eq.save()
             return redirect(request.path)
-        elif task_form.is_valid():
-            task = task_form.save(commit=False)
-            task.ruta = ruta_actual
-            task.finished = False
-            task.save()
-            return redirect(request.path)
+        # elif task_form.is_valid():
+        #     task = task_form.save(commit=False)
+        #     ruta_id = request.POST.get('ruta_id')
+        #     ruta = Ruta.objects.get(code=ruta_id)
+        #     task.ruta = ruta
+        #     task.finished = False
+        #     task.save()
+        #     return redirect(request.path)
         else:
             return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'task_form': task_form})
         
+
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     Vista generica para mostrar Equipos con sus rutinas (v3.0)
@@ -393,6 +395,36 @@ class OtDelete(DeleteView):
     '''
     model = Ot
     success_url = reverse_lazy('got:ot-list')
+
+
+class TaskCreate(CreateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Task
+    form_class = RutActForm
+    
+    def form_valid(self, form):
+        # Obtener el valor del parámetro pk desde la URL
+        pk = self.kwargs['pk']
+
+        # Obtener el objeto System relacionado con el pk
+        ruta = get_object_or_404(Ruta, pk=pk)
+
+        # Establecer el valor del campo system en el formulario
+        form.instance.ruta = ruta
+        form.instance.finished = False
+
+        # Llamar al método form_valid de la clase base
+        return super().form_valid(form)
+
+    def get_success_url(self):
+
+        task = self.object
+        # Redirigir a la vista de detalle del objeto recién creado
+        return reverse('got:sys-detail', args=[task.ruta.system.id])
+
+    
 
 
 class TaskUpdate(UpdateView):

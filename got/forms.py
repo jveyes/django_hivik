@@ -162,6 +162,11 @@ class ActForm(forms.ModelForm):
 
      
 class RutActForm(forms.ModelForm):
+     responsible = UserChoiceField(
+          queryset=User.objects.all(),
+          label='Responsable',
+     )
+
      class Meta:
           model = Task
           fields = ['description', 'news', 'responsible']
@@ -174,7 +179,6 @@ class RutActForm(forms.ModelForm):
                'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
                'news': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
                'responsible': forms.Select(attrs={'class': 'form-control'}),
-
           }
 
 
