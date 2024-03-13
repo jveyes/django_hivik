@@ -20,7 +20,6 @@ urlpatterns = [
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
     # Equipos
-    path('equipo/<str:pk>/', views.EquipoDetailView.as_view(), name='equipo-detail'),
     path('equipo/<str:pk>/update/', views.EquipoUpdate.as_view(), name='equipo-update'), 
     path('equipo/<str:pk>/delete/', views.EquipoDelete.as_view(), name='equipo-delete'),
 
@@ -48,4 +47,6 @@ urlpatterns = [
 
     # Reportes
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report' ),
+    path("dashboard/", views.indicadores, name='dashboard'),
+
 ]

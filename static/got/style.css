@@ -33,19 +33,22 @@ td, th {
   padding: 10px;
 }
 
-.ema-container{
-  display: flex;
-  justify-content: flex-end;
-  width: 400px;
-  align-items: center;
+.circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background-color: #e0e0e0;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
-.ema {
-  width: 35px;
+.progress-bar {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    clip-path: polygon(50% 0%, 100% 0, 100% 100%, 50% 100%, 50% 0%, var(--percentage) 0, var(--percentage) 100%, 50% 100%);
+    background-color: #007bff;
+    transition: var(--percentage) 0.3s ease-in-out;
 }
 
-.ema:hover {
-  cursor: pointer;
-  color: yellowgreen;
-}
   

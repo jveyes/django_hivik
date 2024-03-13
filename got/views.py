@@ -510,6 +510,7 @@ class RutaDelete(DeleteView):
 
 
 # Reportes
+@permission_required('got.can_see_completely')
 def report_pdf(request, num_ot):
     '''
     Funcion para crear reportes pdf
@@ -528,6 +529,7 @@ def report_pdf(request, num_ot):
     return response
 
 
+@permission_required('got.can_see_completely')
 def finish_task(request, pk):
     '''
     Vista formulario para finalizar actividades (v1.1)
@@ -550,3 +552,18 @@ def finish_task(request, pk):
         form = UpdateTaskForm()
     
     return render(request, 'got/task_finish_form.html', {'form': form, 'task': act, 'final_date': final_date})
+
+
+@permission_required('got.can_see_completely')
+def indicadores(request):
+
+    porcentaje1 = 25
+    porcentaje2 = 75
+
+    # Pasa los porcentajes al contexto
+    context = {
+        'porcentaje1': porcentaje1,
+        'porcentaje2': porcentaje2,
+    }
+    return render(request, 'got/indicadores.html', context)
+

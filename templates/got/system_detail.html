@@ -44,12 +44,11 @@
   			{% if equipo.imagen %}
   				<div class="col-md-6">
       				<img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="img-fluid">
-      				<!-- La clase "img-fluid" hace que la imagen sea responsiva y se ajuste al ancho del contenedor -->
   				</div>
   			{% endif %}
     	</div>
 
-    	<!-- Repite la estructura para más equipos si es necesario -->
+    	<!-- Repite la estructura para más equipos -->
 		
 	</section>
 {% endfor %}
@@ -92,11 +91,7 @@
 						<td colspan="5">
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
-
-								<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary">Crear nueva rutina</a>
-								<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#createActivityModal">
-									<i class="bi bi-clipboard2-plus-fill"></i>
-								</button>
+								<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary"><i class="bi bi-clipboard2-plus-fill"></i></a>
 
 								{% if ruta.task_set.all %}
 								<ol>
@@ -124,7 +119,6 @@
 </section>
 
 	
-<!-- Modales -->
 <!-- Formulario modal para Componentes -->
 <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
