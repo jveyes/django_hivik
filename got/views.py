@@ -43,7 +43,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     '''
     model = Task
     template_name = 'got/assignedtasks_list_pendient_user.html'
-    paginate_by = 15     
+    paginate_by = 16  
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -89,7 +89,6 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
     Vista generica para mostrar el listado de los centros de costos (v1.0)
     '''
     model = Asset
-    paginate_by = 15
     
     def get_queryset(self):
         queryset = Asset.objects.all()
