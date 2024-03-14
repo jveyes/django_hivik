@@ -26,7 +26,7 @@ urlpatterns = [
     # Ots
     path("ots/", views.OtListView.as_view(), name="ot-list"), 
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"), 
-    path("ots/create/", views.OtCreate.as_view(), name="ot-create"),
+    path("ots/create/<int:pk>/", views.OtCreate.as_view(), name="ot-create"),
     path("ots/<int:pk>/update/", views.OtUpdate.as_view(), name="ot-update"), 
     path("ots/<int:pk>/delete/", views.OtDelete.as_view(), name="ot-delete"), 
 

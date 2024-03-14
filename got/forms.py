@@ -123,8 +123,12 @@ class OtForm(forms.ModelForm):
           widgets = {
                'super': forms.Select(attrs={'class': 'form-control'}),
                'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
-
           }
+
+     def __init__(self, *args, **kwargs):
+          asset = kwargs.pop('asset')
+          super().__init__(*args, **kwargs)
+          self.fields['system'].queryset = System.objects.filter(asset=asset)
 
 # Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
@@ -180,7 +184,6 @@ class RutActForm(forms.ModelForm):
                'news': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
                'responsible': forms.Select(attrs={'class': 'form-control'}),
           }
-
 
 
 # Form 8: Crear/editar nuevo equipo

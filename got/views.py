@@ -351,6 +351,13 @@ class OtCreate(CreateView):
     form_class = OtForm
     http_method_names = ['get', 'post']
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        asset_id = self.kwargs.get('pk')
+        asset = Asset.objects.get(pk=asset_id)
+        kwargs['asset'] = asset
+        return kwargs
+
 
 class RutaCreate(CreateView):
     '''
