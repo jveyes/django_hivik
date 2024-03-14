@@ -528,7 +528,6 @@ def report_pdf(request, num_ot):
     return response
 
 
-@permission_required('got.can_see_completely')
 def finish_task(request, pk):
     '''
     Vista formulario para finalizar actividades (v1.1)
