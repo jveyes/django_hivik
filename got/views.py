@@ -15,10 +15,10 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm
+from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2
 
 # Librerias auxiliares
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.db.models import Q, F, ExpressionWrapper, fields
@@ -391,7 +391,7 @@ class OtUpdate(UpdateView):
     Vista formulario para actualizar ordenes de trabajo (v1.0)
     '''
     model = Ot
-    form_class = OtForm
+    form_class = OtForm2
     http_method_names = ['get', 'post']
 
 
@@ -562,13 +562,22 @@ def finish_task(request, pk):
 @permission_required('got.can_see_completely')
 def indicadores(request):
 
-    porcentaje1 = 25
-    porcentaje2 = 75
+    labels = ['Preventivo', 'Correctivo', 'Modificativo']
+
+    ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024))
+    ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f'))
+    ind_cumplimiento = (ot_finish/ots)*100
+
+    preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
+    correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
+    modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
+    data = [round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2), round((modificativo/ots)*100,2)]
 
     # Pasa los porcentajes al contexto
     context = {
-        'porcentaje1': porcentaje1,
-        'porcentaje2': porcentaje2,
+        'ind_cumplimiento': ind_cumplimiento,
+        'data': data,
+        'labels': labels
     }
     return render(request, 'got/indicadores.html', context)
 

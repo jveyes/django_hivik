@@ -4,10 +4,36 @@
 
 {% block content %}
 
-<div class="container mt-5">
-    <div class="circle">
-        <div class="progress-bar" style="--percentage: {{ porcentaje1 }};"></div>
-    </div>
+<div id="container" style="width: 40%;">
+    <canvas id="pie-chart"></canvas>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+<script>
+
+    var config = {
+        type: 'pie',
+        data: {
+            datasets: [{
+                data: {{data}},
+                backgroundColor: [
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(255, 159, 64, 0.7)' 
+                ],
+                label: 'label'
+            }],
+            labels: {{labels|safe}}
+        },
+        options: {
+            responsive: true
+        }
+    };
+
+    window.onload = function() {
+        var ctx = document.getElementById('pie-chart').getContext('2d');
+        window.myPie = new Chart(ctx, config);
+    };
+</script>
 
 {% endblock %}

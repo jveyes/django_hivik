@@ -130,6 +130,29 @@ class OtForm(forms.ModelForm):
           super().__init__(*args, **kwargs)
           self.fields['system'].queryset = System.objects.filter(asset=asset)
 
+
+# Form 5: Crear nueva orden de trabajo
+class OtForm2(forms.ModelForm):
+     super = UserChoiceField(
+          queryset=User.objects.all(), label='Supervisor',
+     )
+
+     class Meta:
+          model = Ot
+          exclude = ['creations_date', 'num_ot']
+          labels = {
+               'description': 'Description',
+               'system': 'Sistema',
+               'state': 'Estado',
+               'tipo_mtto': 'Tipo de mantenimiento',
+               'info_contratista_pdf': 'Informe externo'
+          }
+          widgets = {
+               'super': forms.Select(attrs={'class': 'form-control'}),
+               'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+          }
+          
+
 # Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
      finish = forms.BooleanField(
