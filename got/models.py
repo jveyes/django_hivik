@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.utils import timezone
+from django.db.models import Sum
 
 from django.core.validators import RegexValidator
 
@@ -80,6 +81,7 @@ class System(models.Model):
     class Meta:
         ordering = ['asset__name', 'gruop']
 
+
 class Equipo(models.Model):
 
     TIPO = (
@@ -97,10 +99,19 @@ class Equipo(models.Model):
     feature = models.TextField()
     imagen = models.ImageField(upload_to='media/', null=True, blank=True)
     manual_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
+
+    initial_hours = models.IntegerField(default=0)
     horometro = models.IntegerField(default=0, null=True, blank=True)
     tipo = models.CharField(choices=TIPO, default='nr', max_length=50)
 
     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
+
+    # Método para calcular el horómetro teniendo en cuenta las horas iniciales
+    def calculate_horometro(self):
+        # Suma total de las horas de HistoryHour
+        total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
+        # Sumar las horas iniciales a la suma total
+        return total_hours + self.initial_hours
 
     def __str__(self):
         return self.name
@@ -128,15 +139,25 @@ class Ruta(models.Model):
     '''
     (inactivo)
     '''
+    
+    CONTROL = (
+        ('d', 'Días'),
+        ('h', 'Horas'),
+    )
     code = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50, default='nombre-rutina')
+    control = models.CharField(choices=CONTROL, default='d', max_length=50)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
 
     @property
     def next_date(self):
-        return self.intervention_date + timedelta(days=self.frecuency)
+        if self.control=='d':
+            ndate = self.intervention_date + timedelta(days=self.frecuency)
+        # else:
+            # ndate = 
+        return ndate
     
     @property
     def percentage_remaining(self):

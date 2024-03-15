@@ -44,9 +44,10 @@ urlpatterns = [
     path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'), 
     path('ruta/<str:pk>/delete/', views.RutaDelete.as_view(), name='ruta-delete'),
 
-
     # Reportes
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report' ),
     path("dashboard/", views.indicadores, name='dashboard'),
 
+    # reporte de horas
+    path("reportehoras/<str:component>/", views.reporthours, name='horas')
 ]

@@ -14,8 +14,8 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, System, Ot, Task, Equipo, Ruta
-from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2
+from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
+from .forms import OtsFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2
 
 # Librerias auxiliares
 from datetime import timedelta, date, datetime
@@ -148,14 +148,6 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq.system = sys
             eq.save()
             return redirect(request.path)
-        # elif task_form.is_valid():
-        #     task = task_form.save(commit=False)
-        #     ruta_id = request.POST.get('ruta_id')
-        #     ruta = Ruta.objects.get(code=ruta_id)
-        #     task.ruta = ruta
-        #     task.finished = False
-        #     task.save()
-        #     return redirect(request.path)
         else:
             return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'task_form': task_form})
         
@@ -178,7 +170,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     # Formulario para filtrar Ots según descripción
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = OtsDescriptionFilterForm
+        context['form'] = OtsFilterForm
   
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
@@ -190,7 +182,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         return context
     
     def get_queryset(self):
-        form = OtsDescriptionFilterForm(self.request.GET)
+        form = OtsFilterForm(self.request.GET)
         queryset = Ot.objects.all()
         state = self.request.GET.get('state')
         asset_id = self.request.GET.get('asset_id')
@@ -210,6 +202,10 @@ class OtListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(super=responsable_id)
 
         return queryset
+    
+
+
+
 
 
 # Detalle de orden de trabajo - generalidades, listado de actividades y reporte
@@ -605,3 +601,17 @@ def indicadores(request):
     }
     return render(request, 'got/indicadores.html', context)
 
+
+# reporte de horas
+@permission_required('got.can_see_completely')
+def reporthours(request, component):
+
+    hours = HistoryHour.objects.filter(component=component)
+    equipo = get_object_or_404(Equipo, pk=component)
+
+    context = {
+        'horas': hours,
+        'component': equipo
+    }
+
+    return render(request, 'got/hours.html', context)

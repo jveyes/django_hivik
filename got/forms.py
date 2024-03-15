@@ -1,12 +1,12 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Task, Ot, System, Equipo, Ruta
+from .models import Task, Ot, System, Equipo, Ruta, HistoryHour
 from django.contrib.auth.models import User
 import datetime
 
 
 # Form 1: filtrar busqueda de las Ordenes de trabajo
-class OtsDescriptionFilterForm(forms.Form):
+class OtsFilterForm(forms.Form):
       description = forms.CharField(
            	widget=forms.TextInput(attrs={
                 'class': 'form-control',
@@ -248,4 +248,17 @@ class RutaForm(forms.ModelForm):
           }
           widgets = {
             'intervention_date': XYZ_DateInput(format=['%Y-%m-%d'],),
+          }
+
+
+class ReportHours(forms.ModelForm):
+     class Meta:
+          model = HistoryHour
+          fields = ['hour', 'report_date']
+          labels = {
+               'hour': 'Horas',
+               'report_date': 'Fecha'
+          }
+          widgets = {
+            'report_date': XYZ_DateInput(format=['%Y-%m-%d'],),
           }
