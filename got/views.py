@@ -21,7 +21,7 @@ from .forms import OtsDescriptionFilterForm, RescheduleTaskForm, OtForm, ActForm
 from datetime import timedelta, date, datetime
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.db.models import Q, F, ExpressionWrapper, fields
+from django.db.models import Q
 from django.db.models.functions import Now
 from django.core.paginator import Paginator, EmptyPage
 from django.core.mail import EmailMessage
@@ -559,25 +559,49 @@ def finish_task(request, pk):
     return render(request, 'got/task_finish_form.html', {'form': form, 'task': act, 'final_date': final_date})
 
 
+from django.db.models import Count
 @permission_required('got.can_see_completely')
 def indicadores(request):
 
+    area_filter = request.GET.get('area', None)
+
+    top_assets = Asset.objects.annotate(num_ots=Count('system__ot')).order_by('-num_ots')[:5]
+    ots_per_asset = [asset.num_ots for asset in top_assets]
+    asset_labels = [asset.name for asset in top_assets]
+
     labels = ['Preventivo', 'Correctivo', 'Modificativo']
 
-    ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024))
-    ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f'))
-    ind_cumplimiento = (ot_finish/ots)*100
+    if area_filter:
+        ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, system__asset__area=area_filter))
+        ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f', system__asset__area=area_filter))
+        preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p', system__asset__area=area_filter))
+        correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c', system__asset__area=area_filter))
+        modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m', system__asset__area=area_filter))
 
-    preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
-    correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
-    modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
-    data = [round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2), round((modificativo/ots)*100,2)]
+    else:
+        ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024))
+        ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f'))
+        preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
+        correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
+        modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
+
+
+
+    if ots==0:
+        ind_cumplimiento = 0
+        data = 0
+    else:
+        ind_cumplimiento = round((ot_finish/ots)*100, 2)
+        data = [round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2), round((modificativo/ots)*100,2)]
 
     # Pasa los porcentajes al contexto
     context = {
         'ind_cumplimiento': ind_cumplimiento,
         'data': data,
-        'labels': labels
+        'labels': labels,
+        'ots': ots,
+        'ots_asset': ots_per_asset,
+        'asset_labels': asset_labels
     }
     return render(request, 'got/indicadores.html', context)
 

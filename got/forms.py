@@ -151,7 +151,7 @@ class OtForm2(forms.ModelForm):
                'super': forms.Select(attrs={'class': 'form-control'}),
                'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
           }
-          
+
 
 # Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
@@ -214,7 +214,7 @@ class EquipoForm(forms.ModelForm):
 
      class Meta:
           model = Equipo
-          exclude = ['system']
+          exclude = ['system', 'horometro']
           labels = {
                'name': 'Nombre',
                'date_inv': 'Fecha de ingreso al inventario',

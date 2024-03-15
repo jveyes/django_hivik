@@ -1,17 +1,80 @@
 {% extends "got/base_generic.html" %}
 
-{% block head %}Indicadores{% endblock %}
+{% block head %}Indicadores - Marzo, 2024{% endblock %}
 
 {% block content %}
 
-<div id="container" style="width: 40%;">
-    <canvas id="pie-chart"></canvas>
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+    Filtrar por area
+    </button>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'got:dashboard' %}">Mostrar todas</a></li>
+        <li><a href="{% url 'got:dashboard' %}?area=a">Artefactos Navales</a></li>
+        <li><a href="{% url 'got:dashboard' %}?area=b">Buceo</a></li>
+        <li><a href="{% url 'got:dashboard' %}?area=o">Oceanografia</a></li>
+        <li><a href="{% url 'got:dashboard' %}?area=l">Locativo</a></li>
+        <li><a href="{% url 'got:dashboard' %}?area=v">Vehiculos</a></li>
+    </ul>
 </div>
+
+{% if request.GET.area %}
+<div class="mt-4">
+    {% if request.GET.area == 'a' %}
+    <h4>Artefactos Navales</h4>
+    {% elif request.GET.area == 'b' %}
+    <h4>Buceo</h4>
+    {% elif request.GET.area == 'o' %}
+    <h4>Oceanografia</h4>
+    {% elif request.GET.area == 'l' %}
+    <h4>Locativo</h4>
+    {% elif request.GET.area == 'v' %}
+    <h4>Vehiculos</h4>
+    {% endif %}
+</div>
+{% endif %}
+
+
+<div class="container mt-5">
+    <div class="card rounded shadow">
+        <div class="card-body">
+            <h5 class="card-title">Total ordenes de trabajo generadas</h5>
+            <h1 class="display-1">{{ ots }}</h1> 
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div id="container" style="width: 100%; height: auto;">
+                <canvas id="pie-chart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card rounded shadow h-100">
+                <div class="card-body d-flex flex-column justify-content-start">
+                    <h5 class="card-title">Indicador de Cumplimiento</h5>
+                    <h1 class="display-1">{{ind_cumplimiento}}%</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <h5 class="card-title">Ordenes de trabajo por activo</h5>
+            <div class="mt-3" id="bar-container" style="width: 100%; height: auto;">
+                <canvas id="bar-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 <script>
 
-    var config = {
+var pieConfig = {
         type: 'pie',
         data: {
             datasets: [{
@@ -30,9 +93,50 @@
         }
     };
 
+    var barConfig = {
+        type: 'bar',
+        data: {
+            labels: {{ asset_labels|safe }},
+            datasets: [{
+                data: {{ ots_asset|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(255, 206, 86, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            },
+            legend: {
+            display: false  // Oculta el legendario
+        }
+        }
+    };
+
     window.onload = function() {
-        var ctx = document.getElementById('pie-chart').getContext('2d');
-        window.myPie = new Chart(ctx, config);
+        var pieCtx = document.getElementById('pie-chart').getContext('2d');
+        window.pieChart = new Chart(pieCtx, pieConfig);
+
+        var barCtx = document.getElementById('bar-chart').getContext('2d');
+        window.barChart = new Chart(barCtx, barConfig);
     };
 </script>
 

@@ -60,9 +60,10 @@ class Migration(migrations.Migration):
                 ('tipo_mtto', models.CharField(choices=[('p', 'Preventivo'), ('c', 'Correctivo'), ('m', 'Modificativo')], default='c', max_length=50)),
                 ('super', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
+                ('info_contratista_pdf', models.FileField(upload_to='pdfs/', null=True, blank=True)),
             ],
             options={
-                'ordering': ['num_ot'],
+                'ordering': ['-num_ot'],
             },
         ),
         migrations.CreateModel(
@@ -71,6 +72,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('date_inv', models.DateField(blank=True, null=True)),
                 ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
+                ('area', models.CharField(blank=True, max_length=50, null=True)),
                 ('model', models.CharField(blank=True, max_length=50, null=True)),
                 ('serial', models.CharField(blank=True, max_length=50, null=True)),
                 ('marca', models.CharField(blank=True, max_length=50, null=True)),

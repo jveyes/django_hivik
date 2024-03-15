@@ -82,6 +82,11 @@ class System(models.Model):
 
 class Equipo(models.Model):
 
+    TIPO = (
+        ('r', 'Rotativo'),
+        ('nr', 'No rotativo'),
+    )
+
     name = models.CharField(max_length=50)
     date_inv = models.DateField(null=True, blank=True)
     code = models.CharField(primary_key=True, max_length=50)
@@ -92,6 +97,8 @@ class Equipo(models.Model):
     feature = models.TextField()
     imagen = models.ImageField(upload_to='media/', null=True, blank=True)
     manual_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    horometro = models.IntegerField(default=0, null=True, blank=True)
+    tipo = models.CharField(choices=TIPO, default='nr', max_length=50)
 
     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
 
@@ -104,6 +111,18 @@ class Equipo(models.Model):
     def get_absolute_url(self):
         return reverse('got:sys-detail', args=[self.system.id])
 
+
+class HistoryHour(models.Model):
+    report_date = models.DateField()
+    hour = models.IntegerField()
+    reporter = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    component = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='hours')
 
 class Ruta(models.Model):
     '''
