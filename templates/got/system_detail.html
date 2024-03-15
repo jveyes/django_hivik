@@ -15,44 +15,43 @@
 
 <!-- Equipos -->
 {% if system.equipos.all %}
-<section class="container mt-4">
-
-<div class="row">
 {% for equipo in system.equipos.all %}
+	<section class="container mt-5">
+    	<div class="row">
+        	<!-- Información General del Equipo -->
+        	<div class="col-md-6">
+				<div>
+            		<h2>{{equipo.name}}</h2>
+                	<a href="{% url 'got:equipo-delete' equipo.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                	<a href="{% url 'got:equipo-update' equipo.code %}"><i class="bi bi-pen"></i></a>
+            	</div>
+            	
+				<p><strong>Modelo:</strong>  {{equipo.model}}</p>
+            	<p><strong>Marca:</strong>  {{equipo.marca}}</p>
+            	<p><strong>Serial:</strong> {{equipo.serial}}</p>
+            	<p><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</p>
+            	<p><strong>codigo interno:</strong> {{equipo.code}}</p>
+            	<p><strong>Estado:</strong> {{system.get_state_display}}</p>
+				<h4><strong>Información Específica del Equipo</strong></h4>
+          		<p><strong>Fabricante:</strong> {{equipo.fabricante}}</p>
+          		<p><strong>Especificaciones:</strong> {{equipo.feature}}</p>
+				{% if equipo.manual_pdf %}
+  				<p>
+      				<a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a>
+				</p>
+  				{% endif %}
+        	</div>
+  			{% if equipo.imagen %}
+  				<div class="col-md-6">
+      				<img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="figure-img img-fluid rounded">
+  				</div>
+  			{% endif %}
+    	</div>
+
     	<!-- Repite la estructura para más equipos -->
-		<div class="col-md-4">
-			<div class="card" style="width: 25rem;">
-				{% if equipo.imagen %}
-				<img src="{{ equipo.imagen.url }}" class="card-img-top" alt="Imagen del Equipo">
-				{% endif %}
-				<div class="card-body">
-			  		<h2 class="card-title">{{equipo.name}}</h2>
-			  		<p class="card-text"><strong>Especificaciones:</strong> {{equipo.feature}}</p>
-				</div>
-				<ul class="list-group list-group-flush">
-			  		<li class="list-group-item"><strong>Modelo:</strong>  {{equipo.model}}</li>
-			  		<li class="list-group-item"><strong>Marca:</strong>  {{equipo.marca}}</li>
-			  		<li class="list-group-item"><strong>Serial:</strong> {{equipo.serial}}</li>
-			  		<li class="list-group-item"><strong>Fecha ingreso al inventario:</strong> {{equipo.date_inv}}</li>
-			  		<li class="list-group-item"><strong>codigo interno:</strong> {{equipo.code}}</li>
-			  		<li class="list-group-item"><strong>Estado:</strong> {{system.get_state_display}}</li>
-			  		<li class="list-group-item"><strong>Fabricante:</strong> {{equipo.fabricante}}</li>
-				</ul>
-				<div class="card-body">
-					{% if equipo.manual_pdf %}
-					<a href="{{ equipo.manual_pdf.url }}" class="card-link">Ver manual</a>
-					{% endif %}
-					<a href="{% url 'got:equipo-delete' equipo.code %}" class="card-link"><i class="bi bi-file-earmark-minus-fill"></i></a>
-					<a href="{% url 'got:equipo-update' equipo.code %}" class="card-link"><i class="bi bi-pen"></i></a>
-				</div>
-		  	</div>
-		</div>
+		
+	</section>
 {% endfor %}
-</div>
-</section>
-
-
-
 {% else %}
 	<section class="container mt-5">
 		<p>No hay equipos registrados.</p>
