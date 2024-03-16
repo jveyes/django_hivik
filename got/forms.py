@@ -192,6 +192,7 @@ class RutActForm(forms.ModelForm):
      responsible = UserChoiceField(
           queryset=User.objects.all(),
           label='Responsable',
+          required=False,
      )
 
      class Meta:
@@ -199,7 +200,7 @@ class RutActForm(forms.ModelForm):
           fields = ['description', 'news', 'responsible']
           labels = {
                'description': 'Descripción',
-               'news': 'Suministros',
+               'news': 'Novedades',
                'responsible': 'Responsable',
           }
           widgets = {

@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
-from .forms import OtsFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2
+from .forms import OtsFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2, ReportHours
 
 # Librerias auxiliares
 from datetime import timedelta, date, datetime
@@ -606,10 +606,25 @@ def indicadores(request):
 @permission_required('got.can_see_completely')
 def reporthours(request, component):
 
-    hours = HistoryHour.objects.filter(component=component)
+    hours = HistoryHour.objects.filter(component=component)[:20]
     equipo = get_object_or_404(Equipo, pk=component)
 
+    if request.method == 'POST':
+        # Si se envió el formulario, procesarlo
+        form = ReportHours(request.POST)
+        if form.is_valid():
+            # Guardar el formulario si es válido
+            instance = form.save(commit=False)
+            instance.component = equipo
+            instance.reporter = request.user
+            instance.save()
+            return redirect(request.path)
+    else:
+        # Si es una solicitud GET, mostrar el formulario vacío
+        form = ReportHours()
+
     context = {
+        'form': form,
         'horas': hours,
         'component': equipo
     }
