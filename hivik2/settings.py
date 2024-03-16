@@ -78,27 +78,27 @@ WSGI_APPLICATION = 'hivik2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "d4t897a08a91m",
-        "USER": "ezxjhovwzvuxlt",
-        "PASSWORD": "edd77cabb0e571eb17d99e1a0722886dbf243e2da86d56f4c338055f6bd291d0",
-        "HOST": "ec2-35-172-26-41.compute-1.amazonaws.com",
-        "DATABASE_PORT": "5432",
-    }
-}
-
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql_psycopg2",
-#         "NAME": "dbd4t897a08a91m",
+#         "NAME": "d4t897a08a91m",
 #         "USER": "ezxjhovwzvuxlt",
-#         "PASSWORD": "dXavKzs?BK:X{|mS|V&9z51z)Lha~9-2",
-#         "HOST": "ls-06ae36f8e31488b6af9b9130b147e949c922d860.ctobuhtlkwoj.us-east-1.rds.amazonaws.com",
+#         "PASSWORD": "edd77cabb0e571eb17d99e1a0722886dbf243e2da86d56f4c338055f6bd291d0",
+#         "HOST": "ec2-35-172-26-41.compute-1.amazonaws.com",
 #         "DATABASE_PORT": "5432",
 #     }
 # }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "dbd4t897a08a91m",
+        "USER": "ezxjhovwzvuxlt",
+        "PASSWORD": "dXavKzs?BK:X{|mS|V&9z51z)Lha~9-2",
+        "HOST": "ls-06ae36f8e31488b6af9b9130b147e949c922d860.ctobuhtlkwoj.us-east-1.rds.amazonaws.com",
+        "DATABASE_PORT": "5432",
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
