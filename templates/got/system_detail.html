@@ -31,7 +31,9 @@
 							<a href="{% url 'got:horas' equipo.code %}" class="btn btn-outline-secondary float-end">reporte horas</a>
 						{% endif %}
 					</td>
-					<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="figure-img img-fluid rounded"></td>
+					{% if equipo.imagen %}
+						<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="figure-img img-fluid rounded"></td>
+					{% endif %}
 				</tr>
 				<tr>
 					<td>
@@ -115,7 +117,8 @@
 				<thead>
 					<tr>
 						<th scope="col">Codigo</th>
-						<th scope="col">Frecuencia (días)</th>
+						<th scope="col">Frecuencia</th>
+						<th scope="col">Control</th>
 						<th scope="col">Fecha de ultima intervención</th>
 						<th scope="col">Fecha proxima intervención</th>
 						<th scope="col">Acciones</th>
@@ -126,6 +129,7 @@
 					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{% else %}table-danger{% endif %}">
 						<th scope="row">{{ ruta.name }}</th>
 						<td>{{ ruta.frecuency }}</td>
+						<td>{{ ruta.control }}</td>
 						<td>{{ ruta.intervention_date }}</td>
 						<td>{{ ruta.next_date }}</td>
 						<td>

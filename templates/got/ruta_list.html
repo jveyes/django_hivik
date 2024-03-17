@@ -26,7 +26,8 @@
 			<tr>
 				<th scope="col">Equipo</th>
 				<th scope="col">Codigo</th>
-				<th scope="col">Frecuencia (días)</th>
+				<th scope="col">Frecuencia</th>
+				<th scope="col">Control</th>
 				<th scope="col">Fecha de ultima intervención</th>
 				<th scope="col">Fecha proxima intervención</th>
 				<th scope="col">Acciones</th>
@@ -38,6 +39,7 @@
 					<th scope="row">{{ ruta.system.asset }}/{{ ruta.system.name }}</th>
 					<td>{{ ruta.name }}</td>
 					<td>{{ ruta.frecuency }}</td>
+					<td>{{ ruta.control }}</td>
 					<td>{{ ruta.intervention_date }}</td>
 					<td>{{ ruta.next_date }}</td>
 					<td>
