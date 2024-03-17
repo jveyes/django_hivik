@@ -1,62 +1,119 @@
-{% load static %}
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        .enc {
+            width: 75px;
+        }
+        .info {
+            text-align: left;
+        }
+    </style>
 </head>
     
 <body>
-    <!-- Content for Static Frame 'header_frame' -->
-    <div id="header_content">
-        <img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" style="width: 200px; height: auto;">
-        <h1>Reporte Orden de trabajo #{{ ot.num_ot }}</h1>
-    </div>
+
+    <div>
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 200px; border: 1px solid black; height: auto;">
+                    <img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" style="width: 200px; height: auto;">
+                </td>
+                <td style="border: 1px solid black;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td colspan="3" style="text-align: center; padding-top: 10px; margin-bottom: 0;">
+                                <h1 style="margin: 0; font-size: 20px;">REPORTE ORDEN DE TRABAJO #{{ ot.num_ot }}</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-top: 5px; border-top: 1px solid black; border-right: 1px solid black; text-align: center;">
+                                <h4>CODIGO: FR-SP-MT-97</h4>
+                            </td>
+                            <td style="padding-top: 5px; border-top: 1px solid black;border-right: 1px solid black; text-align: center;">
+                                <h4>VERSION 004</h4>
+                            </td>
+                            <td style="padding-top: 5px; border-top: 1px solid black; text-align: center;">
+                                <h4>FECHA DE ACTUALIZACION: 27/01/2023</h4>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>      
     
-    <!-- HTML Content -->
-    <table>
+    <table style="margin-top: 15px;">
         <tr>
-            <td><strong>Fecha:</strong> {{ot.creation_date}}</td>
-            <td><strong>Estado:</strong> {{ot.get_state_display}}</td>
+            <td class="data enc"><strong>FECHA:</strong></td>
+            <td class="data info">{{ot.creation_date}}</td>
+            <td class="data enc"><strong>ESTADO:</strong></td>
+            <td class="data info">{{ot.get_state_display}}</td>
         </tr>
         <tr>
-            <td><strong>Supervisor: </strong>{{ ot.super.first_name }} {{ ot.super.last_name }}</td>
-            <td><strong>Area: </strong> {{ ot.system.asset.get_area_display }}</td>
+            <td class="data enc"><strong>SUPERVISOR: </strong></td>
+            <td class="data info">{{ ot.super.first_name }} {{ ot.super.last_name }}</td>
+            <td class="data enc"><strong>AREA: </strong></td>
+            <td class="data info">{{ ot.system.asset.get_area_display }}</td>
         </tr>
         <tr>
-            <td><strong>Descripción: </strong>{{ot.description}}</td>
-            <td><strong>Equipo: </strong>{{ot.system}}</td>
+            <td class="data enc"><strong>EQUIPO:</strong></td>
+            <td class="data info">{{ot.system.asset}}</td>
+            <td class="data enc"><strong>SISTEMA:</strong></td>
+            <td class="data info">{{ot.system.name}}</td>
+        </tr>
+        <tr style="padding-top: 10px;">
+            <td class="data enc"><strong>DESCRIPCIÓN: </strong></td>
+            <td colspan="2" class="data info">{{ot.description}}</td>
         </tr>
     </table>
     
     <hr>
         
-    <h3>ACTIVIDADES REALIZADAS</h3>
+    
 
-    <table>
+    <table style="border-collapse: collapse;">
         <thead>
             <tr>
-                <th>No</th>
-                <th>Actividad</th>
+                <td colspan="5" style="padding-top: 5px; text-align: center;  background-color: rgb(84, 141, 212); border: 1px solid black; height: auto;">
+                    <h3>ACTIVIDADES REALIZADAS</h3>
+                </td>
+            </tr>
+            <tr style="background-color: rgb(255, 255, 0); border-bottom: 0.5px solid black; height: 25px; padding-top: 5px; padding-bottom: 0px;">
+                <th style="width: 4%; text-align: center; border-left: 1px solid black;">#</th>
+                <th style="width: 60%;">Actividades</th>
                 <th>Responsable</th>
                 <th>Fecha</th>
-                <th>Tiempo Total(Dias)</th>
+                <th style="width: 5%; text-align: center; border-right: 1px solid black;">Tiempo total(D)</th>
             </tr>
         </thead>
         <tbody>
             {% for act in ot.task_set.all %}
                 <tr style="padding-top: 5px;">
-                    <td style="width: 5%; text-align: center;">{{ forloop.counter }}</td>
-                    <td style="width: 65%;">{{ act.description }}</td>
-                    <td style="text-align: center;">{{ act.responsible.first_name }} {{ act.responsible.last_name }}</td>
-                    <td style="text-align: center;">{{ act.start_date|date:"d/m/Y" }}</td>
-                    <td style="text-align: center; width: 5%;">{{ act.men_time }}</td>
+                    <td style="text-align: center; border-bottom: 0.5px solid black; border-left: 0.5px solid black;">
+                        {{ forloop.counter }}
+                    </td>
+                    <td style="text-align: justify; border-bottom: 0.5px solid black;">
+                        {{ act.description }}
+                    </td>
+                    <td style="text-align: center; border-bottom: 0.5px solid black;">
+                        {{ act.responsible.first_name }} {{ act.responsible.last_name }}
+                    </td>
+                    <td style="text-align: center; border-bottom: 0.5px solid black;">
+                        {{ act.start_date|date:"d/m/Y" }}
+                    </td>
+                    <td style="text-align: center; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                        {{ act.men_time }}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <hr>
-
-    <h3>Novedades</h3>
+    <h2>Novedades</h2>
 
     <div>
         {% for act in ot.task_set.all %}
@@ -69,10 +126,8 @@
     </div>
     
     <hr>
-    <h3>Evidencias</h3>
 
-    <hr>
-
+    <h2>Evidencias</h2>
     <div>
         {% for act in ot.task_set.all %}
             {% if act.evidence %}
@@ -83,11 +138,26 @@
         {% endfor %}
     </div>
 
-    <!-- Espacios para Supervisor y Recibido por -->
-    <div style="border: 1px solid;"> <!-- style="padding: 20px; display: flex; align-items: baseline" -->
-        <img src="https://hivik.s3.us-east-2.amazonaws.com/static/firma+nestor.png" style="width: 150px; height: auto;">
-        <p style="margin-top: 0; padding-top: 5; "><strong>Supervisor:</strong></p>
-    </div>
+    <table style=" border-collapse: collapse;">
+        <tr style="height: 60px;">
+            <td style="padding-left: 5px; border: 0.5px solid black; text-align: center;">
+                <img src="https://hivik.s3.us-east-2.amazonaws.com/static/firma+nestor.png" style="width: 150px; height: auto;">
+            </td>
+            <td style="padding-left: 5px; border: 0.5px solid black; height: auto;">
+
+            </td>
+        </tr>
+        <tr style="height: 20px;">
+            <td style="padding-top: 5px; text-align: center; border-bottom: 0.5px solid black; border-left: 0.5px solid black; border-right: 0.5px solid black;">
+                <h4>Supervisión:</h4>
+            </td>
+            <td style="padding-top: 5px; text-align: center; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                <h4>Recibido por:</h4>
+            </td>
+        </tr>
+    </table>
+
+
       
     
 </body>

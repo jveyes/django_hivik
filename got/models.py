@@ -136,9 +136,6 @@ class HistoryHour(models.Model):
     component = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='hours')
 
 class Ruta(models.Model):
-    '''
-    (inactivo)
-    '''
     
     CONTROL = (
         ('d', 'Días'),
@@ -237,6 +234,9 @@ class Task(models.Model):
         blank=True
     )
     description = models.TextField()
+    procedimiento = models.TextField(default="---", blank=True, null=True)
+    hse = models.TextField(default="---", blank=True, null=True)
+    suministros = models.TextField(default="---", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(upload_to='media/', null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)

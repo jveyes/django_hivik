@@ -3,11 +3,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 # Autenticacion de usuario y permisos
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import Group
 
 # Vistas genericas basadas en clases
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views import generic, View
+from django.views import generic
 
 # Librerias de django para manejo de las URLS
 from django.http import HttpResponseRedirect, HttpResponse
@@ -15,15 +15,13 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
-from .forms import OtsFilterForm, RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2, ReportHours
+from .forms import RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2, ReportHours
 
 # Librerias auxiliares
-from datetime import timedelta, date, datetime
+from datetime import timedelta, date
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.db.models import Q
-from django.db.models.functions import Now
-from django.core.paginator import Paginator, EmptyPage
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from io import BytesIO
@@ -170,7 +168,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     # Formulario para filtrar Ots según descripción
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = OtsFilterForm
   
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
@@ -182,18 +179,17 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         return context
     
     def get_queryset(self):
-        form = OtsFilterForm(self.request.GET)
         queryset = Ot.objects.all()
         state = self.request.GET.get('state')
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
+        keyword = self.request.GET.get('keyword')
 
         if state:
             queryset = queryset.filter(state=state)
 
-        if form.is_valid():
-            description = form.cleaned_data.get('description', '')
-            queryset = Ot.objects.filter(description__icontains=description)
+        if keyword:
+            queryset = Ot.objects.filter(description__icontains=keyword)
             return queryset
 
         if asset_id:
@@ -203,10 +199,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
 
         return queryset
     
-
-
-
-
 
 # Detalle de orden de trabajo - generalidades, listado de actividades y reporte
 class OtDetailView(LoginRequiredMixin, generic.DetailView):
@@ -293,6 +285,7 @@ class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     Detalle de actividades (v1.0)
     '''
     model = Task
+
 
 @permission_required('got.can_see_completely')
 def RutaListView(request):
@@ -421,12 +414,9 @@ class TaskCreate(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-
         task = self.object
         # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[task.ruta.system.id])
-
-    
 
 
 class TaskUpdate(UpdateView):
@@ -445,6 +435,38 @@ class TaskDelete(DeleteView):
     '''
     model = Task
     success_url = reverse_lazy('got:ot-list')
+
+
+class TaskUpdaterut(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Task
+    form_class = RutActForm
+    template_name = 'got/task_form.html' 
+    http_method_names = ['get', 'post']
+
+    def get_success_url(self):
+        # Obtén el ID del sistema al que pertenece la tarea eliminada
+        sys_id = self.object.ruta.system.id
+        # Retorna la URL de detalle del sistema con el ID correspondiente
+        return reverse_lazy('got:sys-detail', kwargs={'pk': sys_id})
+
+
+class TaskDeleterut(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = Task
+    # success_url = reverse_lazy('')
+    def get_success_url(self):
+        # Obtén el ID del sistema al que pertenece la tarea eliminada
+        sys_id = self.object.ruta.system.id
+        # Retorna la URL de detalle del sistema con el ID correspondiente
+        return reverse_lazy('got:sys-detail', kwargs={'pk': sys_id})
+    
+    def get(self, request, *args, **kwargs):
+        return render(request, 'got/task_confirm_delete.html', {'task': self.get_object()})
 
 
 class SysDelete(DeleteView):

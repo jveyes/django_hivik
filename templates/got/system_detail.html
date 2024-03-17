@@ -103,13 +103,23 @@
 								{% if ruta.task_set.all %}
 								<ol>
 									{% for task in ruta.task_set.all %}
-										<li>{{ task.description }} <a href="{% url 'got:task-delete' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+										<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
+											<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
+											<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
 										<ul style="list-style-type: none;">
-											<li>{{ task.responsible.first_name }} {{ task.responsible.last_name }}</li>
-											<li>{{ task.news }}</li>
+											{% if task.procedimiento %}
+											<li><strong>Procedimiento: </strong>{{ task.procedimiento }}</li>
+											{% endif %}
+											{% if task.suministros %}
+											<li><strong>Equipos, herramientas y consumibles: </strong>{{ task.suministros }}</li>
+											{% endif %}
+											{% if task.hse %}
+											<li><strong>Precauciones de seguridad: </strong>{{ task.hse }}</li>
+											{% endif %}
 										</ul>
 									{% endfor %}
 								</ol>
+								<hr>
 								{% else %}
 									<p>No hay actividades registradas.</p>
 								{% endif %}

@@ -6,16 +6,16 @@ import datetime
 
 
 # Form 1: filtrar busqueda de las Ordenes de trabajo
-class OtsFilterForm(forms.Form):
-      description = forms.CharField(
-           	widget=forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': '',
-		        'aria-label': 'Username',
-        		'aria-describedby': 'addon-wrapping',
-        	}),
-        	label='Filtro'
-		)
+# class OtsFilterForm(forms.Form):
+#       description = forms.CharField(
+#            	widget=forms.TextInput(attrs={
+#                 'class': 'form-control',
+#                 'placeholder': '',
+# 		        'aria-label': 'Username',
+#         		'aria-describedby': 'addon-wrapping',
+#         	}),
+#         	label='Filtro'
+# 		)
       
 
 # Clase 1: mostrar nombre y apellido de los usuarios en los formularios
@@ -171,7 +171,7 @@ class ActForm(forms.ModelForm):
 
      class Meta:
           model = Task
-          exclude = ['ot', 'ruta']
+          exclude = ['ot', 'ruta', 'hse']
           labels = {
                'description': 'Descripción',
                'news': 'Novedades',
@@ -197,15 +197,19 @@ class RutActForm(forms.ModelForm):
 
      class Meta:
           model = Task
-          fields = ['description', 'news', 'responsible']
+          fields = ['responsible', 'description', 'procedimiento', 'suministros', 'hse']
           labels = {
+               'responsible': 'Responsable(Opcional)',
                'description': 'Descripción',
-               'news': 'Novedades',
-               'responsible': 'Responsable',
+               'procedimiento': 'Procedimiento',
+               'suministros': 'Suministros',
+               'hse': 'Precauciones de seguridad',
           }
           widgets = {
                'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-               'news': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'procedimiento': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'hse': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+               'suministros': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
                'responsible': forms.Select(attrs={'class': 'form-control'}),
           }
 

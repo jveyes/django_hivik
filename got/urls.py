@@ -49,5 +49,8 @@ urlpatterns = [
     path("dashboard/", views.indicadores, name='dashboard'),
 
     # reporte de horas
-    path("reportehoras/<str:component>/", views.reporthours, name='horas')
+    path("reportehoras/<str:component>/", views.reporthours, name='horas'),
+
+    path('task-rut/<int:pk>/update/', views.TaskUpdaterut.as_view(), name='update-task'),
+    path('delete_task/<int:pk>/', views.TaskDeleterut.as_view(), name='delete-task'),
 ]

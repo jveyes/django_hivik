@@ -57,7 +57,7 @@
     <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
         <div class="input-group flex-nowrap" style="width: 500px;">
             <span class="input-group-text" id="addon-wrapping">Descripción</span>
-            {{ form.description }}
+            <input type="text" name="keyword" class="form-control" placeholder="">
             <input type="submit" value="Buscar" class="btn btn-primary">
         </div>  
     </form>
@@ -65,8 +65,8 @@
 
     </section>
       
-    {% if request.GET.description %}
-        <h5>Resultados de búsqueda para: "{{ request.GET.description }}"</h5>
+    {% if request.GET.keyword %}
+        <h5>Resultados de búsqueda para: "{{ request.GET.keyword }}"</h5>
     {% endif %}
     
 
