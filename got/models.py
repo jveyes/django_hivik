@@ -102,11 +102,12 @@ class Equipo(models.Model):
 
     initial_hours = models.IntegerField(default=0)
     horometro = models.IntegerField(default=0, null=True, blank=True)
+    prom_hours = models.IntegerField(default=0, null=True, blank=True)
     tipo = models.CharField(choices=TIPO, default='nr', max_length=50)
 
     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
 
-    # Método para calcular el horómetro teniendo en cuenta las horas iniciales
+    
     def calculate_horometro(self):
         # Suma total de las horas de HistoryHour
         total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
@@ -146,14 +147,20 @@ class Ruta(models.Model):
     control = models.CharField(choices=CONTROL, default='d', max_length=50)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
+
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
+    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True) 
 
     @property
     def next_date(self):
         if self.control=='d':
             ndate = self.intervention_date + timedelta(days=self.frecuency)
-        # else:
-            # ndate = 
+        else:
+            try:
+                ndays = int(self.frecuency/self.equipo.prom_hours)
+                ndate = self.intervention_date + timedelta(days=ndays)
+            except ZeroDivisionError:
+                ndate = self.intervention_date + timedelta(days=30)
         return ndate
     
     @property

@@ -15,7 +15,7 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
-from .forms import RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, OtForm2, ReportHours
+from .forms import RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -367,12 +367,16 @@ class RutaCreate(CreateView):
 
         # Llamar al método form_valid de la clase base
         return super().form_valid(form)
-
+    
     def get_success_url(self):
-
         ruta = self.object
         # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[ruta.system.id])
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
+        return kwargs
 
 
 class OtUpdate(UpdateView):
@@ -380,8 +384,16 @@ class OtUpdate(UpdateView):
     Vista formulario para actualizar ordenes de trabajo (v1.0)
     '''
     model = Ot
-    form_class = OtForm2
+    form_class = OtForm
     http_method_names = ['get', 'post']
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Obtener la instancia actual de la orden de trabajo
+        ot_instance = self.get_object()
+        # Pasar el activo asociado a la orden de trabajo como parámetro al formulario
+        kwargs['asset'] = ot_instance.system.asset
+        return kwargs
 
 
 class OtDelete(DeleteView):
@@ -519,6 +531,12 @@ class RutaUpdate(UpdateView):
     '''
     model = Ruta
     form_class = RutaForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Obtener el sistema relacionado con la ruta y pasar como parámetro al formulario
+        kwargs['system'] = self.object.system
+        return kwargs
 
 
 class RutaDelete(DeleteView):
