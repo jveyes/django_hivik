@@ -159,7 +159,7 @@ class Ruta(models.Model):
             try:
                 ndays = int(self.frecuency/self.equipo.prom_hours)
                 ndate = self.intervention_date + timedelta(days=ndays)
-            except ZeroDivisionError:
+            except (ZeroDivisionError, AttributeError):
                 ndate = self.intervention_date + timedelta(days=30)
         return ndate
     
