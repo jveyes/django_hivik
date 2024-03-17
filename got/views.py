@@ -62,7 +62,6 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        # queryset = Task.objects.all()
         queryset = Task.objects.filter(ot__isnull=False) 
 
         asset_id = self.request.GET.get('asset_id')
@@ -621,8 +620,6 @@ def indicadores(request):
         correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
         modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
 
-
-
     if ots==0:
         ind_cumplimiento = 0
         data = 0
@@ -630,14 +627,13 @@ def indicadores(request):
         ind_cumplimiento = round((ot_finish/ots)*100, 2)
         data = [round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2), round((modificativo/ots)*100,2)]
 
-    # Pasa los porcentajes al contexto
     context = {
         'ind_cumplimiento': ind_cumplimiento,
         'data': data,
         'labels': labels,
         'ots': ots,
         'ots_asset': ots_per_asset,
-        'asset_labels': asset_labels
+        'asset_labels': asset_labels,
     }
     return render(request, 'got/indicadores.html', context)
 

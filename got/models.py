@@ -2,38 +2,34 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
-from django.utils import timezone
 from django.db.models import Sum
-
-from django.core.validators import RegexValidator
 
 
 class Asset(models.Model):
     '''
-    Activos (v1.0)
+    Activos
     '''
-
     AREA = (
-        ('b', 'Buceo'),
         ('a', 'Artefactos Navales'),
+        ('b', 'Buceo'),
         ('o', 'Oceanografia'),
         ('l', 'Locativo'),
-        ('v', 'Vehiculos')
+        ('v', 'Vehiculos'),
+        ('x', 'Apoyo')
     )
 
     name = models.CharField(max_length=50)
+    area = models.CharField(choices=AREA, default='a', max_length=50)
     supervisor = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
-    area = models.CharField(choices=AREA, default='a', max_length=50)
     
     # Propiedades adicionales para artefactos navales
     bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
     eslora = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
-    
     manga = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
     puntal = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
     calado_maximo = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
@@ -54,10 +50,6 @@ class Asset(models.Model):
 
 
 class System(models.Model):
-    '''
-    Sistema agrupados de cada activo, relacion directa con activos y vinculo con ordenes 
-    de trabajo (v1.0)
-    '''
 
     STATUS = (
         ('m', 'Mantenimiento'),
@@ -73,7 +65,7 @@ class System(models.Model):
     asset = models.ForeignKey(Asset, on_delete = models.CASCADE)
 
     def __str__(self):
-        return '%s - %s - %s' % (self.asset, self.gruop, self.name)
+        return '%s/%s' % (self.asset, self.name)
     
     def get_absolute_url(self):
         return reverse('got:sys-detail', args=[self.id])
@@ -107,11 +99,8 @@ class Equipo(models.Model):
 
     system = models.ForeignKey(System, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
 
-    
     def calculate_horometro(self):
-        # Suma total de las horas de HistoryHour
         total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
-        # Sumar las horas iniciales a la suma total
         return total_hours + self.initial_hours
 
     def __str__(self):
@@ -125,6 +114,7 @@ class Equipo(models.Model):
 
 
 class HistoryHour(models.Model):
+
     report_date = models.DateField()
     hour = models.IntegerField()
     reporter = models.ForeignKey(
@@ -136,15 +126,19 @@ class HistoryHour(models.Model):
 
     component = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='hours')
 
+    def __str__(self):
+        return '%s: %s - %s (%s)' % (self.report_date, self.component, self.hour, self.reporter)
+
 class Ruta(models.Model):
     
     CONTROL = (
         ('d', 'Días'),
         ('h', 'Horas'),
     )
+    
     code = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50, default='nombre-rutina')
-    control = models.CharField(choices=CONTROL, default='d', max_length=50)
+    name = models.CharField(max_length=50)
+    control = models.CharField(choices=CONTROL, max_length=50)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
 
@@ -171,7 +165,6 @@ class Ruta(models.Model):
     @property
     def maintenance_status(self):
         percentage = self.percentage_remaining
-
         if 25 <= percentage <= 100:
             return 'c'
         elif 5 <= percentage <= 26:
@@ -187,9 +180,7 @@ class Ruta(models.Model):
 
 
 class Ot(models.Model):
-    '''
-    Ordenes de trabajo (v1.0)
-    '''
+
     STATUS = (
         ('a', 'Abierto'),
         ('x', 'En ejecucion'),
@@ -206,7 +197,6 @@ class Ot(models.Model):
     creation_date = models.DateField(auto_now_add=True)
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
-    system = models.ForeignKey(System, on_delete=models.CASCADE)
     super = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -214,9 +204,10 @@ class Ot(models.Model):
         blank = True
     )
     state = models.CharField(choices=STATUS, default='x', max_length=50)
-    tipo_mtto = models.CharField(choices=TIPO_MTTO, default='c', max_length=50)
+    tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=50)
     info_contratista_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
 
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
 
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
@@ -240,6 +231,7 @@ class Task(models.Model):
         null=True,
         blank=True
     )
+
     description = models.TextField()
     procedimiento = models.TextField(default="---", blank=True, null=True)
     hse = models.TextField(default="---", blank=True, null=True)

@@ -5,32 +5,23 @@ from django.contrib.auth.models import User
 import datetime
 
 
-# Form 1: filtrar busqueda de las Ordenes de trabajo
-# class OtsFilterForm(forms.Form):
-#       description = forms.CharField(
-#            	widget=forms.TextInput(attrs={
-#                 'class': 'form-control',
-#                 'placeholder': '',
-# 		        'aria-label': 'Username',
-#         		'aria-describedby': 'addon-wrapping',
-#         	}),
-#         	label='Filtro'
-# 		)
-      
-
-# Clase 1: mostrar nombre y apellido de los usuarios en los formularios
 class UserChoiceField(forms.ModelChoiceField):
-	def label_from_instance(self, obj):
-            return f'{obj.first_name} {obj.last_name}'
+     '''
+     Objeto widget para desplegar nombre y apellido de los usuarios
+     '''
+     def label_from_instance(self, obj):
+          return f'{obj.first_name} {obj.last_name}'
 
 
-# Clase 2: Personalizar widget para que aparezca calendario
 class XYZ_DateInput(forms.DateInput):
-	input_type = 'date'
+     '''
+     Objeto para desplegar calendario en fechas de formularios
+     '''
+     input_type = 'date'
 
-	def __init__(self, **kwargs):
-            kwargs['format'] = '%Y-%m-%d'
-            super().__init__(**kwargs)
+     def __init__(self, **kwargs):
+          kwargs['format'] = '%Y-%m-%d'
+          super().__init__(**kwargs)
     
 
 # Form 2: Reprogramar actividades 
@@ -240,6 +231,12 @@ class RutaForm(forms.ModelForm):
 
 
 class ReportHours(forms.ModelForm):
+     def clean_hour(self):
+          hour = self.cleaned_data['hour']
+          if hour < 0 or hour > 24:
+               raise forms.ValidationError('El valor de horas debe estar entre 0 y 24.')
+          return hour
+     
      class Meta:
           model = HistoryHour
           fields = ['hour', 'report_date']
