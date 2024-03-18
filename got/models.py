@@ -160,7 +160,15 @@ class Ruta(models.Model):
     @property
     def percentage_remaining(self):
         days_remaining = (self.next_date - date.today()).days
-        return int((days_remaining / self.frecuency) * 100)
+        if self.control=='d':
+            percent = int((days_remaining / self.frecuency) * 100)
+        else:
+            try:
+                ndays = int(self.frecuency/self.equipo.prom_hours)
+                percent = int((days_remaining / ndays) * 100)
+            except (ZeroDivisionError, AttributeError):
+                percent = 'n'
+        return percent
 
     @property
     def maintenance_status(self):
@@ -169,6 +177,8 @@ class Ruta(models.Model):
             return 'c'
         elif 5 <= percentage <= 26:
             return 'p'
+        elif percentage == 'n':
+            return percentage
         else:
             return 'v' 
 

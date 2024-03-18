@@ -24,35 +24,33 @@ class XYZ_DateInput(forms.DateInput):
           super().__init__(**kwargs)
     
 
-# Form 2: Reprogramar actividades 
 class RescheduleTaskForm(forms.ModelForm):
-        '''
-        Formulario ubicado en "assignedtasks_list_pendient_user.html"
-        '''
-        news = forms.CharField(
-            widget=forms.Textarea(attrs={'rows': 4}),
+     '''
+     Form 1: reprogramación de actividades 
+     - "assignedtasks_list_pendient_user.html"
+     '''
+     news = forms.CharField(
+          widget=forms.Textarea(attrs={'rows': 4}),
         	required=False,
-            label = 'Novedades'
-        )
+          label = 'Novedades'
+          )
 
-        def clean_start_date(self):
-               data = self.cleaned_data['start_date']
-               if data < datetime.date.today():
-                    raise ValidationError('Fecha invalida')
-               return data
-        class Meta:
-            model = Task
-            fields = ['start_date', 'news', 'men_time']
-            labels = {
-                  'start_date': 'Fecha de reprogramacion',
-                  'men_time': 'Tiempo de ejecución (Dias)'
-                }
-            help_text = {
-                 'news': 'Motivo de la reprogramación'
-            }
-            widgets = {
-                 'start_date': forms.DateInput(attrs={'type': 'date'}),
-            }
+     def clean_start_date(self):
+          data = self.cleaned_data['start_date']
+          if data < datetime.date.today():
+               raise ValidationError('Fecha invalida')
+          return data
+     
+     class Meta:
+          model = Task
+          fields = ['start_date', 'news', 'men_time']
+          labels = {
+               'start_date': 'Fecha de reprogramacion',
+               'men_time': 'Tiempo de ejecución (Dias)'
+               }
+          widgets = {
+               'start_date': forms.DateInput(attrs={'type': 'date'}),
+               }
             
 
 # Form 3: Actualizar actividad 
@@ -211,6 +209,11 @@ class EquipoForm(forms.ModelForm):
 
 #  Form 9: Crear/editar nueva ruta
 class RutaForm(forms.ModelForm):
+     def clean_frecuency(self):
+          frecuency = self.cleaned_data['frecuency']
+          if frecuency <= 0:
+               raise forms.ValidationError('El valor de la frecuencia no puede ser 0.')
+          return frecuency
 
      class Meta:
           model = Ruta
