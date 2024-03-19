@@ -35,7 +35,7 @@
 		</thead>
 		<tbody>
 			{% for ruta in ruta_list %}
-				<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status=='n'%}table-secondary{% else %}table-danger{% endif %}">
+				<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
 					<th scope="row">{{ ruta.system.asset }}/{{ ruta.system.name }}</th>
 					<td>{{ ruta.name }}</td>
 					<td>{{ ruta.frecuency }}</td>
