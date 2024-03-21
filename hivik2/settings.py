@@ -81,10 +81,10 @@ WSGI_APPLICATION = 'hivik2.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "d4t897a08a91m",
-        "USER": "ezxjhovwzvuxlt",
-        "PASSWORD": "edd77cabb0e571eb17d99e1a0722886dbf243e2da86d56f4c338055f6bd291d0",
-        "HOST": "ec2-35-172-26-41.compute-1.amazonaws.com",
+        "NAME": "dao4gcco5kbsfa",
+        "USER": "ztklwuglyluaih",
+        "PASSWORD": "9e5695fa52bc9d87b4c9c26cea09aec077e4800771005594b8c6e216f90ba688",
+        "HOST": "ec2-52-6-117-96.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
 }
