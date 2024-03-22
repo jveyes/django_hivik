@@ -1,25 +1,30 @@
 {% extends "got/base_generic.html" %}
 
-{% block head %}Detalle de OT-{{ot.num_ot}}{% endblock %} 
+{% block head %}
+<a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+Detalle de OT-{{ot.num_ot}}
+{% endblock %} 
 
 {% block content %}
 
 <div class="container">
 
-<!-- Existen actividades -->
-{% if ot.task_set.all %} 
-<!-- Estan finalizadas esas actividades -->
-{% if all_tasks_finished %}
-<!-- Se encuentra en estado de ejecucion -->
-{% if ot.state == 'x' %}
-<form method="post" action="{% url 'got:ot-detail' ot.num_ot %}">
-    {% csrf_token %}
-    {{ state_form.as_p }}
-    <button type="submit" class="btn btn-primary" name="finish_ot">Finalizar</button>
-</form>
-{% endif %}
-{% endif %}
-{% endif %}
+<section>
+    <!-- Existen actividades -->
+    {% if ot.task_set.all %} 
+        <!-- Estan finalizadas esas actividades -->
+        {% if all_tasks_finished %}
+            <!-- Se encuentra en estado de ejecucion -->
+            {% if ot.state == 'x' %}
+                <form method="post" action="{% url 'got:ot-detail' ot.num_ot %}">{% csrf_token %}
+                    {{ state_form.as_p }}
+                    <button type="submit" class="btn btn-primary" name="finish_ot">Finalizar</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+</section>
+
 <!-- Informacion basica -->
 <table class="table">
     <tbody>

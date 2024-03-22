@@ -642,7 +642,7 @@ def indicadores(request):
 @permission_required('got.can_see_completely')
 def reporthours(request, component):
 
-    hours = HistoryHour.objects.filter(component=component)[:20]
+    hours = HistoryHour.objects.filter(component=component)[:30]
     equipo = get_object_or_404(Equipo, pk=component)
 
     if request.method == 'POST':
