@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 # from pathlib import Path
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -79,15 +79,15 @@ WSGI_APPLICATION = 'hivik2.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-load_dotenv()
+# load_dotenv()
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "dao4gcco5kbsfa",
         "USER": "ztklwuglyluaih",
-        "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        # "PASSWORD": "9e5695fa52bc9d87b4c9c26cea09aec077e4800771005594b8c6e216f90ba688",
+        # "PASSWORD": os.getenv('DATABASE_PASSWORD'),
+        "PASSWORD": "9e5695fa52bc9d87b4c9c26cea09aec077e4800771005594b8c6e216f90ba688",
         "HOST": "ec2-52-6-117-96.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
