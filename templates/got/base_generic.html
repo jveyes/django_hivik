@@ -46,7 +46,13 @@
             		<li class="nav-item">
               			<a class="nav-link active" aria-current="page" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
-					
+					{% obtener_asset_del_supervisor as asset_del_supervisor %}
+					{% if asset_del_supervisor %}
+						<!-- Muestra el enlace directo al equipo del supervisor -->
+						<li class="nav-item">
+							<a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
+						</li>
+					{% endif %}
             		<!-- Opciones limitadas para personal de serport -->
             		{%  if perms.got.view_asset %}
             			<li class="nav-item">
@@ -83,7 +89,7 @@
 		<!-- Bloque main -->
 		<main class="mt-4">
 			<!-- Titulo de la pagina -->
-			<h1>{{ mi_etiqueta_de_plantilla }}{% block head %}{% endblock %}</h1>
+			<h1>{% block head %}{% endblock %}</h1>
 
 			<!-- Contenido -->
 			{% block content %}{% endblock %}

@@ -144,7 +144,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         context['equipo_form'] = EquipoForm()
         context['task_form'] = RutActForm()
         return context
-    
+
     def post(self, request, *args, **kwargs):
         sys = self.get_object()
         equipo_form = EquipoForm(request.POST, request.FILES)
@@ -156,8 +156,13 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq.save()
             return redirect(request.path)
         else:
-            return render(request, self.template_name, {'system': sys, 'equipo_form': equipo_form, 'task_form': task_form})
-        
+            context = {
+                'system': sys,
+                'equipo_form': equipo_form,
+                'task_form': task_form
+                }
+            return render(request, self.template_name, context)
+
 
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
     '''
@@ -177,7 +182,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     # Formulario para filtrar Ots según descripción
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-  
+
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
@@ -186,7 +191,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         context['super_members'] = users_in_group
 
         return context
-    
+
     def get_queryset(self):
         queryset = Ot.objects.all()
         state = self.request.GET.get('state')
@@ -207,7 +212,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(super=responsable_id)
 
         return queryset
-    
+
 
 # Detalle de orden de trabajo - generalidades, listado de actividades y reporte
 class OtDetailView(LoginRequiredMixin, generic.DetailView):
@@ -228,15 +233,14 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         context['all_tasks_finished'] = not all_tasks_finished
 
         return context
-    
+
     def post(self, request, *args, **kwargs):
         ot = self.get_object()
         task_form = ActForm(request.POST, request.FILES)
         state_form = FinishOtForm(request.POST)
-        
 
         if 'finish_ot' in request.POST and state_form.is_valid():
-            ot.state ='Finalizado'
+            ot.state = 'Finalizado'
             ot.save()
 
             supervisor = ot.system.asset.supervisor
@@ -245,21 +249,33 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
                 # Enviar correo electrónico al finalizar la OT
                 subject = f'Orden de Trabajo {ot.num_ot} Finalizada'
-                message = render_to_string('got/ot_finished_email.txt', {'ot': ot})
+                message = render_to_string(
+                    'got/ot_finished_email.txt', {'ot': ot}
+                    )
                 from_email = settings.EMAIL_HOST_USER
                 to_email = supervisor_email
 
-                email = EmailMessage(subject, message, from_email, [to_email])
+                email = EmailMessage(
+                    subject, message, from_email, [to_email]
+                    )
 
                 # Adjuntar el PDF al correo
                 pdf_content_dynamic = self.generate_pdf_content(ot)
                 pdf_filename_dynamic = f'OT_{ot.num_ot}_Detalle.pdf'
-                email.attach(pdf_filename_dynamic, pdf_content_dynamic, 'application/pdf')
+                email.attach(
+                    pdf_filename_dynamic,
+                    pdf_content_dynamic,
+                    'application/pdf'
+                    )
 
                 # Adjuntar el PDF almacenado en el campo info_contratista_pdf
                 if ot.info_contratista_pdf:
                     pdf_filename_stored = f'OT_{ot.num_ot}_Contratista.pdf'
-                    email.attach(pdf_filename_stored, ot.info_contratista_pdf.read(), 'application/pdf')
+                    email.attach(
+                        pdf_filename_stored,
+                        ot.info_contratista_pdf.read(),
+                        'application/pdf'
+                        )
 
                 email.send()
 
@@ -271,8 +287,10 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             act.save()
             return redirect(act.get_absolute_url())
         
-        return render(request, self.template_name, {'ot': ot, 'task_form': task_form, 'state_form': state_form})
-    
+        context = {'ot': ot, 'task_form': task_form, 'state_form': state_form}
+
+        return render(request, self.template_name, context)
+
     def generate_pdf_content(self, ot):
         '''
         Función para generar el contenido del PDF
