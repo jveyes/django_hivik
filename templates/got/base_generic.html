@@ -19,14 +19,23 @@
     <!-- CSS -->
     <link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/style.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+	<style>
+		.navbar-custom .navbar-nav .nav-link {
+    	color: #000;
+		}
+		.navbar {
+		/* padding: 2rem;
+  		line-height: 50px;  	 */
+		}
+	</style>
 </head>
 <body>
 
 	<!-- Barra de navegacion -->
-	<nav class="navbar navbar-expand-lg bg-body-tertiary">
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 		<div class="container-fluid">
           <!-- Logo de serport -->
-        	<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
+        	<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo-gris.png" width="150px">
         	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           		<span class="navbar-toggler-icon"></span>
         	</button>
@@ -55,19 +64,21 @@
             		{% endif %}
           		</ul>
           		<!-- Boton de logout -->
-          		<form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
-            		<div>
-              			Usuario: {{ user.get_username }}
-            		</div>
-            		<button class="btn btn-outline-success" type="submit"><i class="bi bi-person-fill-dash"></i></button>
-          		</form>
+				  <form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
+					<div style="color: #fff; padding-right: 15px;">
+						{{ user.get_username }}
+					</div>
+					<button class="btn btn-outline-danger" type="submit">
+						<i class="bi bi-box-arrow-right"></i>
+					</button>
+				</form>
         	</div>
       	</div>
 	</nav>
 
 	<div class="container">
 		<!-- Bloque main -->
-		<main>
+		<main class="mt-4">
 			<!-- Titulo de la pagina -->
 			<h1>{% block head %}{% endblock %}</h1>
 

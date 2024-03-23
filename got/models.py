@@ -7,40 +7,56 @@ from django.db.models import Sum
 
 class Asset(models.Model):
     '''
-    Activos
+    Modelo para representar activos.
+    Incluye propiedades especificas para Barcos.
     '''
     AREA = (
-        ('a', 'Artefactos Navales'),
+        ('a', 'Remolcadores'),
         ('b', 'Buceo'),
         ('o', 'Oceanografia'),
         ('l', 'Locativo'),
         ('v', 'Vehiculos'),
-        ('x', 'Apoyo')
+        ('x', 'Apoyo'),
     )
 
     name = models.CharField(max_length=50)
-    area = models.CharField(choices=AREA, default='a', max_length=50)
+    area = models.CharField(max_length=1, choices=AREA, default='a')
     supervisor = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    
-    # Propiedades adicionales para artefactos navales
-    bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
-    eslora = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
-    manga = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
-    puntal = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
-    calado_maximo = models.DecimalField(default=0,max_digits=8, decimal_places=2, null=True, blank=True)
-    deadweight = models.IntegerField(default=0, null=True, blank=True)
-    arqueo_bruto = models.IntegerField(default=0, null=True, blank=True)
-    arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
-    espacio_libre_cubierta = models.IntegerField(default=0, null=True, blank=True)
+        User, on_delete=models.SET_NULL, null=True, blank=True
+        )
+
+    # Propiedades adicionales para barcos
+    bandera = models.CharField(
+        default='Colombia', max_length=50, null=True, blank=True
+        )
+    eslora = models.DecimalField(
+        default=0, max_digits=8, decimal_places=2, null=True, blank=True
+        )
+    manga = models.DecimalField(
+        default=0, max_digits=8, decimal_places=2, null=True, blank=True
+        )
+    puntal = models.DecimalField(
+        default=0, max_digits=8, decimal_places=2, null=True, blank=True
+        )
+    calado_maximo = models.DecimalField(
+        default=0, max_digits=8, decimal_places=2, null=True, blank=True
+        )
+    deadweight = models.IntegerField(
+        default=0, null=True, blank=True
+        )
+    arqueo_bruto = models.IntegerField(
+        default=0, null=True, blank=True
+        )
+    arqueo_neto = models.IntegerField(
+        default=0, null=True, blank=True
+        )
+    espacio_libre_cubierta = models.IntegerField(
+        default=0, null=True, blank=True
+        )
 
     def __str__(self):
         return self.name
-    
+
     def get_absolute_url(self):
         return reverse('got:asset-detail', args=[str(self.id)])
 

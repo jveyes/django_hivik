@@ -11,17 +11,18 @@
         </button>
         <ul class="dropdown-menu">
             <li><a href="{% url 'got:asset-list' %}">Mostrar todas</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=a">Artefactos Navales</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
             <li><a href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
             <li><a href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
             <li><a href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
             <li><a href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
+            <li><a href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
         </ul>
     </div>
 
 	{% if request.GET.area %}
 		{% if request.GET.area == 'a' %}
-        <h4>Artefactos Navales</h4>
+        <h4>Barcos</h4>
 		{% elif request.GET.area == 'b' %}
         <h4>Buceo</h4>
 		{% elif request.GET.area == 'o' %}

@@ -11,7 +11,7 @@ def update_equipo_horometro(sender, instance, **kwargs):
     
     # Calcular la suma de las horas de todos los HistoryHour relacionados con el equipo
     horas_totales = HistoryHour.objects.filter(component=equipo).aggregate(total_horas=Sum('hour'))['total_horas']
-    promedio_horas = HistoryHour.objects.filter(component=equipo).aggregate(promedio_horas=Avg('hour'))['promedio_horas']
+    promedio_horas = HistoryHour.objects.filter(component=equipo).aggregate(promedio_horas=Avg('hour'))['promedio_horas'][:30]
 
     equipo.prom_hours = promedio_horas or 0
     
