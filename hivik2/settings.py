@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 # from pathlib import Path
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,8 +86,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "dao4gcco5kbsfa",
         "USER": "ztklwuglyluaih",
-        # "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "PASSWORD": "9e5695fa52bc9d87b4c9c26cea09aec077e4800771005594b8c6e216f90ba688",
+        "PASSWORD": os.getenv('DATABASE_PASSWORD'),
+        # "PASSWORD": "9e5695fa52bc9d87b4c9c26cea09aec077e4800771005594b8c6e216f90ba688",
         "HOST": "ec2-52-6-117-96.compute-1.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
@@ -163,9 +163,14 @@ EMAIL_HOST_PASSWORD = 'fund tewp sxap rbox'
 EMAIL_USE_SSL = False
 
 AWS_ACCESS_KEY_ID = 'AKIAYS2NTXT562AU74PQ'
-AWS_SECRET_ACCESS_KEY = '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'
-AWS_STORAGE_BUCKET_NAME = 'hivik'
-AWS_S3_REGION_NAME = 'us-east-2'
+# AWS_SECRET_ACCESS_KEY = 'IlqJW3nwVukDF06cqs0IAEVo++53WiEk1joTnR6R'
+# AWS_STORAGE_BUCKET_NAME = 'hivik'
+# AWS_S3_REGION_NAME = 'us-east-2'
+# AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-2')
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 
 STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
