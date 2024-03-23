@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
 # Autenticacion de usuario y permisos
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group
 
@@ -15,7 +15,11 @@ from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
-from .forms import RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours
+from .forms import (
+    RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
+    EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours
+)
+
 
 # Librerias auxiliares
 from datetime import timedelta, date
@@ -28,7 +32,7 @@ from io import BytesIO
 from django.conf import settings
 
 
-# ----------------------------------- Main views ------------------------------------------
+# ----------------------------------- Main views -----------------------------#
 
 # Mis actividades
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
@@ -62,7 +66,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        queryset = Task.objects.filter(ot__isnull=False) 
+        queryset = Task.objects.filter(ot__isnull=False)
 
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
@@ -72,10 +76,12 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         if responsable_id:
             queryset = queryset.filter(responsible=responsable_id)
 
-        if self.request.user.is_staff:
+        if self.request.user.has_perm("got.can_see_completely"):
             queryset = queryset.filter(finished=False).order_by('start_date')
         else:
-            queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
+            queryset = queryset.filter(
+                Q(responsible=self.request.user) & Q(finished=False)
+                ).order_by('start_date')
 
         return queryset
 
@@ -86,7 +92,7 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
     Vista generica para mostrar el listado de los centros de costos (v1.0)
     '''
     model = Asset
-    
+
     def get_queryset(self):
         queryset = Asset.objects.all()
         area = self.request.GET.get('area')
@@ -108,7 +114,7 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         context['sys_form'] = SysForm()
         return context
-    
+
     def post(self, request, *args, **kwargs):
         asset = self.get_object()
         sys_form = SysForm(request.POST)
@@ -119,7 +125,11 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
             sys.save()
             return redirect(request.path)
         else:
-            return render(request, self.template_name, {'asset': asset, 'sys_form': sys_form})
+            return render(
+                request,
+                self.template_name,
+                {'asset': asset, 'sys_form': sys_form}
+                )
 
 
 class SysDetailView(LoginRequiredMixin, generic.DetailView):

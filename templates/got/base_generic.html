@@ -1,3 +1,5 @@
+{% load my_tags %}
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -44,6 +46,7 @@
             		<li class="nav-item">
               			<a class="nav-link active" aria-current="page" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
+					
             		<!-- Opciones limitadas para personal de serport -->
             		{%  if perms.got.view_asset %}
             			<li class="nav-item">
@@ -80,7 +83,7 @@
 		<!-- Bloque main -->
 		<main class="mt-4">
 			<!-- Titulo de la pagina -->
-			<h1>{% block head %}{% endblock %}</h1>
+			<h1>{{ mi_etiqueta_de_plantilla }}{% block head %}{% endblock %}</h1>
 
 			<!-- Contenido -->
 			{% block content %}{% endblock %}
