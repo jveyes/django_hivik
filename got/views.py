@@ -33,7 +33,7 @@ from django.conf import settings
 # Mis actividades
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     '''
-    Vista generica basada en clases que muestra las actividades en ejecucion de cada
+    Vista generica basada en clases que muestra las actividades en ejecucion
     cada miembro de serport (v1.0)
 
     v1.1 se le agrega opciones de filtrado por equipos y personal
@@ -41,11 +41,11 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     '''
     model = Task
     template_name = 'got/assignedtasks_list_pendient_user.html'
-    paginate_by = 16  
-    
+    paginate_by = 16
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
@@ -66,7 +66,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
-        
+
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
         if responsable_id:
@@ -74,7 +74,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
         if self.request.user.is_staff:
             queryset = queryset.filter(finished=False).order_by('start_date')
-        else: 
+        else:
             queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
         return queryset

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
 
-# Register models.
+
 class OtAdmin(admin.ModelAdmin):
     list_display = (
         'num_ot',
@@ -10,6 +10,7 @@ class OtAdmin(admin.ModelAdmin):
         'system',
         'super'
         )
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
@@ -46,6 +47,7 @@ class TaskAdmin(admin.ModelAdmin):
             'fields': ('men_time', 'finished')
         }),
     )
+
 
 admin.site.register(Asset)
 admin.site.register(Ruta)

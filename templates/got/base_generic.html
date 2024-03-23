@@ -23,10 +23,10 @@
 		.navbar-custom .navbar-nav .nav-link {
     	color: #000;
 		}
-		.navbar {
-		/* padding: 2rem;
-  		line-height: 50px;  	 */
-		}
+		/* .navbar {
+		padding: 2rem;
+  		line-height: 50px;  	
+		} */
 	</style>
 </head>
 <body>
@@ -45,7 +45,7 @@
               			<a class="nav-link active" aria-current="page" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
             		<!-- Opciones limitadas para personal de serport -->
-            		{%  if request.user.is_staff %}
+            		{%  if perms.got.view_asset %}
             			<li class="nav-item">
               				<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
             			</li>
