@@ -9,17 +9,20 @@
 
 {% block content %}
 
-{% if perms.got.add_ot %}
+
     <div class="d-flex">
+        {% if perms.got.add_ot %}
         <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
 
         <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
             Crear nuevo sistema
         </button>
+        {% endif %}
+    <a class="btn btn-secondary space" href="{% url 'got:horas-asset' asset.id %}">Reporte total de horas</a>
     </div>
-{% endif %}
 
-<a class="btn btn-primary space" href="{% url 'got:horas-asset' asset.id %}">Reporte total de horas</a>
+
+
 
 <div class="d-flex">
     <div class="" style="min-width: 350px;">
