@@ -296,5 +296,6 @@ class ReportHoursAsset(forms.ModelForm):
         asset = kwargs.pop('asset')
         super().__init__(*args, **kwargs)
         self.fields['component'].queryset = Equipo.objects.filter(
-            system__asset=asset
+            system__asset=asset,
+            tipo='r'
             )
