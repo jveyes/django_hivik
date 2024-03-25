@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 # Autenticacion de usuario y permisos
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, User
 
 # Vistas genericas basadas en clases
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -17,7 +17,8 @@ from django.urls import reverse, reverse_lazy
 from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
-    EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours
+    EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
+    ReportHoursAsset,
 )
 
 
@@ -30,6 +31,8 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from io import BytesIO
 from django.conf import settings
+from django.db.models import Count
+from django.core.paginator import Paginator
 
 
 # ----------------------------------- Main views -----------------------------#
@@ -53,8 +56,17 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
-        serport_group = Group.objects.get(name='serport_members')
+        asset_id = self.request.GET.get('asset_id')
+        if asset_id:
+            selected_asset = Asset.objects.get(id=asset_id)
+            context['selected_asset_name'] = selected_asset.name
 
+        responsable_id = self.request.GET.get('responsable')
+        if responsable_id:
+            user = User.objects.get(id=responsable_id)
+            context['selected_res'] = f'{user.first_name} {user.last_name}'
+
+        serport_group = Group.objects.get(name='serport_members')
         users_in_group = serport_group.user_set.all()
 
         context['serport_members'] = users_in_group
@@ -71,6 +83,9 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
 
+        maq_group = Group.objects.get(name='maq_members')
+        users_maq = maq_group.user_set.all()
+
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
         if responsable_id:
@@ -78,6 +93,10 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
         if self.request.user.has_perm("got.can_see_completely"):
             queryset = queryset.filter(finished=False).order_by('start_date')
+        elif self.request.user in users_maq:
+            queryset = queryset.filter(
+                finished=False,
+                ot__system__asset__supervisor=self.request.user)
         else:
             queryset = queryset.filter(
                 Q(responsible=self.request.user) & Q(finished=False)
@@ -113,6 +132,23 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['sys_form'] = SysForm()
+
+        systems = self.object.system_set.all()
+        paginator = Paginator(systems, 10)  # Muestra 10 sistemas por página
+
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        context['page_obj'] = page_obj
+
+        asset = self.get_object()
+        rutas = sorted(
+            Ruta.objects.filter(system__asset=asset),
+            key=lambda t: t.next_date
+            )
+
+        context['rutas'] = rutas
+
         return context
 
     def post(self, request, *args, **kwargs):
@@ -286,7 +322,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             act.ot = ot
             act.save()
             return redirect(act.get_absolute_url())
-        
+
         context = {'ot': ot, 'task_form': task_form, 'state_form': state_form}
 
         return render(request, self.template_name, context)
@@ -321,17 +357,20 @@ def RutaListView(request):
 
     area_filter = request.GET.get('area_filter')
     if area_filter:
-        ruta = sorted(Ruta.objects.filter(system__asset__area=area_filter), key=lambda t:t.next_date)
+        ruta = sorted(
+            Ruta.objects.filter(system__asset__area=area_filter),
+            key=lambda t: t.next_date
+            )
     else:
         ruta = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
 
-    return render(request, 'got/ruta_list.html', {'ruta_list': ruta, 'assets': assets, 'area_filter': area_filter})
+    context = {'ruta_list': ruta, 'assets': assets, 'area_filter': area_filter}
+    return render(request, 'got/ruta_list.html', context)
 
 
+# ------------------------------------- Formularios -------------------------#
 
-# ------------------------------------- Formularios -------------------------------------------
-    
-# Vista de formulario para reprogramar actividades
+
 @permission_required('got.can_see_completely')
 def reschedule_task(request, pk):
     '''
@@ -354,9 +393,12 @@ def reschedule_task(request, pk):
 
     else:
         proposed_reschedule_date = date.today() + timedelta(weeks=1)
-        form = RescheduleTaskForm(initial={'proposed_date': proposed_reschedule_date,})
-    
-    return render(request, 'got/task_reschedule.html', {'form': form, 'task': act, 'final_date': final_date})
+        form = RescheduleTaskForm(
+            initial={'proposed_date': proposed_reschedule_date, }
+            )
+
+    context = {'form': form, 'task': act, 'final_date': final_date}
+    return render(request, 'got/task_reschedule.html', context)
 
 
 class OtCreate(CreateView):
@@ -394,12 +436,12 @@ class RutaCreate(CreateView):
 
         # Llamar al método form_valid de la clase base
         return super().form_valid(form)
-    
+
     def get_success_url(self):
         ruta = self.object
         # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[ruta.system.id])
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
@@ -418,7 +460,6 @@ class OtUpdate(UpdateView):
         kwargs = super().get_form_kwargs()
         # Obtener la instancia actual de la orden de trabajo
         ot_instance = self.get_object()
-        # Pasar el activo asociado a la orden de trabajo como parámetro al formulario
         kwargs['asset'] = ot_instance.system.asset
         return kwargs
 
@@ -437,7 +478,7 @@ class TaskCreate(CreateView):
     '''
     model = Task
     form_class = RutActForm
-    
+
     def form_valid(self, form):
         # Obtener el valor del parámetro pk desde la URL
         pk = self.kwargs['pk']
@@ -464,7 +505,7 @@ class TaskUpdate(UpdateView):
     '''
     model = Task
     form_class = ActForm
-    template_name = 'got/task_form.html' 
+    template_name = 'got/task_form.html'
     http_method_names = ['get', 'post']
 
 
@@ -482,7 +523,7 @@ class TaskUpdaterut(UpdateView):
     '''
     model = Task
     form_class = RutActForm
-    template_name = 'got/task_form.html' 
+    template_name = 'got/task_form.html'
     http_method_names = ['get', 'post']
 
     def get_success_url(self):
@@ -497,15 +538,16 @@ class TaskDeleterut(DeleteView):
     Vista formulario para eliminar actividades
     '''
     model = Task
-    # success_url = reverse_lazy('')
+
     def get_success_url(self):
         # Obtén el ID del sistema al que pertenece la tarea eliminada
         sys_id = self.object.ruta.system.id
         # Retorna la URL de detalle del sistema con el ID correspondiente
         return reverse_lazy('got:sys-detail', kwargs={'pk': sys_id})
-    
+
     def get(self, request, *args, **kwargs):
-        return render(request, 'got/task_confirm_delete.html', {'task': self.get_object()})
+        context = {'task': self.get_object()}
+        return render(request, 'got/task_confirm_delete.html', context)
 
 
 class SysDelete(DeleteView):
@@ -515,12 +557,13 @@ class SysDelete(DeleteView):
     model = System
 
     success_url = reverse_lazy('got:ot-list')
-    
+
     def get_success_url(self):
         asset_code = self.object.asset.id
-        success_url = reverse_lazy('got:asset-detail', kwargs={'pk': asset_code})
+        kwargs = {'pk': asset_code}
+        success_url = reverse_lazy('got:asset-detail', kwargs)
         return success_url
-    
+
 
 class EquipoUpdate(UpdateView):
     '''
@@ -528,7 +571,7 @@ class EquipoUpdate(UpdateView):
     '''
     model = Equipo
     form_class = EquipoForm
-    template_name = 'got/equipo_form.html' 
+    template_name = 'got/equipo_form.html'
     http_method_names = ['get', 'post']
 
 
@@ -545,7 +588,7 @@ class EquipoDelete(DeleteView):
     Vista formulario para eliminar actividades
     '''
     model = Equipo
-    
+
     def get_success_url(self):
         sys_code = self.object.system.id
         success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
@@ -561,7 +604,6 @@ class RutaUpdate(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Obtener el sistema relacionado con la ruta y pasar como parámetro al formulario
         kwargs['system'] = self.object.system
         return kwargs
 
@@ -571,7 +613,7 @@ class RutaDelete(DeleteView):
     Vista formulario para eliminar actividades
     '''
     model = Ruta
-    
+
     def get_success_url(self):
         sys_code = self.object.system.id
         success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
@@ -587,7 +629,7 @@ def report_pdf(request, num_ot):
     ot_info = Ot.objects.get(num_ot=num_ot)
     template_path = 'got/pdf_template.html'
     context = {'ot': ot_info}
-    response = HttpResponse(content_type = 'application/pdf')
+    response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'filename="orden_de_trabajo.pdf'
     template = get_template(template_path)
     html = template.render(context)
@@ -618,42 +660,73 @@ def finish_task(request, pk):
 
     else:
         form = UpdateTaskForm()
-    
-    return render(request, 'got/task_finish_form.html', {'form': form, 'task': act, 'final_date': final_date})
+
+    context = {'form': form, 'task': act, 'final_date': final_date}
+    return render(request, 'got/task_finish_form.html', context)
 
 
-from django.db.models import Count
 @permission_required('got.can_see_completely')
 def indicadores(request):
 
     area_filter = request.GET.get('area', None)
 
-    top_assets = Asset.objects.annotate(num_ots=Count('system__ot')).order_by('-num_ots')[:5]
+    top_assets = Asset.objects.annotate(
+        num_ots=Count('system__ot')).order_by('-num_ots')[:5]
     ots_per_asset = [asset.num_ots for asset in top_assets]
     asset_labels = [asset.name for asset in top_assets]
 
     labels = ['Preventivo', 'Correctivo', 'Modificativo']
 
     if area_filter:
-        ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, system__asset__area=area_filter))
-        ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f', system__asset__area=area_filter))
-        preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p', system__asset__area=area_filter))
-        correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c', system__asset__area=area_filter))
-        modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m', system__asset__area=area_filter))
+        ots = len(Ot.objects.filter(
+            creation_date__month=3,
+            creation_date__year=2024,
+            system__asset__area=area_filter
+            ))
+        ot_finish = len(Ot.objects.filter(
+            creation_date__month=3,
+            creation_date__year=2024, state='f',
+            system__asset__area=area_filter))
+        preventivo = len(Ot.objects.filter(
+            creation_date__month=3,
+            creation_date__year=2024,
+            tipo_mtto='p',
+            system__asset__area=area_filter
+            ))
+        correctivo = len(Ot.objects.filter(
+            creation_date__month=3,
+            creation_date__year=2024,
+            tipo_mtto='c',
+            system__asset__area=area_filter
+            ))
+        modificativo = len(Ot.objects.filter(
+            creation_date__month=3,
+            creation_date__year=2024,
+            tipo_mtto='m',
+            system__asset__area=area_filter
+            ))
 
     else:
-        ots = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024))
-        ot_finish = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, state='f'))
-        preventivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
-        correctivo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
-        modificativo = len(Ot.objects.filter(creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
+        ots = len(Ot.objects.filter(
+            creation_date__month=3, creation_date__year=2024))
+        ot_finish = len(Ot.objects.filter(
+            creation_date__month=3, creation_date__year=2024, state='f'))
+        preventivo = len(Ot.objects.filter(
+            creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
+        correctivo = len(Ot.objects.filter(
+            creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
+        modificativo = len(Ot.objects.filter(
+            creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
 
-    if ots==0:
+    if ots == 0:
         ind_cumplimiento = 0
         data = 0
     else:
         ind_cumplimiento = round((ot_finish/ots)*100, 2)
-        data = [round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2), round((modificativo/ots)*100,2)]
+        data = [
+            round((preventivo/ots)*100, 2), round((correctivo/ots)*100, 2),
+            round((modificativo/ots)*100, 2)
+            ]
 
     context = {
         'ind_cumplimiento': ind_cumplimiento,
@@ -694,3 +767,31 @@ def reporthours(request, component):
     }
 
     return render(request, 'got/hours.html', context)
+
+
+@permission_required('got.can_see_completely')
+def reportHoursAsset(request, asset_id):
+
+    asset = get_object_or_404(Asset, pk=asset_id)
+
+    if request.method == 'POST':
+        # Si se envió el formulario, procesarlo
+        form = ReportHoursAsset(request.POST, asset=asset)
+        if form.is_valid():
+            # Guardar el formulario si es válido
+            instance = form.save(commit=False)
+            instance.reporter = request.user
+            instance.save()
+            return redirect(request.path)
+    else:
+        form = ReportHoursAsset(asset=asset)
+
+    hours = HistoryHour.objects.filter(component__system__asset=asset)[:30]
+
+    context = {
+        'form': form,
+        'horas': hours,
+        'asset': asset,
+    }
+
+    return render(request, 'got/hours_asset.html', context)

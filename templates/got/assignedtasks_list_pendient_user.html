@@ -1,68 +1,95 @@
 {% extends "got/base_generic.html" %}
+{% load my_tags %}
 
-{% block head %}Mis actividades{% endblock %}
+{% block head %}
+Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif %}
+{% if selected_res %}/{{ selected_res }}{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container">
+
 <!-- Opciones de filtrado -->
+<section class="mt-5">
+	<!-- Filtros para equipos -->
+	{% if not request.user|has_group:"maq_members" %}
+	<div class="btn-group" role="group">
+		<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+			Filtrar por equipo
+		</button>
+		<ul class="dropdown-menu">
+			<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
+			{% for a in asset %}
+				<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
+			{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
 
-<!-- Enlace sin filtros -->
-<div class="btn-group" role="group">
-	<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-      Filtrar por equipo
-    </button>
-    <ul class="dropdown-menu">
-      	<li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
-	  	{% for a in asset %}
-      		<li><a href="{% url 'got:my-tasks' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
-		{% endfor %}
-    </ul>
-</div>
+	{% if not request.user|has_group:"serport_members" %}
+	<div class="btn-group" role="group">
+		<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+			Filtrar por taller
+		</button>
+		<ul class="dropdown-menu">
+			<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
+			{% for u in serport_members %}
+				<li>
+					<a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">
+						{{ u.first_name }} {{ u.last_name }}
+					</a>
+				</li>
+			{% endfor %}
+		</ul>
+	</div>
+	{% endif %}
+</section>
 
-{%  if request.user.is_staff %}
-<div class="btn-group" role="group">
-	<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-      Filtrar por taller
-    </button>
-    <ul class="dropdown-menu">
-      	<li><a href="{% url 'got:my-tasks' %}">Mostrar todas</a></li>
-		{% for u in serport_members %}
-			<li><a href="{% url 'got:my-tasks' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
-		{% endfor %}
-    </ul>
-</div>
-{% endif %}
-</div>
-<!-- Inicio tabla de actividades -->
-<table class="table">
-    <thead>
-      	<tr>
-        	<th scope="col">#OT</th>
-        	<th scope="col">Sistema</th>
-        	<th scope="col">Descripción</th>
-        	<th scope="col">Responsable</th>
-			<th scope="col">Fecha de Inicio</th>
-        	<th scope="col">Fecha de finalización</th>
-        	{% if perms.got.can_see_completely %}<th scope="col"></th>{% endif %}
-    	</tr>
-    </thead>
-    <tbody>
-        {% if task_list %}
-            {% for act in task_list %}
-				<tr>
-					<td>OT-{{act.ot.num_ot}}</td>
-					<td>{{act.ot.system.asset}}/{{act.ot.system.name}}</td>
-					<td class="{% if act.is_overdue %}text-danger{% endif %}"><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
-					<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-					<td>{{act.start_date|date:"d/m/Y"}}</td>
-					<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
-					{% if perms.got.can_see_completely %}<td><a href="{% url 'got:reschedule-task' act.id %}">reprogramar</a></td>{% endif %}
-				</tr>
-            {% endfor %}
-		{% else %}
-			<p>No hay actividades pendientes.</p>
-    	{% endif %}
-    </tbody>
-</table>
+<section class="mt-2">
+	<!-- Inicio tabla de actividades -->
+	<table class="table mi-tabla-borde-externo mt-0">
+		<thead class="table-secondary">
+			<tr>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">#OT</th>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Sistema</th>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Descripción</th>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Responsable</th>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Fecha de Inicio</th>
+				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Fecha de finalización</th>
+				{% if perms.got.can_see_completely %}
+					<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+						Reprogramar
+					</th>
+				{% endif %}
+			</tr>
+		</thead>
+		<tbody>
+			{% if task_list %}
+			
+				{% for act in task_list %}
+					<tr>
+						<td><strong>{{act.ot.num_ot}}</strong></td>
+						<td><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
+						<td class="{% if act.is_overdue %}text-danger{% endif %}"><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+						<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
+						<td>{{act.start_date|date:"d/m/Y"}}</td>
+						<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
+						{% if perms.got.can_see_completely %}
+							<td style="text-align: center;">
+								{% if act.is_overdue %}
+								<a href="{% url 'got:reschedule-task' act.id %}">
+									<i class="bi bi-calendar-x"></i>
+								</a>
+								{% endif %}
+							</td>
+						{% endif %}
+					</tr>
+				{% endfor %}
+				
+			{% else %}
+				<p>No hay actividades pendientes.</p>
+			{% endif %}
+		</tbody>
+	</table>
+</section>
 
 {% endblock %}

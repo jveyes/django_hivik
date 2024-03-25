@@ -13,7 +13,7 @@ class Asset(models.Model):
     AREA = (
         ('a', 'Motonave'),
         ('b', 'Buceo'),
-        ('o', 'Oceanografia'),
+        ('o', 'Oceanografía'),
         ('l', 'Locativo'),
         ('v', 'Vehiculos'),
         ('x', 'Apoyo'),
@@ -295,12 +295,11 @@ class Task(models.Model):
 
     def __str__(self):
         return self.description
-    
+
     def get_absolute_url(self):
         return reverse('got:task-detail', args=[str(self.id)])
 
     @property
     def is_overdue(self):
-        if self.start_date and date.today() > self.start_date + timedelta(days=self.men_time):
-            return True
-        return False
+        overdue_date = self.start_date + timedelta(days=self.men_time)
+        return self.start_date and date.today() > overdue_date

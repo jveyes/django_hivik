@@ -1,119 +1,246 @@
 {% extends "got/base_generic.html" %}
 
 {% block head %}
-<a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
-{{ asset.name }}
+    {% if perms.got.view_asset %}
+        <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+    {% endif %}
+    {{ asset.name }}
 {% endblock %}
 
 {% block content %}
 
-<div>
-    <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
-</div>
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Supervisor: </th>
-                <td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
-            </tr>
-            <tr>
-                <th>Departamento: </th>
-                <td>{{asset.get_area_display}}</td>
-            </tr>
-            {% if asset.area == 'a' %}
-            <tr>
-                <th>bandera: </th>
-                <td>{{asset.bandera}}</td>
-            </tr>
-            <tr>
-                <th>Eslora: </th>
-                <td>{{asset.eslora}} m</td>
-            </tr>
-            <tr>
-                <th>Manga: </th>
-                <td>{{asset.manga}}  m</td>
-            </tr>
-            <tr>
-                <th>Puntal: </th>
-                <td>{{asset.puntal}} m</td>
-            </tr>
-            <tr>
-                <th>Calado maximo: </th>
-                <td>{{asset.calado_maximo}}</td>
-            </tr>
-            <tr>
-                <th>Deadweight: </th>
-                <td>{{asset.deadweight}}</td>
-            </tr>
-            <tr>
-                <th>Arqueo bruto: </th>
-                <td>{{asset.arqueo_bruto}}</td>
-            </tr>
-            <tr>
-                <th>Arqueo neto: </th>
-                <td>{{asset.arqueo_neto}}</td>
-            </tr>
-            <tr>
-                <th>Espacio libre sobre cubierta: </th>
-                <td>{{asset.espacio_libre_cubierta}} m2</td>
-            </tr>
-            {% endif %}
-            
-        </tbody>
-    </table>
+{% if perms.got.add_ot %}
+    <div class="d-flex">
+        <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
 
+        <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
+            Crear nuevo sistema
+        </button>
+    </div>
+{% endif %}
 
-    <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
-        Crear nuevo sistema
-    </button>
-    {% if asset.system_set.all %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">Grupo</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Ubicación</th>
-                <th scope="col">Estado</th>
-            </tr>
-        </thead>
-        <tbody>           
-            {% for sys in asset.system_set.all %}
+<a class="btn btn-primary space" href="{% url 'got:horas-asset' asset.id %}">Reporte total de horas</a>
+
+<div class="d-flex">
+    <div class="" style="min-width: 350px;">
+        <table class="table table-dark mt-0 mb-0 table-striped">
+            <tbody>
                 <tr>
-                    <th scope="row">{{sys.gruop}}</th>
-                    <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
-                    <td>{{ sys.location }}</td>
-                    <td>{{ sys.get_state_display }}</td>
-                    <td>
-                        <a class="" href="{% url 'got:sys-update' sys.id %}"><i class="bi bi-pen"></i></a>
-                    </td>
-                    <td>
-                        <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-                    </td>
+                    <th colspan="2" class="text-center">Información general</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-        
-    {% else %}
-        <p>No hay sistemas registrados.</p>
-    {% endif %}
+                <tr>
+                    <th class="w-50">Supervisor: </th>
+                    <td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
+                </tr>
+                <tr>
+                    <th>Area: </th>
+                    <td>{{asset.get_area_display}}</td>
+                </tr>
+                {% if asset.area == 'a' %}
+                    <tr>
+                        <th colspan="2" class="text-center">Información especifica</th>
+                    </tr>
+                    <tr>
+                        <th>bandera: </th>
+                        <td>{{asset.bandera}}</td>
+                    </tr>
+                    <tr>
+                        <th>Eslora: </th>
+                        <td>{{asset.eslora}} m</td>
+                    </tr>
+                    <tr>
+                        <th>Manga: </th>
+                        <td>{{asset.manga}}  m</td>
+                    </tr>
+                    <tr>
+                        <th>Puntal: </th>
+                        <td>{{asset.puntal}} m</td>
+                    </tr>
+                    <tr>
+                        <th>Calado maximo: </th>
+                        <td>{{asset.calado_maximo}}</td>
+                    </tr>
+                    <tr>
+                        <th>Deadweight: </th>
+                        <td>{{asset.deadweight}}</td>
+                    </tr>
+                    <tr>
+                        <th>Arqueo bruto: </th>
+                        <td>{{asset.arqueo_bruto}}</td>
+                    </tr>
+                    <tr>
+                        <th>Arqueo neto: </th>
+                        <td>{{asset.arqueo_neto}}</td>
+                    </tr>
+                    <tr>
+                        <th>Espacio libre sobre cubierta: </th>
+                        <td>{{asset.espacio_libre_cubierta}} m2</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 
-    <div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sysModalLabel">Crear nuevo sistema</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form method="post" action="" enctype="multipart/form-data">{% csrf_token %}
-                        <table>
-                            {{ sys_form.as_table }}
-                        </table>
-                        <button type="submit" class="btn btn-primary">Agregar</button>
-                    </form>
-                </div>
+    <div class="ms-4 flex-grow-1">
+        {% if asset.system_set.all %}
+            <table class="table table-striped mi-tabla-borde-externo mt-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Grupo</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Ubicación</th>
+                        <th scope="col">Estado</th>
+                        {% if perms.got.add_ot %}
+                            <th scope="col" colspan="2">Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>           
+                    {% for sys in page_obj %}
+                        <tr>
+                            <th scope="row">{{sys.group}}</th>
+                            <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
+                            <td>{{ sys.location }}</td>
+                            <td>{{ sys.get_state_display }}</td>
+                            {% if perms.got.add_ot %}
+                                <td>
+                                    <a class="" href="{% url 'got:sys-update' sys.id %}"><i class="bi bi-pen"></i></a>
+                                </td>
+                                <td>
+                                    <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- Paginación -->
+            {% if page_obj.has_other_pages %}
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.previous_page_number }}" class="page-link">Anterior</a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Mostrar números de página -->
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><a href="#" class="page-link">{{ num }}</a></li>
+                        {% else %}
+                            <li class="page-item"><a href="?page={{ num }}" class="page-link">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a href="?page={{ page_obj.next_page_number }}" class="page-link">Siguiente</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        {% else %}
+            <p>No hay sistemas registrados.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Rutinas -->
+<section class="container mt-4">
+	<div>
+		<h2>Rutinas de mantenimiento</h2>
+        
+        {% if rutas %}
+			<table class="table mt-1">
+				<thead>
+					<tr>
+						<th scope="col">Codigo</th>
+						<th scope="col">Frecuencia</th>
+						<th scope="col">Control</th>
+						<th scope="col">Fecha de ultima intervención</th>
+						<th scope="col">Fecha proxima intervención</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for ruta in rutas %}
+					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
+						<th scope="row">{{ ruta.name }}</th>
+						<td>{{ ruta.frecuency }}</td>
+						<td>{{ ruta.get_control_display }}</td>
+						<td>{{ ruta.intervention_date }}</td>
+						<td>{{ ruta.next_date }}</td>
+					</tr>
+
+					<!-- Actividades -->
+					<tr>
+						<td colspan="5">
+							<div id="collapse{{ ruta.code }}" class="collapse">
+								<h3>
+                                    <a href="{{ ruta.get_absolute_url }}"><i class="bi bi-arrow-right-square-fill"></i></a>
+                                    Actividades:
+                                </h3>
+
+								{% if ruta.task_set.all %}
+								<ol>
+									{% for task in ruta.task_set.all %}
+										<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
+
+											{% if perms.got.create_ruta %}
+												<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
+												<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+											{% endif %}
+											
+										<ul style="list-style-type: none;">
+											{% if task.procedimiento %}
+											<li><strong>Procedimiento: </strong>{{ task.procedimiento }}</li>
+											{% endif %}
+											{% if task.suministros %}
+											<li><strong>Equipos, herramientas y consumibles: </strong>{{ task.suministros }}</li>
+											{% endif %}
+											{% if task.hse %}
+											<li><strong>Precauciones de seguridad: </strong>{{ task.hse }}</li>
+											{% endif %}
+										</ul>
+									{% endfor %}
+								</ol>
+								<hr>
+								{% else %}
+									<p>No hay actividades registradas.</p>
+								{% endif %}
+							</div>
+						</td>
+					</tr>
+                    {% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			<p>No hay rutinas registradas.</p>
+		{% endif %}
+	</div>
+</section>
+
+
+
+
+<div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sysModalLabel">Crear nuevo sistema</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="" enctype="multipart/form-data">{% csrf_token %}
+                    <table>
+                        {{ sys_form.as_table }}
+                    </table>
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

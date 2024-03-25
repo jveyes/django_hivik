@@ -1,105 +1,105 @@
 {% extends "got/base_generic.html" %}
 
 {% block head %}
-<a href="{% url 'got:asset-detail' system.asset.id %}"><i class="bi bi-arrow-90deg-left"></i></a>
-{{ system.asset }}/{{ system.name }}
+	<a href="{% url 'got:asset-detail' system.asset.id %}"><i class="bi bi-arrow-90deg-left"></i></a>
+	{{ system.asset }}/{{ system.name }}
 {% endblock %}
 
 {% block content %}
 
-<div class="container">
-    <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#comModal">
-        Crear nuevo componente
-    </button>
-</div>
-
+{% if perms.got.add_system %}
+	<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#comModal">
+		Crear nuevo componente
+	</button>
+{% endif %}
 
 
 <!-- Equipos -->
 {% if system.equipos.all %}
-{% for equipo in system.equipos.all %}
-	<section class="container mt-4">
-		<div class="table-responsive">
-        <table class="table table-bordered shadow">
-			<tbody>
-				<tr style="height: 20%;">
-					<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
-						<h2>{{equipo.name}}</h2>
-						<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
-						<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
-						{% if equipo.tipo == 'r' %}
-							<a href="{% url 'got:horas' equipo.code %}" class="btn btn-outline-secondary float-end">reporte horas</a>
-						{% endif %}
-					</td>
-					{% if equipo.imagen %}
-						<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="figure-img img-fluid rounded"></td>
-					{% endif %}
-				</tr>
-				<tr>
-					<td>
-						<table style="margin-top: 0;">
-							<tr>
-								<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información General</strong></h4></td>
-							</tr>
-							<tr>
-								<td><strong>Código interno:</strong></td>  
-								<td>{{equipo.code}}</td>
-							</tr>
-							<tr>
-								<td><strong>Modelo:</strong></td>  
-								<td>{{equipo.model}}</td>
-							</tr>
-							<tr>
-								<td><strong>Marca:</strong></td>  
-								<td>{{equipo.marca}}</td>
-							</tr>
-							<tr>
-								<td><strong>Serial:</strong></td>  
-								<td>{{equipo.serial}}</td>
-							</tr>
-							<tr>
-								<td><strong>Fecha ingreso al inventario:</strong></td>  
-								<td>{{equipo.date_inv}}</td>
-							</tr>
-							<tr>
-								<td><strong>Estado:</strong></td>  
-								<td>{{system.get_state_display}}</td>
-							</tr>
-							{% if equipo.tipo == 'r' %}
-								<tr>
-									<td><strong>Horometro:</strong></td>
-									<td>{{equipo.horometro}}</td>
-								</tr>
-								<tr>
-									<td><strong>Promedio de horas por día:</strong></td>
-									<td>{{equipo.prom_hours}}</td>
-								</tr>
-  							{% endif %}
-							<tr>
-								<td><strong>Fabricante:</strong></td>  
-								<td>{{equipo.fabricante}}</td>
-							</tr>
-							<tr>
-								<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información Específica del Equipo</strong></h4></td>
-							</tr>
-							<tr>
-								<td><strong>Especificaciones:</strong></td>  
-								<td>{{equipo.feature}}</td>
-							</tr>
-							{% if equipo.manual_pdf %}
-								<tr>
-									<td><strong>Manual:</strong></td>  
-									<td><a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a></td>
-								</tr>
+	{% for equipo in system.equipos.all %}
+		<section>
+			<table class="table table-bordered shadow mt-0">
+				
+				<tbody>
+					<tr style="height: 20%;">
+						<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
+							<h2>{{equipo.name}}</h2>
+							{% if perms.got.add_system %}
+								<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
+								<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
 							{% endif %}
-						</table>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-	</section>
-	{% endfor %}
+							{% if equipo.tipo == 'r' %}
+								<a href="{% url 'got:horas' equipo.code %}" class="btn btn-secondary float-end">reporte horas</a>
+							{% endif %}
+						</td>
+						{% if equipo.imagen %}
+							<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" class="figure-img img-fluid rounded"></td>
+						{% endif %}
+					</tr>
+					<tr>
+						<td>
+							<table style="margin-top: 0;">
+								<tr>
+									<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información General</strong></h4></td>
+								</tr>
+								<tr>
+									<td><strong>Código interno:</strong></td>  
+									<td>{{equipo.code}}</td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Modelo:</strong></td>  
+									<td class="pt-0">{{equipo.model}}</td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Marca:</strong></td>  
+									<td class="pt-0">{{equipo.marca}}</td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Serial:</strong></td>  
+									<td class="pt-0">{{equipo.serial}}</td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Fecha ingreso:</strong></td>  
+									<td class="pt-0">{{equipo.date_inv}}</td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Estado:</strong></td>  
+									<td class="pt-0">{{system.get_state_display}}</td>
+								</tr>
+								{% if equipo.tipo == 'r' %}
+									<tr>
+										<td class="pt-0"><strong>Horometro:</strong></td>
+										<td class="pt-0">{{equipo.horometro}}</td>
+									</tr>
+									<tr>
+										<td class="pt-0"><strong>Prom hora/día:</strong></td>
+										<td class="pt-0">{{equipo.prom_hours}}</td>
+									</tr>
+								{% endif %}
+								<tr>
+									<td class="pt-0"><strong>Fabricante:</strong></td>  
+									<td class="pt-0">{{equipo.fabricante}}</td>
+								</tr>
+								<tr>
+									<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información Específica del Equipo</strong></h4></td>
+								</tr>
+								<tr>
+									<td class="pt-0"><strong>Especificaciones:</strong></td>  
+									<td>{{equipo.feature}}</td>
+								</tr>
+								{% if equipo.manual_pdf %}
+									<tr>
+										<td class="pt-0"><strong>Manual:</strong></td>  
+										<td class="pt-0"><a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a></td>
+									</tr>
+								{% endif %}
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		{% endfor %}
 	{% else %}
 		<section class="container mt-5">
 			<p>No hay equipos registrados.</p>
@@ -110,7 +110,9 @@
 <section class="container mt-4">
 	<div>
 		<h2>Rutinas de mantenimiento</h2>
-		<a href="{% url 'got:ruta-create' system.id %}" class="btn btn-secondary">Crear nueva rutina</a>
+		{% if perms.got.add_system %}
+			<a href="{% url 'got:ruta-create' system.id %}" class="btn btn-secondary">Crear nueva rutina</a>
+		{% endif %}
 	
 		{% if system.rutas.all %}
 			<table class="table table-striped mt-1">
@@ -121,7 +123,9 @@
 						<th scope="col">Control</th>
 						<th scope="col">Fecha de ultima intervención</th>
 						<th scope="col">Fecha proxima intervención</th>
-						<th scope="col">Acciones</th>
+						{% if perms.got.create_ruta %}
+							<th scope="col">Acciones</th>
+						{% endif %}
 					</tr>
 				</thead>
 				<tbody>
@@ -132,23 +136,34 @@
 						<td>{{ ruta.get_control_display }}</td>
 						<td>{{ ruta.intervention_date }}</td>
 						<td>{{ ruta.next_date }}</td>
-						<td>
-							<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
-							<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-						</td>
+						{% if perms.got.add_system %}
+							<td>
+								<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
+								<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+							</td>
+						{% endif %}
 					</tr>
+
+					<!-- Actividades -->
 					<tr>
 						<td colspan="5">
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
-								<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary"><i class="bi bi-clipboard2-plus-fill"></i></a>
+
+								{% if perms.got.add_system %}
+									<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary"><i class="bi bi-clipboard2-plus-fill"></i></a>
+								{% endif %}
 
 								{% if ruta.task_set.all %}
 								<ol>
 									{% for task in ruta.task_set.all %}
 										<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
-											<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
-											<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+
+											{% if perms.got.create_ruta %}
+												<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
+												<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
+											{% endif %}
+											
 										<ul style="list-style-type: none;">
 											{% if task.procedimiento %}
 											<li><strong>Procedimiento: </strong>{{ task.procedimiento }}</li>

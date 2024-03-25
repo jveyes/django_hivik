@@ -1,45 +1,51 @@
 {% extends "got/base_generic.html" %}
 
-{% block head %}Equipos{% endblock %}
+{% block head %}
+
+Listado de equipos
+{% if request.GET.area %}
+{% if request.GET.area == 'a' %}
+- Barcos
+{% elif request.GET.area == 'b' %}
+- Buceo
+{% elif request.GET.area == 'o' %}
+- Oceanografía
+{% elif request.GET.area == 'l' %}
+- Locativo
+{% elif request.GET.area == 'v' %}
+- Vehiculos
+{% elif request.GET.area == 'x' %}
+- Apoyo
+{% endif %}
+{% endif %}
+
+{% endblock %}
 
 {% block content %}
-
+<section class="mt-5">
     <!-- Enlace sin filtros -->
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
         Filtrar por area
         </button>
         <ul class="dropdown-menu">
-            <li><a href="{% url 'got:asset-list' %}">Mostrar todas</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
-            <li><a href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}">Mostrar todos</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
+            <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
         </ul>
     </div>
+</section>
 
-	{% if request.GET.area %}
-		{% if request.GET.area == 'a' %}
-        <h4>Barcos</h4>
-		{% elif request.GET.area == 'b' %}
-        <h4>Buceo</h4>
-		{% elif request.GET.area == 'o' %}
-        <h4>Oceanografia</h4>
-		{% elif request.GET.area == 'l' %}
-        <h4>Locativo</h4>
-		{% elif request.GET.area == 'v' %}
-        <h4>Vehiculos</h4>
-		{% endif %}
-    {% endif %}
-
-<table class="table">
-    <thead>
+<table class="table mi-tabla-borde-externo mt-2">
+    <thead class="table-info">
     	<tr>
-        	<th scope="col">Nombre</th>
-        	<th scope="col">Supervisor</th>
-        	<th scope="col">Área</th>
+        	<th scope="col" style="border-bottom: 1px solid #333;">Nombre</th>
+        	<th scope="col" style="border-bottom: 1px solid #333;">Supervisor</th>
+        	<th scope="col" style="border-bottom: 1px solid #333;">Área</th>
       	</tr>
     </thead>
     <tbody>
