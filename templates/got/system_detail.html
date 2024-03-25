@@ -123,7 +123,8 @@
 						<th scope="col">Control</th>
 						<th scope="col">Fecha de ultima intervención</th>
 						<th scope="col">Fecha proxima intervención</th>
-						{% if perms.got.create_ruta %}
+						<th scope="col">Ultima Orden de trabajo</th>
+						{% if perms.got.add_system %}
 							<th scope="col">Acciones</th>
 						{% endif %}
 					</tr>
@@ -136,8 +137,10 @@
 						<td>{{ ruta.get_control_display }}</td>
 						<td>{{ ruta.intervention_date }}</td>
 						<td>{{ ruta.next_date }}</td>
+						<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
 						{% if perms.got.add_system %}
 							<td>
+								<a href="{% url 'got:crear_ot_desde_ruta' ruta.code %}" class="btn btn-success btn-sm"><i class="bi bi-clipboard-plus"></i></a>
 								<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
 								<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
 							</td>
@@ -146,7 +149,7 @@
 
 					<!-- Actividades -->
 					<tr>
-						<td colspan="5">
+						<td colspan="7">
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
 
@@ -181,6 +184,7 @@
 								{% else %}
 									<p>No hay actividades registradas.</p>
 								{% endif %}
+								<!-- Fin de actividades -->
 							</div>
 						</td>
 					</tr>
@@ -192,7 +196,7 @@
 		{% endif %}
 	</div>
 </section>
-
+<!-- Fin de rutinas -->
 	
 <!-- Formulario modal para Componentes -->
 <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">

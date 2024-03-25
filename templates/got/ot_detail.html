@@ -1,7 +1,10 @@
 {% extends "got/base_generic.html" %}
+{% load my_tags %}
 
 {% block head %}
-<a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+    {% if perms.got.view_asset %}
+        <a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+    {% endif %}
 Detalle de OT-{{ot.num_ot}}
 {% endblock %} 
 
@@ -62,30 +65,33 @@ Detalle de OT-{{ot.num_ot}}
 </table>
 
 
-
-
-<!-- Opciones (generar reportte/ actualizar/ Eliminar) -->
-<div class="d-flex justify-content-end">
-    <div class="btn-group">
-        <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
-        <a href="{% url 'got:ot-update' ot.num_ot %}" class="btn btn-outline-primary">Actualizar</a>
-        <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
-    </div>
-</div>
-</div>
-
-<div class="container">
-<h4>Actividades</h4>
-
-{% if ot.state == 'x' %}
-<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
-    Crear Actividad
-</button>
+<!---------------------------------------- Opciones (generar reportte/ actualizar/ Eliminar) ---------------------------------------->
+{% if request.user|has_group:"super_members" %}
+    <section class="d-flex justify-content-end">
+        <div class="btn-group">
+            <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
+            <a href="{% url 'got:ot-update' ot.num_ot %}" class="btn btn-outline-primary">Actualizar</a>
+            <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
+        </div>
+    </section>
 {% endif %}
+
+<!------------------------------------------------ Actividades de ordenes de trabajo ------------------------------------------------>
+<section>
+
+    <h4>Actividades</h4>
+
+    {% if request.user|has_group:"super_members" %}
+        {% if ot.state == 'x' %}
+            <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
+                Crear Actividad
+            </button>
+        {% endif %}
+    {% endif %}
 
 
     {% if ot.task_set.all %}
-        <table class="table table-striped">
+        <table class="table table-striped mt-2">
             <thead>
                 <tr>
                 <th scope="col">#</th>
@@ -93,53 +99,55 @@ Detalle de OT-{{ot.num_ot}}
                 <th scope="col">Novedades</th>
                 <th scope="col">Responsable</th>
                 <th scope="col">Estado</th>
-                <th scope="col">Editar</th>
-                <th scope="col">Eliminar</th>
+                {% if request.user|has_group:"super_members" %}
+                    <th scope="col">Acciones</th>
+                {% endif %}
                 </tr>
             </thead>
+
             <tbody>
-            {% for act in ot.task_set.all %}
-                <tr>
-                    <th scope="row">{{forloop.counter}}</th>
-                    <td><a href="{% url 'got:task-detail' act.id %}"> {{ act.description }}</a></td>
-                    <td>{{ act.news }}</td>
-                    <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-                    <td>{% if act.finished %}Completado{%else%}Pendiente{% endif %}</td>
-                    <td>
-                        <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
-                    </td>
-                    <td>
-                        <a class="" href="{% url 'got:task-delete' act.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-                    </td>
-                </tr>
-            {% endfor %}
-            
-          </tbody>
+                {% for act in ot.task_set.all %}
+                    <tr>
+                        <th scope="row">{{forloop.counter}}</th>
+                        <td><a href="{% url 'got:task-detail' act.id %}"> {{ act.description }}</a></td>
+                        <td>{{ act.news }}</td>
+                        <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
+                        <td>{% if act.finished %}Completado{%else%}Pendiente{% endif %}</td>
+                        {% if request.user|has_group:"super_members" %}
+                            <td>
+                                <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
+                                <a class="" href="{% url 'got:task-delete' act.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                            </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
+
     {% else %}
         <p>No hay actividades registradas.</p>
     {% endif %}
-    </div>
+</section>
+<!--------------------------------------------- Fin de actividades de ordenes de trabajo ----------------------------->
 
-
-    <div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
+<!--------------------------------------------- modal para crear actividades ----------------------------------------->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="activityModalLabel">Crear Actividad</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="activityModalLabel">Crear Actividad</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <form method="post" action="{{ ot.get_absolute_url }}" enctype="multipart/form-data">
-                {% csrf_token %}
-                <table>
-                  {{ task_form.as_table }}
-                </table>
-                <button type="submit" class="btn btn-primary" name="submit_task">Agregar Actividad</button>
-              </form>
+                <form method="post" action="{{ ot.get_absolute_url }}" enctype="multipart/form-data">{% csrf_token %}
+                    <table>
+                        {{ task_form.as_table }}
+                    </table>
+                    <button type="submit" class="btn btn-primary" name="submit_task">Agregar Actividad</button>
+                </form>
             </div>
-          </div>
         </div>
-      </div>
+    </div>
+</div>
 
 {% endblock %}

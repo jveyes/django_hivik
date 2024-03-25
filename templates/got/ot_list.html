@@ -54,13 +54,13 @@
     
 
     <div style="padding: 10px 0">
-    <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
-        <div class="input-group flex-nowrap" style="width: 500px;">
-            <span class="input-group-text" id="addon-wrapping">Descripción</span>
-            <input type="text" name="keyword" class="form-control" placeholder="">
-            <input type="submit" value="Buscar" class="btn btn-primary">
-        </div>  
-    </form>
+        <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
+            <div class="input-group flex-nowrap" style="width: 500px;">
+                <span class="input-group-text" id="addon-wrapping">Descripción</span>
+                <input type="text" name="keyword" class="form-control" placeholder="">
+                <input type="submit" value="Buscar" class="btn btn-primary">
+            </div>  
+        </form>
     </div>
 
     </section>
@@ -70,7 +70,7 @@
     {% endif %}
     
 
-    <table class="table table-hover">
+    <table class="table table-hover mi-tabla-borde-externo">
         <thead>
             <tr>
                 <th scope="col">OT-#</th>

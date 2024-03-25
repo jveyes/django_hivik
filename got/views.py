@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
 # Autenticacion de usuario y permisos
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 
@@ -740,7 +740,7 @@ def indicadores(request):
 
 
 # reporte de horas
-@permission_required('got.can_see_completely')
+@login_required
 def reporthours(request, component):
 
     hours = HistoryHour.objects.filter(component=component)[:30]
@@ -769,7 +769,7 @@ def reporthours(request, component):
     return render(request, 'got/hours.html', context)
 
 
-@permission_required('got.can_see_completely')
+@login_required
 def reportHoursAsset(request, asset_id):
 
     asset = get_object_or_404(Asset, pk=asset_id)
@@ -795,3 +795,39 @@ def reportHoursAsset(request, asset_id):
     }
 
     return render(request, 'got/hours_asset.html', context)
+
+
+@permission_required('got.can_see_completely')
+def crear_ot_desde_ruta(request, ruta_id):
+    ruta = get_object_or_404(Ruta, pk=ruta_id)
+    nueva_ot = Ot(
+        description=f"Rutina de mantenimiento con código {ruta.name}",
+        state='x',  # Ejecución
+        super=request.user,
+        tipo_mtto='p',
+        system=ruta.system,
+    )
+    nueva_ot.save()
+
+    # Copiar las Task de la Ruta a la nueva OT
+    for task in ruta.task_set.all():
+        Task.objects.create(
+            ot=nueva_ot,
+            responsible=task.responsible,
+            description=task.description,
+            procedimiento=task.procedimiento,
+            hse=task.hse,
+            suministros=task.suministros,
+            news=task.news,
+            evidence=task.evidence,
+            start_date=date.today(),
+            men_time=1,
+            finished=False,  # Suponiendo que quieres que estén abiertas
+        )
+
+    # Actualizar el campo OT de la Ruta con la nueva OT
+    ruta.ot = nueva_ot
+    ruta.save()
+
+    # Redirige a la vista de detalle de la nueva OT
+    return redirect('got:ot-detail', pk=nueva_ot.pk)

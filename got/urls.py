@@ -96,4 +96,10 @@ urlpatterns = [
         'delete_task/<int:pk>/',
         views.TaskDeleterut.as_view(),
         name='delete-task'),
+
+    path(
+        'ruta/<int:ruta_id>/crear_ot/',
+        views.crear_ot_desde_ruta,
+        name='crear_ot_desde_ruta'
+        ),
 ]
