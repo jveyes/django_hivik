@@ -116,6 +116,13 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
         queryset = Asset.objects.all()
         area = self.request.GET.get('area')
 
+        # Verifica si el usuario pertenece al grupo 'buzos_members'
+        user_groups = self.request.user.groups.values_list('name', flat=True)
+
+        if 'buzos_members' in user_groups:
+            # Si pertenece al grupo 'buzos_members', filtra por área 'b'
+            queryset = queryset.filter(area='b')
+
         if area:
             queryset = queryset.filter(area=area)
         return queryset

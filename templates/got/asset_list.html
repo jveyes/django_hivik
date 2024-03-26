@@ -1,4 +1,5 @@
 {% extends "got/base_generic.html" %}
+{% load my_tags %}
 
 {% block head %}
 
@@ -22,6 +23,7 @@ Listado de equipos
 {% endblock %}
 
 {% block content %}
+{% if not request.user|has_group:"buzos_members" %}
 <section class="mt-5">
     <!-- Enlace sin filtros -->
     <div class="btn-group" role="group">
@@ -39,6 +41,7 @@ Listado de equipos
         </ul>
     </div>
 </section>
+{% endif %}
 
 <table class="table mi-tabla-borde-externo mt-2">
     <thead class="table-info">

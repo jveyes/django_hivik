@@ -2,8 +2,7 @@
 {% load my_tags %}
 
 {% block head %}
-Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif %}
-{% if selected_res %}/{{ selected_res }}{% endif %}
+	Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif %}{% if selected_res %}/{{ selected_res }}{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -11,18 +10,19 @@ Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif 
 <!-- Opciones de filtrado -->
 <section class="mt-5">
 	<!-- Filtros para equipos -->
+	{% if not request.user|has_group:"buzos_members" %}
 	{% if not request.user|has_group:"maq_members" %}
-	<div class="btn-group" role="group">
-		<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-			Filtrar por equipo
-		</button>
-		<ul class="dropdown-menu">
-			<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
-			{% for a in asset %}
-				<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
-			{% endfor %}
-		</ul>
-	</div>
+		<div class="btn-group" role="group">
+			<button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+				Filtrar por equipo
+			</button>
+			<ul class="dropdown-menu">
+				<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
+				{% for a in asset %}
+					<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
 	{% endif %}
 
 	{% if not request.user|has_group:"serport_members" %}
@@ -41,6 +41,7 @@ Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif 
 			{% endfor %}
 		</ul>
 	</div>
+	{% endif %}
 	{% endif %}
 </section>
 

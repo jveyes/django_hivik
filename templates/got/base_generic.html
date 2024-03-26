@@ -74,6 +74,11 @@
 							<a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
 						</li>
 					{% endif %}
+					{% if request.user|has_group:"buzos_members" %}
+					<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
+				 	</li>
+					 {% endif %}
             		<!-- Opciones limitadas para supervisores de serport -->
             		{% if request.user|has_group:"super_members" %}
             			<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
