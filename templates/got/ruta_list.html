@@ -58,13 +58,13 @@
 									<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
 									<ul style="list-style-type: none;">
 										{% if task.procedimiento %}
-										<li><strong>Procedimiento: </strong>{{ task.procedimiento }}</li>
+										<li><strong>Procedimiento:<br></strong>{{ task.procedimiento|linebreaksbr }}</li>
 										{% endif %}
 										{% if task.suministros %}
-										<li><strong>Equipos, herramientas y consumibles: </strong>{{ task.suministros }}</li>
+										<li><strong>Equipos, herramientas y consumibles:<br></strong>{{ task.suministros|linebreaksbr }}</li>
 										{% endif %}
 										{% if task.hse %}
-										<li><strong>Precauciones de seguridad: </strong>{{ task.hse }}</li>
+										<li><strong>Precauciones de seguridad:<br></strong>{{ task.hse|linebreaksbr }}</li>
 										{% endif %}
 									</ul>
 									{% endfor %}
