@@ -1,0 +1,31 @@
+{% extends "got/base_generic.html" %}
+{% load my_tags %}
+
+{% block head %}
+
+
+{% endblock %}
+
+{% block content %}
+
+
+<table class="table mi-tabla-borde-externo mt-2">
+    <thead class="table-info">
+
+    </thead>
+    <tbody>
+        {% if failurereport_list %}
+            {% for fail in failurereport_list %}
+				<tr>
+					<td><a href="#">{{fail}}</a></td>
+					<td>{{fail.reporter.first_name}} {{fail.reporter.last_name}}</td>
+					<td>{{fail.moment}}</td>
+				</tr>
+            {% endfor %}
+        {% else %}
+        	<p>No hay reportes de falla registrados.</p>
+        {% endif %}
+    </tbody>
+</table>
+
+{% endblock %}

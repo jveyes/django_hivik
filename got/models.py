@@ -184,7 +184,7 @@ class Ot(models.Model):
         blank=True
     )
     state = models.CharField(choices=STATUS, default='x', max_length=50)
-    tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=50)
+    tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(
         upload_to='pdfs/', null=True, blank=True
         )
@@ -210,7 +210,7 @@ class Ruta(models.Model):
 
     code = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
-    control = models.CharField(choices=CONTROL, max_length=50)
+    control = models.CharField(choices=CONTROL, max_length=1)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
 
@@ -284,9 +284,9 @@ class Task(models.Model):
     )
 
     description = models.TextField()
-    procedimiento = models.TextField(default="---", blank=True, null=True)
-    hse = models.TextField(default="---", blank=True, null=True)
-    suministros = models.TextField(default="---", blank=True, null=True)
+    procedimiento = models.TextField(default="", blank=True, null=True)
+    hse = models.TextField(default="", blank=True, null=True)
+    suministros = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(upload_to='media/', null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
@@ -303,3 +303,38 @@ class Task(models.Model):
     def is_overdue(self):
         overdue_date = self.start_date + timedelta(days=self.men_time)
         return self.start_date and date.today() > overdue_date
+
+
+class FailureReport(models.Model):
+
+    IMPACT = (
+        ('s', 'La seguridad personal'),
+        ('m', 'El medio ambiente'),
+        ('i', 'Integridad del equipo/sistema'),
+        ('o', 'El desarrollo normal de las operaciones'),
+    )
+
+    moment = models.DateTimeField(auto_now_add=True)
+    critico = models.BooleanField()
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    description = models.TextField()
+    causas = models.TextField()
+    suggest_repair = models.TextField(null=True, blank=True)
+    evidence = models.ImageField(upload_to='media/', null=True, blank=True)
+    closed = models.BooleanField(default=False)
+
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    related_ot = models.OneToOneField(
+        'Ot',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='failure_report'
+        )
+
+    class Meta:
+        ordering = ['-moment']
+
+    def __str__(self):
+        status = "Cerrado" if self.closed else "Abierto"
+        return f'Reporte de falla en {self.equipo.name} - {status}'

@@ -13,16 +13,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='hse',
-            field=models.TextField(blank=True, default='---', null=True),
+            field=models.TextField(blank=True, default='', null=True),
         ),
         migrations.AddField(
             model_name='task',
             name='procedimiento',
-            field=models.TextField(blank=True, default='---', null=True),
+            field=models.TextField(blank=True, default='', null=True),
         ),
         migrations.AddField(
             model_name='task',
             name='suministros',
-            field=models.TextField(blank=True, default='---', null=True),
+            field=models.TextField(blank=True, default='', null=True),
         ),
     ]

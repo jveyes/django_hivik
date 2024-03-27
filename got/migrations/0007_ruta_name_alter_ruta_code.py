@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ruta',
             name='name',
-            field=models.CharField(default='nombre-rutina', max_length=50),
+            field=models.CharField(max_length=50),
         ),
         migrations.AlterField(
             model_name='ruta',

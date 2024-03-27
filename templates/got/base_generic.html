@@ -94,7 +94,8 @@
 							<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
 					  	</li>
             			<li class="nav-item">
-              				<a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a>
+              				<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
+              				<a class="nav-link"  href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
             			</li>
             		{% endif %}
           		</ul>

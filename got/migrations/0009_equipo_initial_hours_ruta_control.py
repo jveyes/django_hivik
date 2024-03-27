@@ -18,6 +18,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ruta',
             name='control',
-            field=models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], default='d', max_length=50),
+            field=models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1),
         ),
     ]

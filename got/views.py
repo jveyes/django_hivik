@@ -14,7 +14,9 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
 
 # Modelos y formularios
-from .models import Asset, System, Ot, Task, Equipo, Ruta, HistoryHour
+from .models import (
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport
+)
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
@@ -375,6 +377,22 @@ def RutaListView(request):
     return render(request, 'got/ruta_list.html', context)
 
 
+# Equipos
+class FailureListView(LoginRequiredMixin, generic.ListView):
+    '''
+    Vista generica para mostrar el listado de reportes de falla (v1.5)
+    '''
+    model = FailureReport
+    paginate_by = 15
+
+
+# Detalle de actividades
+class FailureDetailView(LoginRequiredMixin, generic.DetailView):
+    '''
+    Detalle de reportes de falla (v1.0)
+    '''
+    model = FailureReport
+
 # ------------------------------------- Formularios -------------------------#
 
 
@@ -389,7 +407,7 @@ def reschedule_task(request, pk):
     final_date = act.start_date + timedelta(days=time)
 
     if request.method == 'POST':
-        form = RescheduleTaskForm(request.POST)
+        form = RescheduleTaskForm(request.POST, instance=act)
 
         if form.is_valid():
             act.start_date = form.cleaned_data['start_date']
@@ -399,10 +417,8 @@ def reschedule_task(request, pk):
             return HttpResponseRedirect(reverse('got:my-tasks'))
 
     else:
-        proposed_reschedule_date = date.today() + timedelta(weeks=1)
-        form = RescheduleTaskForm(
-            initial={'proposed_date': proposed_reschedule_date, }
-            )
+        # proposed_reschedule_date = date.today() + timedelta(weeks=1)
+        form = RescheduleTaskForm(instance=act)
 
     context = {'form': form, 'task': act, 'final_date': final_date}
     return render(request, 'got/task_reschedule.html', context)

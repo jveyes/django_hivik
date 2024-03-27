@@ -8,7 +8,11 @@ app_name = 'got'
 '''
 urlpatterns = [
     # Home
-    path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
+    path(
+        "",
+        views.AssignedTaskByUserListView.as_view(),
+        name="my-tasks"
+    ),
 
     # Assets
     path("assets/", views.AssetsListView.as_view(), name="asset-list"),
@@ -101,5 +105,17 @@ urlpatterns = [
         'ruta/<int:ruta_id>/crear_ot/',
         views.crear_ot_desde_ruta,
         name='crear_ot_desde_ruta'
+        ),
+
+    # Reportes de fallas
+    path(
+        "failure-report/",
+        views.FailureListView.as_view(),
+        name="failure-report-list"
+        ),
+    path(
+        "failure-report/<int:pk>/",
+        views.FailureDetailView.as_view(),
+        name="failure-report-detail"
         ),
 ]

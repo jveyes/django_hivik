@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
-                ('area', models.CharField(choices=[('b', 'Buceo'), ('a', 'Artefactos Navales'), ('o', 'Oceanografia'), ('l', 'Locativo'), ('v', 'Vehiculos')], default='a', max_length=50)),
+                ('area', models.CharField(choices=[('b', 'Buceo'), ('a', 'Motonave'), ('o', 'Oceanografía'), ('l', 'Locativo'), ('v', 'Vehiculos'), ('x', 'Apoyo')], default='a', max_length=1)),
                 ('bandera', models.CharField(blank=True, default='Colombia', max_length=50, null=True)),
                 ('eslora', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=8, null=True)),
                 ('manga', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=8, null=True)),
@@ -41,9 +41,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
-                ('gruop', models.IntegerField()),
+                ('group', models.IntegerField()),
                 ('location', models.CharField(blank=True, default='Cartagena', max_length=50, null=True)),
-                ('state', models.CharField(choices=[('m', 'Mantenimiento'), ('o', 'Operativo'), ('x', 'Fuera de servicio')], default='m', max_length=50)),
+                ('state', models.CharField(choices=[('m', 'Mantenimiento'), ('o', 'Operativo'), ('x', 'Fuera de servicio')], default='m', max_length=1)),
                 ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.asset')),
             ],
             options={
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ('num_ot', models.AutoField(primary_key=True, serialize=False)),
                 ('description', models.TextField()),
                 ('state', models.CharField(choices=[('a', 'Abierto'), ('x', 'En ejecucion'), ('f', 'Finalizado'), ('c', 'Cancelado')], default='x', max_length=50)),
-                ('tipo_mtto', models.CharField(choices=[('p', 'Preventivo'), ('c', 'Correctivo'), ('m', 'Modificativo')], default='c', max_length=50)),
+                ('tipo_mtto', models.CharField(choices=[('p', 'Preventivo'), ('c', 'Correctivo'), ('m', 'Modificativo')], max_length=1)),
                 ('super', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
                 ('info_contratista_pdf', models.FileField(upload_to='pdfs/', null=True, blank=True)),
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
             name='Equipo',
             fields=[
                 ('name', models.CharField(max_length=50)),
-                ('date_inv', models.DateField(blank=True, null=True)),
+                ('date_inv', models.DateField()),
                 ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
                 ('area', models.CharField(blank=True, max_length=50, null=True)),
                 ('model', models.CharField(blank=True, max_length=50, null=True)),
@@ -78,8 +78,9 @@ class Migration(migrations.Migration):
                 ('marca', models.CharField(blank=True, max_length=50, null=True)),
                 ('fabricante', models.CharField(blank=True, max_length=50, null=True)),
                 ('feature', models.TextField()),
+                ('prom_hours', models.IntegerField(blank=True, default=0, null=True)),
                 ('imagen', models.ImageField(blank=True, null=True, upload_to='media/')),
-                ('system', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='equipos', to='got.system')),
+                ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='equipos', to='got.system')),
             ],
             options={
                 'ordering': ['name', 'code'],

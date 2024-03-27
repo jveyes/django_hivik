@@ -1,8 +1,8 @@
 from django import forms
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ValidationError
 from .models import Task, Ot, System, Equipo, Ruta, HistoryHour
 from django.contrib.auth.models import User
-import datetime
+# import datetime
 
 
 class UserChoiceField(forms.ModelChoiceField):
@@ -35,12 +35,6 @@ class RescheduleTaskForm(forms.ModelForm):
         label='Novedades'
         )
 
-    def clean_start_date(self):
-        data = self.cleaned_data['start_date']
-        if data < datetime.date.today():
-            raise ValidationError('Fecha invalida')
-        return data
-
     class Meta:
         model = Task
         fields = ['start_date', 'news', 'men_time']
@@ -49,7 +43,9 @@ class RescheduleTaskForm(forms.ModelForm):
             'men_time': 'Tiempo de ejecución (Dias)'
             }
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'start_date': forms.DateInput(
+                format='%d/%m/%Y', attrs={'type': 'date'}
+                ),
             }
 
 

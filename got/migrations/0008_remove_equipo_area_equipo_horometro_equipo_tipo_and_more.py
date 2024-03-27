@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='equipo',
             name='tipo',
-            field=models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=50),
+            field=models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2),
         ),
         migrations.AlterField(
             model_name='ot',
