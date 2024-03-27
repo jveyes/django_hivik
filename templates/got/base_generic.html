@@ -55,7 +55,7 @@
 <body>
 
 	<!-- Barra de navegacion -->
-	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #abbed0;">
+	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #cad3db;">
 		<div class="container-fluid">
           <!-- Logo de serport -->
         	<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
@@ -65,6 +65,7 @@
         	<div class="collapse navbar-collapse" id="navbarSupportedContent">
         		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
             		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
+						<a class="nav-link" aria-current="page" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
 					{% obtener_asset_del_supervisor as asset_del_supervisor %}
 					{% if asset_del_supervisor %}
