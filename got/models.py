@@ -3,6 +3,21 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.db.models import Sum
+from datetime import datetime
+import uuid
+
+
+def get_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    # Ruta incluyendo la carpeta 'media/'
+    filename = f"media/{datetime.now():%Y%m%d%H%M%S}.{ext}"
+    return filename
+
+
+def get_upload_pdfs(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"pdfs/{uuid.uuid4()}.{ext}"
+    return filename
 
 
 class Asset(models.Model):
@@ -107,8 +122,16 @@ class Equipo(models.Model):
     marca = models.CharField(max_length=50, null=True, blank=True)
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
-    imagen = models.ImageField(upload_to='media/', null=True, blank=True)
-    manual_pdf = models.FileField(upload_to='pdfs/', null=True, blank=True)
+    imagen = models.ImageField(
+        upload_to=get_upload_path,
+        null=True,
+        blank=True
+        )
+    manual_pdf = models.FileField(
+        upload_to=get_upload_pdfs,
+        null=True,
+        blank=True
+        )
 
     tipo = models.CharField(choices=TIPO, default='nr', max_length=2)
 
@@ -186,7 +209,9 @@ class Ot(models.Model):
     state = models.CharField(choices=STATUS, default='x', max_length=50)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(
-        upload_to='pdfs/', null=True, blank=True
+        upload_to=get_upload_path,
+        null=True,
+        blank=True
         )
 
     system = models.ForeignKey(System, on_delete=models.CASCADE)
@@ -288,7 +313,11 @@ class Task(models.Model):
     hse = models.TextField(default="", blank=True, null=True)
     suministros = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
-    evidence = models.ImageField(upload_to='media/', null=True, blank=True)
+    evidence = models.ImageField(
+        upload_to=get_upload_path,
+        null=True,
+        blank=True
+        )
     start_date = models.DateField(null=True, blank=True)
     men_time = models.IntegerField(default=0)
     finished = models.BooleanField()
@@ -320,7 +349,11 @@ class FailureReport(models.Model):
     description = models.TextField()
     causas = models.TextField()
     suggest_repair = models.TextField(null=True, blank=True)
-    evidence = models.ImageField(upload_to='media/', null=True, blank=True)
+    evidence = models.ImageField(
+        upload_to=get_upload_path,
+        null=True,
+        blank=True
+        )
     closed = models.BooleanField(default=False)
 
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)

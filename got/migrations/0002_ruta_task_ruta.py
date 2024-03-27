@@ -41,6 +41,18 @@ class Migration(migrations.Migration):
                 ('evidence', models.ImageField(blank=True, null=True, upload_to='media/')),
                 ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.equipo')),
                 ('reporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('related_ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
+                ('finished', models.BooleanField(default=False)),
             ],
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='equipo',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo'),
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='ot',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot'),
         ),
     ]

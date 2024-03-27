@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
-                ('area', models.CharField(choices=[('b', 'Buceo'), ('a', 'Motonave'), ('o', 'Oceanografía'), ('l', 'Locativo'), ('v', 'Vehiculos'), ('x', 'Apoyo')], default='a', max_length=1)),
+                ('area', models.CharField(choices=[('a', 'Motonave'), ('b', 'Buceo'), ('o', 'Oceanografía'), ('l', 'Locativo'), ('v', 'Vehiculos'), ('x', 'Apoyo')], default='a', max_length=1)),
                 ('bandera', models.CharField(blank=True, default='Colombia', max_length=50, null=True)),
                 ('eslora', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=8, null=True)),
                 ('manga', models.DecimalField(blank=True, decimal_places=2, default=0, max_digits=8, null=True)),
@@ -91,6 +91,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('description', models.TextField()),
+                ('hse', models.TextField(blank=True, default='', null=True)),
+                ('procedimiento', models.TextField(blank=True, default='', null=True)),
+                ('suministros', models.TextField(blank=True, default='', null=True)),
                 ('news', models.TextField(blank=True, null=True)),
                 ('evidence', models.ImageField(blank=True, null=True, upload_to='media/')),
                 ('start_date', models.DateField(blank=True, null=True)),

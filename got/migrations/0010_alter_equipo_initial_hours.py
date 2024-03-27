@@ -15,4 +15,16 @@ class Migration(migrations.Migration):
             name='initial_hours',
             field=models.IntegerField(default=0),
         ),
+        migrations.AlterModelOptions(
+            name='failurereport',
+            options={'ordering': ['-moment']},
+        ),
+        migrations.AlterModelOptions(
+            name='historyhour',
+            options={'ordering': ['-report_date']},
+        ),
+        migrations.AlterModelOptions(
+            name='system',
+            options={'ordering': ['asset__name', 'group']},
+        ),
     ]
