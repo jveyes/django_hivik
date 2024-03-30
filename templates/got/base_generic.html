@@ -25,30 +25,13 @@
 		.navbar-custom .navbar-nav .nav-link {
     		color: #000;
 		}
-
-		.mi-tabla-borde-externo {
-			border-collapse: separate;
-			border-spacing: 0;
-			border: 1px solid #333; 
-			width: 100%;
-			border-radius: 10px;
-			overflow: hidden; 
+		.active {
+			color: #007bff !important; /* Azul */
 		}
 
-		.mi-tabla-borde-externo th, .mi-tabla-borde-externo td {
-			border-bottom: 1px solid #dee2e6;
+		.nav-link {
+			color: #000 !important; /* Negro */
 		}
-
-		.mi-tabla-borde-externo tr:last-child th, .mi-tabla-borde-externo tr:last-child td {
-			border-bottom: none;
-		}
-
-		.nav-item.active .nav-link {
-			/* background-color: #007bff;  */
-			color: white; /* Color de texto */
-			/* border-radius: .25rem;  */
-		}
-
 
 	</style>
 </head>
@@ -58,44 +41,46 @@
 	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #cad3db;">
 		<div class="container-fluid">
           <!-- Logo de serport -->
-        	<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
+		  	<a class="nav-link" href="{% url 'got:my-tasks' %}">
+        		<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
+			</a>
         	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           		<span class="navbar-toggler-icon"></span>
         	</button>
         	<div class="collapse navbar-collapse" id="navbarSupportedContent">
         		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
             		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
-						<a class="nav-link" aria-current="page" href="{% url 'got:my-tasks' %}">Actividades</a>
+						<a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
 					{% obtener_asset_del_supervisor as asset_del_supervisor %}
 					{% if asset_del_supervisor %}
 						<!-- Muestra el enlace directo al equipo del supervisor -->
 						<li class="nav-item {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}">
-							<a class="nav-link" style="color: #000;" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
+							<a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
 						</li>
 					{% endif %}
 					{% if request.user|has_group:"buzos_members" %}
 					<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-						<a class="nav-link" style="color: #000;" href="{% url 'got:asset-list' %}">Equipos</a>
+						<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
 				 	</li>
 					 {% endif %}
             		<!-- Opciones limitadas para supervisores de serport -->
             		{% if request.user|has_group:"super_members" %}
             			<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-              				<a class="nav-link" style="color: #000;" href="{% url 'got:asset-list' %}">Equipos</a>
+              				<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
             			</li>
             			<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
-              				<a class="nav-link" style="color: #000;" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
+              				<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
             			</li>
 						<li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
-							<a class="nav-link" style="color: #000;" href="{% url 'got:ruta-list' %}">Rutinas</a>
+							<a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
 					  	</li>
 						<li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-							<a class="nav-link" style="color: #000;" href="{% url 'got:dashboard' %}">Indicadores</a>
+							<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
 					  	</li>
             			<li class="nav-item">
               				<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
-              				<a class="nav-link" style="color: #000;"  href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
+              				<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
             			</li>
             		{% endif %}
           		</ul>
@@ -160,7 +145,7 @@
 	  <p>
 		Departamento de mantenimiento - Serport SAS
 	  </p>
-	  <p>Version en desarrollo v1.4.1 - </p>
+	  <p>Version en desarrollo v1.5 </p>
 	</footer>
 
 	<!-- javascript -->

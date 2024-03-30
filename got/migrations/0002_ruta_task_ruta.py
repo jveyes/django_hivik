@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.equipo')),
                 ('reporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('related_ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
-                ('finished', models.BooleanField(default=False)),
+                ('closed', models.BooleanField(default=False)),
             ],
         ),
         migrations.AddField(

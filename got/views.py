@@ -1,81 +1,72 @@
+# ---------------------------- Librerias de Django -------------------------- #
 from django.shortcuts import render, get_object_or_404, redirect
-
-# Autenticacion de usuario y permisos
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
-
-# Vistas genericas basadas en clases
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
-
-# Librerias de django para manejo de las URLS
 from django.http import HttpResponseRedirect, HttpResponse
 from django.urls import reverse, reverse_lazy
+from django.db.models import Count, Q
+from django.template.loader import get_template
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.conf import settings
+from django.core.paginator import Paginator
 
-# Modelos y formularios
+# ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset,
+    ReportHoursAsset, failureForm
 )
 
-
-# Librerias auxiliares
+# ---------------------------- Librerias auxiliares ------------------------- #
 from datetime import timedelta, date
-from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.db.models import Q
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
 from io import BytesIO
-from django.conf import settings
-from django.db.models import Count
-from django.core.paginator import Paginator
 
 
-# ----------------------------------- Main views -----------------------------#
-
-# Mis actividades
+# ---------------------------- Main views ------------------------------------#
+# ---------------------------- Mis actividades ------------------------------ #
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
-    '''
-    Vista generica basada en clases que muestra las actividades en ejecucion
-    cada miembro de serport (v1.0)
-
-    v1.1 se le agrega opciones de filtrado por equipos y personal
 
     '''
+    Vista 1: consulta para listado de actividades pendientes y enlace directo a
+    cada actividad.
+
+    - Para supervisores mostrara el listado de actividades pendientes para
+      todos los activos (Opciones de filtrado por activos/responsables y
+      boton para reprogramar).
+
+    - Para buzos y talleres mostrara listado de actividades pendientes por cada
+      activo.
+
+    '''
+
     model = Task
-    template_name = 'got/assignedtasks_list_pendient_user.html'
-    paginate_by = 16
+    template_name = 'got/assignedtasks_list_pendient.html'
+    paginate_by = 15
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        info_filter = Asset.objects.all()
-        context['asset'] = info_filter
+        serport_group = Group.objects.get(name='serport_members')
 
         asset_id = self.request.GET.get('asset_id')
-        if asset_id:
-            selected_asset = Asset.objects.get(id=asset_id)
-            context['selected_asset_name'] = selected_asset.name
-
-        responsable_id = self.request.GET.get('responsable')
-        if responsable_id:
-            user = User.objects.get(id=responsable_id)
-            context['selected_res'] = f'{user.first_name} {user.last_name}'
-
-        serport_group = Group.objects.get(name='serport_members')
-        users_in_group = serport_group.user_set.all()
-
-        context['serport_members'] = users_in_group
-
-        for obj in context['task_list']:
-            time = obj.men_time
-            obj.final_date = obj.start_date + timedelta(days=time)
+        worker_id = self.request.GET.get('worker')
+        # contexto adicional:
+        context['asset'] = Asset.objects.all()
+        context['serport_members'] = serport_group.user_set.all()
+        if asset_id:  # Nombre assets para filtrar
+            context['selected_asset_name'] = Asset.objects.get(id=asset_id)
+            context['asset_id'] = asset_id
+        if worker_id:  # Nombre usuarios para filtrar
+            worker = User.objects.get(id=worker_id)
+            context['worker'] = f'{worker.first_name} {worker.last_name}'
+            context['worker_id'] = worker_id
 
         return context
 
@@ -83,22 +74,24 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         queryset = Task.objects.filter(ot__isnull=False)
 
         asset_id = self.request.GET.get('asset_id')
-        responsable_id = self.request.GET.get('responsable')
+        responsable_id = self.request.GET.get('worker')
 
         maq_group = Group.objects.get(name='maq_members')
         users_maq = maq_group.user_set.all()
-
+        # Filtrar actividades por activo y/o usuario.
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
         if responsable_id:
             queryset = queryset.filter(responsible=responsable_id)
-
+        # Para filtrar actividades para usuarios supervisores.
         if self.request.user.has_perm("got.can_see_completely"):
             queryset = queryset.filter(finished=False).order_by('start_date')
+        # Para filtrar actividades usuarios maquinistas.
         elif self.request.user in users_maq:
             queryset = queryset.filter(
                 finished=False,
                 ot__system__asset__supervisor=self.request.user)
+        # Para buzos y talleres.
         else:
             queryset = queryset.filter(
                 Q(responsible=self.request.user) & Q(finished=False)
@@ -107,55 +100,73 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
-# Equipos
+# ---------------------------- Activos (Assets) ---------------------------- #
 class AssetsListView(LoginRequiredMixin, generic.ListView):
+
     '''
-    Vista generica para mostrar el listado de los centros de costos (v1.0)
+    Vista 2: consulta del listado de activos(Assets) de cada area (barcos,
+    buceo, oceanografía, vehiculos, locativo y apoyo).
+
+    - Supervisores tendran acceso al listado completo de cada area.
+
+    - Grupo de buzos tendra acceso solo a los equipo de buceo.
+
+    - Maquinistas/talleres no tendran acceso a esta vista.
     '''
+
     model = Asset
+    paginate_by = 15
 
     def get_queryset(self):
         queryset = Asset.objects.all()
+
         area = self.request.GET.get('area')
-
-        # Verifica si el usuario pertenece al grupo 'buzos_members'
+        # Filtro de equipos de buceo para grupo de buzos.
         user_groups = self.request.user.groups.values_list('name', flat=True)
-
         if 'buzos_members' in user_groups:
-            # Si pertenece al grupo 'buzos_members', filtra por área 'b'
             queryset = queryset.filter(area='b')
-
+        # Filtrado por area del activo.
         if area:
             queryset = queryset.filter(area=area)
+
         return queryset
 
 
-# Detalle de equipos y listado de sistemas
-class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
+# Detalle assets y listado de sistemas
+class AssetDetailView(LoginRequiredMixin, generic.DetailView):
+
     '''
-    Vista generica para mostrar detalle de activos (v1.0)
+    Información de activo y relaciones con sus sistemas y sus rutinas.
+
+    - template name: asset_detail.html
+
+    - Supervisores:
+        Crear nueva OT.
+        Crear/editar/eliminar sistema.
+        Reporte total de horas.
+        Reportar fallas.
+
+    - Maquinistas y buzos:
+        Reporte total de horas.
+        Reportar fallas.
     '''
+
     model = Asset
 
-    # Formulario para crear, modificar o eliminar actividades
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sys_form'] = SysForm()
-
         systems = self.object.system_set.all()
-        paginator = Paginator(systems, 10)  # Muestra 10 sistemas por página
-
+        rutas = sorted(  # Filtrado de rutinas que pertenecen a este Asset
+            Ruta.objects.filter(system__asset=self.get_object()),
+            key=lambda t: t.next_date
+        )
+        # Limitar a mostrar 10 sistemas
+        paginator = Paginator(systems, 10)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
+        context['sys_form'] = SysForm()
         context['page_obj'] = page_obj
-
-        asset = self.get_object()
-        rutas = sorted(
-            Ruta.objects.filter(system__asset=asset),
-            key=lambda t: t.next_date
-            )
-
         context['rutas'] = rutas
 
         return context
@@ -163,24 +174,87 @@ class AssetsDetailView(LoginRequiredMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         asset = self.get_object()
         sys_form = SysForm(request.POST)
-
+        # Formulario para crear nuevo sistema
         if sys_form.is_valid():
             sys = sys_form.save(commit=False)
             sys.asset = asset
             sys.save()
             return redirect(request.path)
         else:
-            return render(
-                request,
-                self.template_name,
-                {'asset': asset, 'sys_form': sys_form}
-                )
+            context = {'asset': asset, 'sys_form': sys_form}
+            return render(request, self.template_name, context)
+
+
+# ---------------------------- Failure Report ---------------------------- #
+
+class FailureListView(LoginRequiredMixin, generic.ListView):
+
+    '''
+    Información de activo y relaciones con sus sistemas y sus rutinas.
+
+    - template name: asset_detail.html
+
+    - Supervisores:
+        Crear nueva OT.
+        Crear/editar/eliminar sistema.
+        Reporte total de horas.
+        Reportar fallas.
+
+    - Maquinistas y buzos:
+        Reporte total de horas.
+        Reportar fallas.
+    '''
+
+    model = FailureReport
+    paginate_by = 15
+
+
+class FailureReportForm(CreateView):
+
+    '''
+    Formulario para reportar fallas en los equipos de activo.
+    '''
+
+    model = FailureReport
+    form_class = failureForm
+    http_method_names = ['get', 'post']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        asset_id = self.kwargs.get('asset_id')
+        asset = get_object_or_404(Asset, pk=asset_id)
+        context['asset_main'] = asset
+        return context
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        asset_id = self.kwargs.get('asset_id')
+        asset = get_object_or_404(Asset, pk=asset_id)
+        form.fields['equipo'].queryset = Equipo.objects.filter(
+            system__asset=asset
+        )
+        return form
+
+    def form_valid(self, form):
+        form.instance.reporter = self.request.user
+        # Guarda el formulario con el reporter asignado
+        return super().form_valid(form)
 
 
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
+
     '''
-    Vista generica para mostrar componentes (v1.2)
+    Información de consulta para listado de equipos detallado de cada sistema
+    creado.
+
+    - Supervisores:
+        Crear/editar/eliminar componente.
+        Reporte de horas de equipos rotativos.
+
+    - Maquinistas y buzos:
+        Reporte de horas de equipos rotativos.
     '''
+
     model = System
 
     # Formulario para crear, modificar o eliminar actividades
@@ -375,15 +449,6 @@ def RutaListView(request):
 
     context = {'ruta_list': ruta, 'assets': assets, 'area_filter': area_filter}
     return render(request, 'got/ruta_list.html', context)
-
-
-# Equipos
-class FailureListView(LoginRequiredMixin, generic.ListView):
-    '''
-    Vista generica para mostrar el listado de reportes de falla (v1.5)
-    '''
-    model = FailureReport
-    paginate_by = 15
 
 
 # Detalle de actividades

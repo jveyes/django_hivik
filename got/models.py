@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from django.db.models import Sum
 from datetime import datetime
 import uuid
+from django.contrib.postgres.fields import ArrayField
 
 
 def get_upload_path(instance, filename):
@@ -333,6 +334,10 @@ class Task(models.Model):
         overdue_date = self.start_date + timedelta(days=self.men_time)
         return self.start_date and date.today() > overdue_date
 
+    @property
+    def final_date(self):
+        return self.start_date + timedelta(days=self.men_time)
+
 
 class FailureReport(models.Model):
 
@@ -343,20 +348,26 @@ class FailureReport(models.Model):
         ('o', 'El desarrollo normal de las operaciones'),
     )
 
-    moment = models.DateTimeField(auto_now_add=True)
-    critico = models.BooleanField()
     reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+
+    moment = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
     causas = models.TextField()
     suggest_repair = models.TextField(null=True, blank=True)
+    critico = models.BooleanField()
     evidence = models.ImageField(
         upload_to=get_upload_path,
         null=True,
         blank=True
         )
     closed = models.BooleanField(default=False)
+    impact = ArrayField(
+        models.CharField(max_length=1, choices=IMPACT),
+        default=list,
+        blank=True
+    )
 
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
     related_ot = models.OneToOneField(
         'Ot',
         on_delete=models.SET_NULL,
@@ -371,3 +382,8 @@ class FailureReport(models.Model):
     def __str__(self):
         status = "Cerrado" if self.closed else "Abierto"
         return f'Reporte de falla en {self.equipo.name} - {status}'
+
+    def get_absolute_url(self):
+        # Suponiendo que 'got:failure-report-detail' es el nombre de tu URL
+        # para la vista de detalle y que usas el ID del reporte como parámetro
+        return reverse('got:failure-report-detail', kwargs={'pk': self.pk})

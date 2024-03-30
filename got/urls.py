@@ -7,45 +7,55 @@ app_name = 'got'
 13
 '''
 urlpatterns = [
-    # Home
+    # ---------------------------- Main views ------------------------------ #
     path(
         "",
         views.AssignedTaskByUserListView.as_view(),
         name="my-tasks"
     ),
 
-    # Assets
-    path("assets/", views.AssetsListView.as_view(), name="asset-list"),
-    path(
+    # ---------------------------- Assets view ----------------------------- #
+    path(  # LIST VIEW
+        "assets/",
+        views.AssetsListView.as_view(),
+        name="asset-list"
+    ),
+    path(  # DETAIL VIEW
         "assets/<int:pk>/",
-        views.AssetsDetailView.as_view(),
+        views.AssetDetailView.as_view(),
         name="asset-detail"
-        ),
+    ),
 
-    # Systems
+    # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
     path('sys/<int:pk>/update/', views.SysUpdate.as_view(), name='sys-update'),
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
-    # Equipos
-    path(
+    # ---------------------------- Equipos view ----------------------------- #
+    path(  # UPDATE VIEW
         'equipo/<str:pk>/update/',
         views.EquipoUpdate.as_view(),
-        name='equipo-update'),
-    path(
+        name='equipo-update'
+    ),
+    path(  # DELETE VIEW
         'equipo/<str:pk>/delete/',
         views.EquipoDelete.as_view(),
-        name='equipo-delete'),
+        name='equipo-delete'
+    ),
 
-    # Ots
+    # ---------------------------- OTs view --------------------------------- #
     path("ots/", views.OtListView.as_view(), name="ot-list"),
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"),
     path("ots/create/<int:pk>/", views.OtCreate.as_view(), name="ot-create"),
     path("ots/<int:pk>/update/", views.OtUpdate.as_view(), name="ot-update"),
     path("ots/<int:pk>/delete/", views.OtDelete.as_view(), name="ot-delete"),
 
-    # Tasks
-    path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"),
+    # ---------------------------- Taks view ----------------------------- #
+    path(  # DETALLE DE ACTIVIDADES
+        "task/<int:pk>/",
+        views.TaskDetailView.as_view(),
+        name="task-detail"
+    ),
     path(
         "task/<int:pk>/reschedule/",
         views.reschedule_task,
@@ -63,7 +73,16 @@ urlpatterns = [
         name='task-delete'),
     path('task/<int:pk>/finish/', views.finish_task, name='finish-task'),
 
-    # Rutinas
+    path(
+        'task-rut/<int:pk>/update/',
+        views.TaskUpdaterut.as_view(),
+        name='update-task'),
+    path(
+        'delete_task/<int:pk>/',
+        views.TaskDeleterut.as_view(),
+        name='delete-task'),
+
+    # ---------------------------- Rutinas view ----------------------------- #
     path('rutas/', views.RutaListView, name="ruta-list"),
     path(
         'ruta/<str:pk>/create/',
@@ -80,11 +99,11 @@ urlpatterns = [
         views.RutaDelete.as_view(), name='ruta-delete'
         ),
 
-    # Reportes
+    # ---------------------------- Reportes --------------------------------- #
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report'),
     path("dashboard/", views.indicadores, name='dashboard'),
 
-    # reporte de horas
+    # ---------------------------- History hour view ------------------------ #
     path("reportehoras/<str:component>/", views.reporthours, name='horas'),
     path(
         "reportehorasasset/<int:asset_id>/",
@@ -92,14 +111,7 @@ urlpatterns = [
         name='horas-asset'
         ),
 
-    path(
-        'task-rut/<int:pk>/update/',
-        views.TaskUpdaterut.as_view(),
-        name='update-task'),
-    path(
-        'delete_task/<int:pk>/',
-        views.TaskDeleterut.as_view(),
-        name='delete-task'),
+
 
     path(
         'ruta/<int:ruta_id>/crear_ot/',
@@ -107,15 +119,23 @@ urlpatterns = [
         name='crear_ot_desde_ruta'
         ),
 
-    # Reportes de fallas
+    # ---------------------------- Reportes de falla view ------------------- #
+    # LISTADO REPORTES DE FALLA
     path(
         "failure-report/",
         views.FailureListView.as_view(),
         name="failure-report-list"
-        ),
+    ),
+    # DETALLE REPORTES DE FALLA
     path(
         "failure-report/<int:pk>/",
         views.FailureDetailView.as_view(),
         name="failure-report-detail"
-        ),
+    ),
+    # FORMULARIO CREACION DE REPORTE DE FALLA
+    path(
+        'report-failure/<int:asset_id>/create/',
+        views.FailureReportForm.as_view(),
+        name='failure-report-create'
+    ),
 ]

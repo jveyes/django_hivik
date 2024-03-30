@@ -1,7 +1,8 @@
 {% extends "got/base_generic.html" %}
 
 {% block head %}
-    {{ failurereport }}
+    <a href="{% url 'got:failure-report-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+    Reporte de falla #{{ failurereport.id }}
 {% endblock %}
 
 {% block content %}

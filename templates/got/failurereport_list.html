@@ -17,7 +17,7 @@
         {% if failurereport_list %}
             {% for fail in failurereport_list %}
 				<tr>
-					<td><a href="#">{{fail}}</a></td>
+					<td><a href="{{ fail.get_absolute_url }}">{{fail}}</a></td>
 					<td>{{fail.reporter.first_name}} {{fail.reporter.last_name}}</td>
 					<td>{{fail.moment}}</td>
 				</tr>

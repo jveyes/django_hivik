@@ -1,0 +1,42 @@
+{% extends "got/base_generic.html" %}
+
+{% block title %}{% endblock %}
+
+{% block head %}{{asset_main}} - Reporte de falla{% endblock %}
+
+{% block content %}
+    <hr>
+    <div class="formulario-centrado">
+        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.equipo.id_for_label }}">{{ form.equipo.label }}</label>
+                {{ form.equipo }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+                {{ form.description }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.causas.id_for_label }}">{{ form.causas.label }}</label>
+                {{ form.causas }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.suggest_repair.id_for_label }}">{{ form.suggest_repair.label }}</label>
+                {{ form.suggest_repair }}
+            </div>
+            <div class="">
+                <label for="{{ form.impact.id_for_label }}">{{ form.impact.label }}</label>
+                {{ form.impact }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.critico.id_for_label }}">{{ form.critico.label }}</label>
+                {{ form.critico }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.evidence.id_for_label }}">{{ form.evidence.label }}</label>
+                {{ form.evidence }}
+            </div>
+            <input type="submit" value="Generar" class="btn btn-primary" />
+        </form>
+    </div>
+{% endblock %}

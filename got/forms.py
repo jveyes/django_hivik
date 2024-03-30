@@ -1,8 +1,10 @@
 from django import forms
 # from django.core.exceptions import ValidationError
-from .models import Task, Ot, System, Equipo, Ruta, HistoryHour
+from .models import (
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport
+    )
 from django.contrib.auth.models import User
-# import datetime
+# from django.contrib.postgres.forms import SimpleArrayField
 
 
 class UserChoiceField(forms.ModelChoiceField):
@@ -295,3 +297,51 @@ class ReportHoursAsset(forms.ModelForm):
             system__asset=asset,
             tipo='r'
             )
+
+
+# Form : Crear nuevo reporte de falla
+class failureForm(forms.ModelForm):
+
+    critico_choices = [
+        (True, 'Sí'),
+        (False, 'No'),
+    ]
+
+    critico = forms.ChoiceField(
+        choices=critico_choices,
+        widget=forms.RadioSelect(attrs={'class': 'radioOptions'}),
+        label='¿El equipo/sistema que presenta la falla es crítico?',
+        initial=False,
+        required=False,
+    )
+
+    impact = forms.MultipleChoiceField(
+        choices=FailureReport.IMPACT,
+        widget=forms.CheckboxSelectMultiple(
+            attrs={'class': 'custom-checkbox'}
+        ),
+        required=False,
+        label='Impacto',
+    )
+
+    class Meta:
+        model = FailureReport
+        exclude = ['reporter', 'related_ot', 'closed']
+        labels = {
+            'equipo': 'Equipo que presenta la falla',
+            'critico': '¿Equipo/sistema que presenta la falla es critico?',
+            'description': 'Descripción detallada de falla presentada',
+            'impact': 'Seleccione las areas afectadas por la falla',
+            'causas': 'Describa las causas probable de la falla',
+            'suggest_repair': 'Reparación sugerida',
+            'evidence': 'Evidencia',
+            }
+        widgets = {
+            'description': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3}),
+            'causas': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3}),
+            'suggest_repair': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 3}),
+            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+        }
