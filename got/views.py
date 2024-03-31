@@ -21,7 +21,7 @@ from .models import (
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm
+    ReportHoursAsset, failureForm, RutaUpdateOTForm
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -165,9 +165,14 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
+        paginator_rutas = Paginator(rutas, 20)  # Muestra hasta 20 rutas por
+        page_number_rutas = self.request.GET.get('page_rutas')
+        page_obj_rutas = paginator_rutas.get_page(page_number_rutas)
+
         context['sys_form'] = SysForm()
         context['page_obj'] = page_obj
-        context['rutas'] = rutas
+        # context['rutas'] = rutas
+        context['page_obj_rutas'] = page_obj_rutas
 
         return context
 
@@ -182,6 +187,46 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             return redirect(request.path)
         else:
             context = {'asset': asset, 'sys_form': sys_form}
+            return render(request, self.template_name, context)
+
+
+# ---------------------------- Systems -------------------------------------- #
+class SysDetailView(LoginRequiredMixin, generic.DetailView):
+
+    '''
+    Información de consulta para listado de equipos detallado de cada sistema
+    creado.
+
+    - Supervisores:
+        Crear/editar/eliminar componente.
+        Reporte de horas de equipos rotativos.
+
+    - Maquinistas y buzos:
+        Reporte de horas de equipos rotativos.
+    '''
+
+    model = System
+
+    # Formulario para crear, modificar o eliminar actividades
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['equipo_form'] = EquipoForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        sys = self.get_object()
+        equipo_form = EquipoForm(request.POST, request.FILES)
+
+        if equipo_form.is_valid():
+            eq = equipo_form.save(commit=False)
+            eq.system = sys
+            eq.save()
+            return redirect(request.path)
+        else:
+            context = {
+                'system': sys,
+                'equipo_form': equipo_form,
+                }
             return render(request, self.template_name, context)
 
 
@@ -239,48 +284,6 @@ class FailureReportForm(CreateView):
         form.instance.reporter = self.request.user
         # Guarda el formulario con el reporter asignado
         return super().form_valid(form)
-
-
-class SysDetailView(LoginRequiredMixin, generic.DetailView):
-
-    '''
-    Información de consulta para listado de equipos detallado de cada sistema
-    creado.
-
-    - Supervisores:
-        Crear/editar/eliminar componente.
-        Reporte de horas de equipos rotativos.
-
-    - Maquinistas y buzos:
-        Reporte de horas de equipos rotativos.
-    '''
-
-    model = System
-
-    # Formulario para crear, modificar o eliminar actividades
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['equipo_form'] = EquipoForm()
-        context['task_form'] = RutActForm()
-        return context
-
-    def post(self, request, *args, **kwargs):
-        sys = self.get_object()
-        equipo_form = EquipoForm(request.POST, request.FILES)
-        task_form = RutActForm(request.POST)
-
-        if equipo_form.is_valid():
-            eq = equipo_form.save(commit=False)
-            eq.system = sys
-            eq.save()
-            return redirect(request.path)
-        else:
-            context = {
-                'system': sys,
-                'equipo_form': equipo_form,
-                'task_form': task_form
-                }
-            return render(request, self.template_name, context)
 
 
 class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
@@ -693,6 +696,21 @@ class RutaUpdate(UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['system'] = self.object.system
+        return kwargs
+
+
+class RutaUpdateOT(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Ruta
+    form_class = RutaUpdateOTForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Obtener la instancia actual de la orden de trabajo
+        instance = self.get_object()
+        kwargs['asset'] = instance.system.asset
         return kwargs
 
 

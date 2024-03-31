@@ -155,8 +155,7 @@
 <section class="container mt-4">
 	<div>
 		<h2>Rutinas de mantenimiento</h2>
-        
-        {% if rutas %}
+        {% if page_obj_rutas %}
 			<table class="table mt-1">
 				<thead>
 					<tr>
@@ -169,7 +168,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{% for ruta in rutas %}
+					{% for ruta in page_obj_rutas %}
 					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
 						<th scope="row">{{ ruta.name }}</th>
 						<td>{{ ruta.frecuency }}</td>
@@ -221,6 +220,31 @@
                     {% endfor %}
 				</tbody>
 			</table>
+                        <!-- Paginación para Rutas -->
+                        <nav aria-label="Page navigation for rutas">
+                            <ul class="pagination">
+                                {% if page_obj_rutas.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page_rutas={{ page_obj_rutas.previous_page_number }}" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <!-- Números de página -->
+                                {% for num in page_obj_rutas.paginator.page_range %}
+                                    <li class="page-item {% if page_obj_rutas.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?page_rutas={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% if page_obj_rutas.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page_rutas={{ page_obj_rutas.next_page_number }}" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
 		{% else %}
 			<p>No hay rutinas registradas.</p>
 		{% endif %}

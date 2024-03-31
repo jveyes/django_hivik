@@ -1,10 +1,9 @@
 from django import forms
-# from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError
 from .models import (
     Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport
     )
-from django.contrib.auth.models import User
-# from django.contrib.postgres.forms import SimpleArrayField
+from django.contrib.auth.models import User, Group
 
 
 class UserChoiceField(forms.ModelChoiceField):
@@ -91,8 +90,11 @@ class SysForm(forms.ModelForm):
 
 # Form 5: Crear nueva orden de trabajo
 class OtForm(forms.ModelForm):
+
     super = UserChoiceField(
-        queryset=User.objects.all(), label='Supervisor',
+        queryset=User.objects.none(),  # La queryset se define en __init__
+        label='Supervisor',
+        widget=forms.Select(attrs={'class': 'form-control'}),
     )
 
     class Meta:
@@ -106,16 +108,20 @@ class OtForm(forms.ModelForm):
             'info_contratista_pdf': 'Informe externo'
         }
         widgets = {
-            'super': forms.Select(attrs={'class': 'form-control'}),
             'info_contratista_pdf': forms.FileInput(
                 attrs={'class': 'form-control'}
                 ),
+            'tipo_mtto': forms.Select(attrs={'class': 'form-control'}),
+            'system': forms.Select(attrs={'class': 'form-control'}),
+            'state': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         asset = kwargs.pop('asset')
         super().__init__(*args, **kwargs)
         self.fields['system'].queryset = System.objects.filter(asset=asset)
+        super_members_group = Group.objects.get(name='super_members')
+        self.fields['super'].queryset = super_members_group.user_set.all()
 
 
 # Form 6: Finalizar actividad
@@ -198,6 +204,14 @@ class RutActForm(forms.ModelForm):
 # Form 8: Crear/editar nuevo equipo
 class EquipoForm(forms.ModelForm):
 
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        if Equipo.objects.filter(code=code).exists():
+            raise ValidationError(
+                'Este código ya está en uso. Por favor, ingresa un código diferente.'
+                )
+        return code
+
     class Meta:
         model = Equipo
         exclude = ['system', 'horometro']
@@ -248,8 +262,11 @@ class RutaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         system = kwargs.pop('system')
+        asset = system.asset
         super().__init__(*args, **kwargs)
         self.fields['equipo'].queryset = Equipo.objects.filter(system=system)
+        self.fields['ot'].queryset = Ot.objects.filter(
+            system__asset=asset)
 
 
 class ReportHours(forms.ModelForm):
@@ -345,3 +362,16 @@ class failureForm(forms.ModelForm):
                 attrs={'class': 'form-control', 'rows': 3}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+
+class RutaUpdateOTForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        asset_id = kwargs.pop('asset_id')
+        super().__init__(*args, **kwargs)
+        self.fields['ot'].queryset = Ot.objects.filter(
+            system__asset_id=asset_id)
+
+    class Meta:
+        model = Ruta
+        fields = ['ot']

@@ -95,6 +95,11 @@ urlpatterns = [
         name='ruta-update'
         ),
     path(
+        'ruta/<str:pk>/update/',
+        views.RutaUpdateOT.as_view(),
+        name='ruta-update-ot'
+        ),
+    path(
         'ruta/<str:pk>/delete/',
         views.RutaDelete.as_view(), name='ruta-delete'
         ),
@@ -117,7 +122,7 @@ urlpatterns = [
         'ruta/<int:ruta_id>/crear_ot/',
         views.crear_ot_desde_ruta,
         name='crear_ot_desde_ruta'
-        ),
+    ),
 
     # ---------------------------- Reportes de falla view ------------------- #
     # LISTADO REPORTES DE FALLA
