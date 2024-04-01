@@ -230,98 +230,11 @@
                 <form method="post" action="" enctype="multipart/form-data">
                     {% csrf_token %}
                     
-                    <!-- Nombre -->
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre:</label>
-                        {{ equipo_form.name|add_class:"form-control" }}
-                        {% for error in equipo_form.name.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Fecha de Ingreso -->
-                    <div class="mb-3">
-                        <label for="date_inv" class="form-label">Fecha de ingreso:</label>
-                        {{ equipo_form.date_inv|add_class:"form-control" }}
-                        {% for error in equipo_form.date_inv.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Código Interno -->
-                    <div class="mb-3">
-                        <label for="code" class="form-label">Código interno:</label>
-                        {{ equipo_form.code|add_class:"form-control" }}
-                        {% for error in equipo_form.code.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Modelo -->
-                    <div class="mb-3">
-                        <label for="model" class="form-label">Modelo:</label>
-                        {{ equipo_form.model|add_class:"form-control" }}
-                        {% for error in equipo_form.model.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Serial -->
-                    <div class="mb-3">
-                        <label for="serial" class="form-label"># Serial:</label>
-                        {{ equipo_form.serial|add_class:"form-control" }}
-                        {% for error in equipo_form.serial.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Marca -->
-                    <div class="mb-3">
-                        <label for="marca" class="form-label">Marca:</label>
-                        {{ equipo_form.marca|add_class:"form-control" }}
-                        {% for error in equipo_form.marca.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Fabricante -->
-                    <div class="mb-3">
-                        <label for="fabricante" class="form-label">Fabricante:</label>
-                        {{ equipo_form.fabricante|add_class:"form-control" }}
-                        {% for error in equipo_form.fabricante.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Características -->
-                    <div class="mb-3">
-                        <label for="feature" class="form-label">Características:</label>
-                        {{ equipo_form.feature|add_class:"form-control" }}
-                        {% for error in equipo_form.feature.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Imagen -->
-                    <div class="mb-3">
-                        <label for="imagen" class="form-label">Imagen:</label>
-                        {{ equipo_form.imagen|add_class:"form-control" }}
-                        {% for error in equipo_form.imagen.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-
-                    <!-- Manual PDF -->
-                    <div class="mb-3">
-                        <label for="manual_pdf" class="form-label">Manual (PDF):</label>
-                        {{ equipo_form.manual_pdf|add_class:"form-control" }}
-                        {% for error in equipo_form.manual_pdf.errors %}
-                            <div class="invalid-feedback">{{ error }}</div>
-                        {% endfor %}
-                    </div>
+					<table>
+						{{ equipo_form.as_table }}
+				  	</table>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
                 </form>

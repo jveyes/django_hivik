@@ -224,12 +224,11 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq.save()
             return redirect(request.path)
         else:
-            equipo_form = EquipoForm(request.POST, request.FILES)
-        context = {
-            'system': sys,
-            'equipo_form': equipo_form,
-            }
-        return render(request, "got/system_detail.html", context)
+            context = {
+                'system': sys,
+                'equipo_form': equipo_form,
+                }
+            return render(request, "got/system_detail.html", context)
 
 
 # ---------------------------- Failure Report ---------------------------- #

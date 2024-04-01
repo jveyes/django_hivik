@@ -215,7 +215,7 @@ class EquipoForm(forms.ModelForm):
 
     class Meta:
         model = Equipo
-        exclude = ['system', 'horometro']
+        exclude = ['system', 'horometro', 'prom_hours']
         labels = {
             'name': 'Nombre',
             'date_inv': 'Fecha de ingreso al inventario',
@@ -226,7 +226,9 @@ class EquipoForm(forms.ModelForm):
             'fabricante': 'Fabricante',
             'feature': 'Caracteristicas',
             'imagen': 'Imagen',
-            'manual_pdf': 'Manual'
+            'manual_pdf': 'Manual',
+            'tipo': 'tipo de equipo:',
+            'initial_hours': 'Horas iniciales (si aplica)'
             }
         widgets = {
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
