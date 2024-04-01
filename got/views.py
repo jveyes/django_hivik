@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
+# from django.contrib import messages
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
@@ -223,11 +224,12 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
             eq.save()
             return redirect(request.path)
         else:
-            context = {
-                'system': sys,
-                'equipo_form': equipo_form,
-                }
-            return render(request, self.template_name, context)
+            equipo_form = EquipoForm(request.POST, request.FILES)
+        context = {
+            'system': sys,
+            'equipo_form': equipo_form,
+            }
+        return render(request, "got/system_detail.html", context)
 
 
 # ---------------------------- Failure Report ---------------------------- #

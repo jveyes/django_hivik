@@ -208,7 +208,8 @@ class EquipoForm(forms.ModelForm):
         code = self.cleaned_data.get('code')
         if Equipo.objects.filter(code=code).exists():
             raise ValidationError(
-                'Este código ya está en uso. Por favor, ingresa un código diferente.'
+                '''Este código ya está en uso. Por favor,
+                ingresa un código diferente.'''
                 )
         return code
 
