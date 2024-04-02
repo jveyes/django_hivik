@@ -1,5 +1,5 @@
 from django import template
-from got.models import Asset
+from got.models import Asset, FailureReport
 from django.contrib.auth.models import Group
 
 register = template.Library()
@@ -21,3 +21,8 @@ def obtener_asset_del_supervisor(context):
 def has_group(user, group_name):
     group = Group.objects.get(name=group_name)
     return True if group in user.groups.all() else False
+
+
+@register.filter(name='get_impact_display')
+def get_impact_display(impact_code):
+    return FailureReport().get_impact_display(impact_code)

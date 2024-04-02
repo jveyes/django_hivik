@@ -5,13 +5,15 @@
 {% block content %}
 
 <div class="container">
-    <a class="btn btn-primary" role="button" href="{% url 'got:finish-task' task.id %}">
-        Modificar
-    </a>
-    {%  if request.user.is_staff %}
-    <a class="btn btn-primary" role="button" href="{% url 'got:ot-detail' task.ot.num_ot %}">
-        OT - {{task.ot.num_ot}}
-    </a>
+    {%  if task.responsible == user %}
+        <a class="btn btn-primary" role="button" href="{% url 'got:finish-task' task.id %}">
+            Modificar
+        </a>
+    {% endif %}
+    {%  if perms.got.view_asset %}
+        <a class="btn btn-primary" role="button" href="{% url 'got:ot-detail' task.ot.num_ot %}">
+            OT - {{task.ot.num_ot}}
+        </a>
     {% endif %}
 
 <table class="table">

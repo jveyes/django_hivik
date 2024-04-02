@@ -3,7 +3,7 @@
 
 {% block head %}
 
-
+Reportes de falla
 {% endblock %}
 
 {% block content %}
@@ -11,15 +11,35 @@
 
 <table class="table mi-tabla-borde-externo mt-2">
     <thead class="table-info">
-
+        <tr>
+            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+                #
+            </th>
+            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+                Fecha
+            </th>
+            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+                Descripción
+            </th>
+            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+                Responsable
+            </th>
+            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
+                Estado
+            </th>
+        </tr>
     </thead>
     <tbody>
         {% if failurereport_list %}
             {% for fail in failurereport_list %}
 				<tr>
-					<td><a href="{{ fail.get_absolute_url }}">{{fail}}</a></td>
+					<td>{{ fail.id }}</td>
+					<td>{{ fail.moment|date:"d/m/Y" }}</td>
+					<td>
+                        <a href="{{ fail.get_absolute_url }}">{{ fail.description }}</a>
+                    </td>
 					<td>{{fail.reporter.first_name}} {{fail.reporter.last_name}}</td>
-					<td>{{fail.moment}}</td>
+					<td>{% if fail.closed %}Cerrado{% else %}Abierto{% endif %}</td>
 				</tr>
             {% endfor %}
         {% else %}

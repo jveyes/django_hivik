@@ -240,6 +240,36 @@ class EquipoForm(forms.ModelForm):
             }
 
 
+# Form 8: Crear/editar nuevo equipo
+class EquipoFormUpdate(forms.ModelForm):
+
+    class Meta:
+        model = Equipo
+        exclude = ['system', 'horometro', 'prom_hours']
+        labels = {
+            'name': 'Nombre',
+            'date_inv': 'Fecha de ingreso al inventario',
+            'code': 'Codigo interno',
+            'model': 'Modelo',
+            'serial': '# Serial',
+            'marca': 'Marca',
+            'fabricante': 'Fabricante',
+            'feature': 'Caracteristicas',
+            'imagen': 'Imagen',
+            'manual_pdf': 'Manual',
+            'tipo': 'tipo de equipo:',
+            'initial_hours': 'Horas iniciales (si aplica)'
+            }
+        widgets = {
+            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'feature': forms.Textarea(
+                attrs={'rows': 4, 'class': 'form-control'}
+                ),
+            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+            }
+
+
 #  Form 9: Crear/editar nueva ruta
 class RutaForm(forms.ModelForm):
     def clean_frecuency(self):

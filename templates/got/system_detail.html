@@ -124,9 +124,7 @@
 						<th scope="col">Fecha de ultima intervención</th>
 						<th scope="col">Fecha proxima intervención</th>
 						<th scope="col">Ultima Orden de trabajo</th>
-						{% if perms.got.add_system %}
-							<th scope="col">Acciones</th>
-						{% endif %}
+						<th scope="col">Acciones</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -138,13 +136,13 @@
 						<td>{{ ruta.intervention_date }}</td>
 						<td>{{ ruta.next_date }}</td>
 						<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
-						{% if perms.got.add_system %}
-							<td>
-								<a href="{% url 'got:crear_ot_desde_ruta' ruta.code %}" class="btn btn-success btn-sm"><i class="bi bi-clipboard-plus"></i></a>
+						<td>
+							<a href="{% url 'got:crear_ot_desde_ruta' ruta.code %}" class="btn btn-success btn-sm"><i class="bi bi-clipboard-plus"></i></a>
+							{% if perms.got.add_system %}
 								<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
 								<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+							{% endif %}
 							</td>
-						{% endif %}
 					</tr>
 
 					<!-- Actividades -->

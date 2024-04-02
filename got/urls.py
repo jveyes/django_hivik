@@ -103,6 +103,11 @@ urlpatterns = [
         'ruta/<str:pk>/delete/',
         views.RutaDelete.as_view(), name='ruta-delete'
         ),
+    path(
+        'ruta/<int:ruta_id>/crear_ot/',
+        views.crear_ot_desde_ruta,
+        name='crear_ot_desde_ruta'
+    ),
 
     # ---------------------------- Reportes --------------------------------- #
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report'),
@@ -116,24 +121,16 @@ urlpatterns = [
         name='horas-asset'
         ),
 
-
-
-    path(
-        'ruta/<int:ruta_id>/crear_ot/',
-        views.crear_ot_desde_ruta,
-        name='crear_ot_desde_ruta'
-    ),
-
     # ---------------------------- Reportes de falla view ------------------- #
     # LISTADO REPORTES DE FALLA
     path(
-        "failure-report/",
+        "report-failure/",
         views.FailureListView.as_view(),
         name="failure-report-list"
     ),
     # DETALLE REPORTES DE FALLA
     path(
-        "failure-report/<int:pk>/",
+        "report-failure/<int:pk>/",
         views.FailureDetailView.as_view(),
         name="failure-report-detail"
     ),
@@ -142,5 +139,16 @@ urlpatterns = [
         'report-failure/<int:asset_id>/create/',
         views.FailureReportForm.as_view(),
         name='failure-report-create'
+    ),
+    # FORMULARIO ACTUALIZACION DE REPORTE DE FALLA
+    path(
+        'report-failure/<int:pk>/update/',
+        views.FailureReportUpdate.as_view(),
+        name='failure-report-update'
+    ),
+    path(
+        'report-failure/<int:fail_id>/crear_ot/',
+        views.crear_ot_failure_report,
+        name='failure-report-crear-ot'
     ),
 ]

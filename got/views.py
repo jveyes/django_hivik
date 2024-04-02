@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
+from django.utils import timezone
 # from django.contrib import messages
 
 # ---------------------------- Modelos y formularios ------------------------ #
@@ -22,7 +23,7 @@ from .models import (
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm, RutaUpdateOTForm
+    ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -255,7 +256,7 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 15
 
 
-class FailureReportForm(CreateView):
+class FailureReportForm(LoginRequiredMixin, CreateView):
 
     '''
     Formulario para reportar fallas en los equipos de activo.
@@ -287,12 +288,55 @@ class FailureReportForm(CreateView):
         return super().form_valid(form)
 
 
-class EquipoDetailView(LoginRequiredMixin, generic.DetailView):
-    '''
-    Vista generica para mostrar Equipos con sus rutinas (v3.0)
-    '''
-    model = Equipo
+class FailureReportUpdate(LoginRequiredMixin, UpdateView):
 
+    '''
+    Formulario para reportar fallas en los equipos de activo.
+    '''
+
+    model = FailureReport
+    form_class = failureForm
+    http_method_names = ['get', 'post']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        asset = self.get_object().equipo.system.asset
+        context['asset_main'] = asset
+        return context
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        asset = self.get_object().equipo.system.asset
+        form.fields['equipo'].queryset = Equipo.objects.filter(
+            system__asset=asset)
+        return form
+
+    def form_valid(self, form):
+        form.instance.reporter = self.request.user
+        return super().form_valid(form)
+
+
+@permission_required('got.can_see_completely')
+def crear_ot_failure_report(request, fail_id):
+    fail = get_object_or_404(FailureReport, pk=fail_id)
+    nueva_ot = Ot(
+        description=f"Mantenimiento por reporte de falla #{fail.id}",
+        state='x',  # Ejecución
+        super=request.user,
+        tipo_mtto='c',
+        system=fail.equipo.system,
+    )
+    nueva_ot.save()
+
+    # Actualizar el campo OT de la Ruta con la nueva OT
+    fail.related_ot = nueva_ot
+    fail.save()
+
+    # Redirige a la vista de detalle de la nueva OT
+    return redirect('got:ot-detail', pk=nueva_ot.pk)
+
+
+# --------------------------- Ordenes de trabajo --------------------------- #
 
 # Ordenes de trabajo
 class OtListView(LoginRequiredMixin, generic.ListView):
@@ -365,6 +409,16 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         if 'finish_ot' in request.POST and state_form.is_valid():
             ot.state = 'Finalizado'
             ot.save()
+
+            # Verificar y actualizar la ruta relacionada, si existe
+            if hasattr(ot, 'ruta'):
+                ot.ruta.intervention_date = timezone.now()
+                ot.ruta.save()
+
+            # Verificar y cerrar el reporte de falla relacionado, si existe
+            if hasattr(ot, 'failure_report'):
+                ot.failure_report.closed = True
+                ot.failure_report.save()
 
             supervisor = ot.system.asset.supervisor
             if supervisor and supervisor.email:
@@ -662,7 +716,7 @@ class EquipoUpdate(UpdateView):
     Vista formulario para actualizar una actividad
     '''
     model = Equipo
-    form_class = EquipoForm
+    form_class = EquipoFormUpdate
     template_name = 'got/equipo_form.html'
     http_method_names = ['get', 'post']
 
@@ -929,7 +983,7 @@ def crear_ot_desde_ruta(request, ruta_id):
             evidence=task.evidence,
             start_date=date.today(),
             men_time=1,
-            finished=False,  # Suponiendo que quieres que estén abiertas
+            finished=False,
         )
 
     # Actualizar el campo OT de la Ruta con la nueva OT

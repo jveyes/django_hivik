@@ -1,5 +1,5 @@
 {% extends "got/base_generic.html" %}
-
+{% load my_tags %}
 {% block head %}
     {% if perms.got.view_asset %}
         <a href="{% url 'got:failure-report-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
@@ -8,6 +8,65 @@
 {% endblock %}
 
 {% block content %}
-<p>Persona que reporta la falla:</p>
-<p>{{ failurereport.reporter }}</p>
+{% if perms.got.add_system %}
+    <a href="{% url 'got:failure-report-update' failurereport.id %}" class="btn btn-danger"><i class="bi bi-pen"></i></a>
+    {% if not failurereport.related_ot %}
+        <a href="{% url 'got:failure-report-crear-ot' failurereport.id %}" class="btn btn-success"><i class="bi bi-clipboard-plus"></i></a>
+    {% endif %}
+{% endif %}
+Orden de trabajo: OT-{% if failurereport.related_ot %}{{ failurereport.related_ot.num_ot }}{% endif %}
+
+<!-- Informacion basica -->
+<table class="table">
+    <tbody>
+        <tr>
+            <th>Fecha: </th>
+            <td>{{ failurereport.moment }}</td>
+        </tr>
+        <tr>
+            <th>Persona que reporta la falla: </th>
+            <td>{{ failurereport.reporter.first_name }} {{ failurereport.reporter.last_name }}</td>
+        </tr>
+        <tr>
+            <th>Estado: </th>
+            <td>{% if failurereport.closed %}Cerrado{% else %}Abierto{% endif %}</td>
+        </tr>{{ failurereport.get_state_display }}
+        <tr>
+            <th>Sistema: </th>
+            <td>{{ failurereport.equipo.system.asset.name }}</td>
+        </tr>
+        <tr>
+            <th>Equipo: </th>
+            <td>{{ failurereport.equipo.name }}</td>
+        </tr>     
+        <tr>
+            <th>Descripción detallada de la falla: </th>
+            <td>{{ failurereport.description }}</td>
+        </tr>
+        <tr>
+            <th>Analisis de causas: </th>
+            <td>{{ failurereport.causas }}</td>
+        </tr>
+        <tr>
+            <th>Reparación sugerida: </th>
+            <td>{{ failurereport.suggest_repair }}</td>
+        </tr>
+        <tr>
+            <th>Impacto: </th>
+            <td>
+                {% for impact_code in failurereport.impact %}
+                    {{ impact_code|get_impact_display }}{% if not forloop.last %},{% else %}.{% endif %}
+                {% empty %}
+                    No se especificó impacto.
+                {% endfor %}
+            </td>
+        </tr>
+        {% if failurereport.evidence %}
+            <tr>
+                <th>Evidencias: </th>
+                <td><img src="{{ failurereport.evidence.url }}"></td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
 {% endblock %}

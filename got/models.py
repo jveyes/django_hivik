@@ -387,3 +387,7 @@ class FailureReport(models.Model):
         # Suponiendo que 'got:failure-report-detail' es el nombre de tu URL
         # para la vista de detalle y que usas el ID del reporte como parámetro
         return reverse('got:failure-report-detail', kwargs={'pk': self.pk})
+
+    def get_impact_display(self, impact_code):
+        """Devuelve la representación en texto de un código de impacto."""
+        return dict(self.IMPACT).get(impact_code, "Desconocido")

@@ -85,7 +85,7 @@
             {% if ot_list %}
                 {% for ot in ot_list %}
                 <tr>
-                    <th scope="row">OT-{{ot.num_ot}}</td>
+                    <th scope="row">OT-{{ ot.num_ot }}</td>
                     <td>{{ot.creation_date|date:"d/m/Y"}}</td>
                     <td><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
                     <td>{{ot.system}}</td>
