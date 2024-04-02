@@ -15,7 +15,7 @@ def update_equipo_horometro(sender, instance, **kwargs):
     # HistoryHour.objects.filter(component=equipo)
     # .aggregate(total_horas=Sum('hour'))['total_horas']
     promedio_horas = HistoryHour.objects.filter(component=equipo).aggregate(
-        promedio_horas=Avg('hour'))['promedio_horas'][:30]
+        promedio_horas=Avg('hour'))['promedio_horas']
 
     equipo.prom_hours = promedio_horas or 0
 
