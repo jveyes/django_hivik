@@ -1055,7 +1055,7 @@ def reportHoursAsset(request, asset_id):
     return render(request, 'got/hours_asset.html', context)
 
 
-@permission_required('got.can_see_completely')
+@login_required
 def crear_ot_desde_ruta(request, ruta_id):
     ruta = get_object_or_404(Ruta, pk=ruta_id)
     nueva_ot = Ot(
