@@ -2,10 +2,8 @@
 {% load my_tags %}
 
 {% block head %}
-    {% if perms.got.view_asset %}
-        <a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
-    {% endif %}
-Detalle de OT-{{ot.num_ot}}
+    <a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+    Detalle de OT-{{ot.num_ot}}
 {% endblock %} 
 
 {% block content %}
@@ -66,7 +64,7 @@ Detalle de OT-{{ot.num_ot}}
 
 
 <!---------------------------------------- Opciones (generar reportte/ actualizar/ Eliminar) ---------------------------------------->
-{% if request.user|has_group:"super_members" %}
+
     <section class="d-flex justify-content-end">
         <div class="btn-group">
             <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
@@ -74,34 +72,29 @@ Detalle de OT-{{ot.num_ot}}
             <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
         </div>
     </section>
-{% endif %}
 
 <!------------------------------------------------ Actividades de ordenes de trabajo ------------------------------------------------>
 <section>
 
     <h4>Actividades</h4>
 
-    {% if request.user|has_group:"super_members" %}
         {% if ot.state == 'x' %}
             <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#activityModal">
                 Crear Actividad
             </button>
         {% endif %}
-    {% endif %}
 
 
     {% if ot.task_set.all %}
         <table class="table table-striped mt-2">
             <thead>
                 <tr>
-                <th scope="col">#</th>
-                <th scope="col">Descripción</th>
-                <th scope="col">Novedades</th>
-                <th scope="col">Responsable</th>
-                <th scope="col">Estado</th>
-                {% if request.user|has_group:"super_members" %}
+                    <th scope="col">#</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Novedades</th>
+                    <th scope="col">Responsable</th>
+                    <th scope="col">Estado</th>
                     <th scope="col">Acciones</th>
-                {% endif %}
                 </tr>
             </thead>
 
@@ -113,7 +106,7 @@ Detalle de OT-{{ot.num_ot}}
                         <td>{{ act.news }}</td>
                         <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
                         <td>{% if act.finished %}Completado{%else%}Pendiente{% endif %}</td>
-                        {% if request.user|has_group:"super_members" %}
+                        {% if not request.user|has_group:"serport_members" %}
                             <td>
                                 <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
                                 <a class="" href="{% url 'got:task-delete' act.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>

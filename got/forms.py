@@ -124,6 +124,34 @@ class OtForm(forms.ModelForm):
         self.fields['super'].queryset = super_members_group.user_set.all()
 
 
+# Form 5: Crear nueva orden de trabajo
+class OtFormNoSup(forms.ModelForm):
+
+    class Meta:
+        model = Ot
+        exclude = ['creations_date', 'num_ot', 'super']
+        labels = {
+            'description': 'Description',
+            'system': 'Sistema',
+            'state': 'Estado',
+            'tipo_mtto': 'Tipo de mantenimiento',
+            'info_contratista_pdf': 'Informe externo'
+        }
+        widgets = {
+            'info_contratista_pdf': forms.FileInput(
+                attrs={'class': 'form-control'}
+                ),
+            'tipo_mtto': forms.Select(attrs={'class': 'form-control'}),
+            'system': forms.Select(attrs={'class': 'form-control'}),
+            'state': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        asset = kwargs.pop('asset')
+        super().__init__(*args, **kwargs)
+        self.fields['system'].queryset = System.objects.filter(asset=asset)
+
+
 # Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
     finish = forms.BooleanField(
@@ -159,6 +187,37 @@ class ActForm(forms.ModelForm):
                 ),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
             }
+
+    def __init__(self, *args, **kwargs):
+        super(ActForm, self).__init__(*args, **kwargs)
+        self.fields['start_date'].required = True
+
+
+# Form 7: Crear nueva actividad
+class ActFormNoSup(forms.ModelForm):
+
+    class Meta:
+        model = Task
+        exclude = ['ot', 'ruta', 'hse', 'responsible']
+        labels = {
+            'description': 'Descripción',
+            'news': 'Novedades',
+            'evidence': 'Evidencia',
+            'start_date': 'Fecha de inicio',
+            'men_time': 'Tiempo de ejecución (Dias)',
+            'finished': 'Finalizado',
+        }
+        widgets = {
+            'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'description': forms.Textarea(
+                attrs={'rows': 4, 'class': 'form-control'}
+                ),
+            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(ActFormNoSup, self).__init__(*args, **kwargs)
+        self.fields['start_date'].required = True
 
 
 class RutActForm(forms.ModelForm):

@@ -1,5 +1,5 @@
 {% extends "got/base_generic.html" %}
-
+{% load my_tags %}
 {% block head %}Detalle de actividad{% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
             Modificar
         </a>
     {% endif %}
-    {%  if perms.got.view_asset %}
+    {% if not request.user|has_group:"serport_members" %}
         <a class="btn btn-primary" role="button" href="{% url 'got:ot-detail' task.ot.num_ot %}">
             OT - {{task.ot.num_ot}}
         </a>

@@ -60,17 +60,17 @@
 						</li>
 					{% endif %}
 					{% if request.user|has_group:"buzos_members" %}
-					<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-						<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
-				 	</li>
-					 {% endif %}
+						<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
+							<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
+						</li>
+					{% endif %}
+					<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
+				  	</li>
             		<!-- Opciones limitadas para supervisores de serport -->
             		{% if request.user|has_group:"super_members" %}
             			<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
               				<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
-            			</li>
-            			<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
-              				<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
             			</li>
 						<li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
 							<a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
@@ -78,11 +78,13 @@
 						<li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
 							<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
 					  	</li>
-            			<li class="nav-item">
-              				<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
-              				<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
-            			</li>
             		{% endif %}
+					{% if not request.user|has_group:"serport_members" %}
+						<li class="nav-item">
+							<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
+							<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
+						</li>
+					{% endif %}
           		</ul>
           		<!-- Boton de logout -->
 				  <form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}

@@ -7,7 +7,7 @@
 		<p>¿Estas seguro que deseas eliminar la actividad: <strong>{{ task }}</strong>?</p>
 
 		<form action="" method="POST">{% csrf_token %}
-  			<input type="submit" action="" value="Si, Eliminar." />
+  			<input type="submit" action="" class="btn btn-danger" value="Si, Eliminar." />
 		</form>
 	</div>
 {% endblock %}

@@ -23,7 +23,8 @@ from .models import (
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate
+    ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
+    OtFormNoSup, ActFormNoSup
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -157,9 +158,23 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        systems = self.object.system_set.all()
+        asset = self.get_object()
+
+        rotativos = Equipo.objects.filter(
+            system__asset=asset, tipo='r').exists()
+
+        # Determina si el usuario pertenece al grupo 'santamarta_station'
+        user_in_santamarta_group = self.request.user.groups.filter(
+            name='santamarta_station').exists()
+
+        # Filtrar sistemas basado en el grupo de usuario
+        if user_in_santamarta_group:
+            systems = asset.system_set.filter(location='Santa Marta')
+        else:
+            systems = asset.system_set.all()
+
         rutas = sorted(  # Filtrado de rutinas que pertenecen a este Asset
-            Ruta.objects.filter(system__asset=self.get_object()),
+            Ruta.objects.filter(system__in=systems),
             key=lambda t: t.next_date
         )
         # Limitar a mostrar 10 sistemas
@@ -167,14 +182,14 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        paginator_rutas = Paginator(rutas, 20)  # Muestra hasta 20 rutas por
+        paginator_rutas = Paginator(rutas, 20)
         page_number_rutas = self.request.GET.get('page_rutas')
         page_obj_rutas = paginator_rutas.get_page(page_number_rutas)
 
         context['sys_form'] = SysForm()
         context['page_obj'] = page_obj
-        # context['rutas'] = rutas
         context['page_obj_rutas'] = page_obj_rutas
+        context['rotativos'] = rotativos
 
         return context
 
@@ -255,6 +270,33 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
     model = FailureReport
     paginate_by = 15
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Comprueba si el usuario es parte del grupo 'maq_members'
+        if self.request.user.groups.filter(name='maq_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                supervisor=self.request.user)
+
+            # Filtra los reportes de falla cuyos equipos pertenecen a un
+            # sistema que a su vez pertenece a un asset supervisado por
+            # el usuario
+            queryset = queryset.filter(
+                equipo__system__asset__in=supervised_assets)
+        elif self.request.user.groups.filter(name='buzos_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                area='b')
+
+            # Filtra los reportes de falla cuyos equipos pertenecen a un
+            # sistema que a su vez pertenece a un asset supervisado por
+            # el usuario
+            queryset = queryset.filter(
+                equipo__system__asset__in=supervised_assets)
+
+        return queryset
+
 
 class FailureReportForm(LoginRequiredMixin, CreateView):
 
@@ -286,6 +328,14 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         form.instance.reporter = self.request.user
         # Guarda el formulario con el reporter asignado
         return super().form_valid(form)
+
+
+# Detalle de actividades
+class FailureDetailView(LoginRequiredMixin, generic.DetailView):
+    '''
+    Detalle de reportes de falla (v1.0)
+    '''
+    model = FailureReport
 
 
 class FailureReportUpdate(LoginRequiredMixin, UpdateView):
@@ -350,7 +400,12 @@ class OtListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        info_filter = Asset.objects.all()
+        if self.request.user.groups.filter(name='buzos_members').exists():
+            # Limitar a los asset que tienen en área el valor de 'b'
+            info_filter = Asset.objects.filter(area='b')
+        else:
+            # Todos los asset para usuarios que no son parte de buzos_members
+            info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
         super_group = Group.objects.get(name='super_members')
@@ -365,6 +420,25 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
         keyword = self.request.GET.get('keyword')
+
+        if self.request.user.groups.filter(name='maq_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                supervisor=self.request.user)
+
+            # Filtra los reportes de falla cuyos equipos pertenecen a un
+            # sistema que a su vez pertenece a un asset supervisado por
+            # el usuario
+            queryset = queryset.filter(system__asset__in=supervised_assets)
+        elif self.request.user.groups.filter(name='buzos_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                area='b')
+
+            # Filtra los reportes de falla cuyos equipos pertenecen a un
+            # sistema que a su vez pertenece a un asset supervisado por
+            # el usuario
+            queryset = queryset.filter(system__asset__in=supervised_assets)
 
         if state:
             queryset = queryset.filter(state=state)
@@ -391,7 +465,10 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
     # Formulario para crear, modificar o eliminar actividades
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['task_form'] = ActForm()
+        if self.request.user.groups.filter(name='super_members').exists():
+            context['task_form'] = ActForm()
+        else:
+            context['task_form'] = ActFormNoSup()
         context['state_form'] = FinishOtForm()
 
         # Agregar lógica para determinar el estado global de las tareas
@@ -403,7 +480,11 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
     def post(self, request, *args, **kwargs):
         ot = self.get_object()
-        task_form = ActForm(request.POST, request.FILES)
+        if request.user.groups.filter(name='super_members').exists():
+            task_form = ActForm(request.POST, request.FILES)
+        else:
+            task_form = ActFormNoSup(request.POST, request.FILES)
+
         state_form = FinishOtForm(request.POST)
 
         if 'finish_ot' in request.POST and state_form.is_valid():
@@ -461,6 +542,8 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         elif 'submit_task' in request.POST and task_form.is_valid():
             act = task_form.save(commit=False)
             act.ot = ot
+            if isinstance(task_form, ActFormNoSup):
+                act.responsible = request.user
             act.save()
             return redirect(act.get_absolute_url())
 
@@ -483,12 +566,76 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         return pdf_content.getvalue()
 
 
+class OtCreate(CreateView):
+    '''
+    Vista formulario para crear ordenes de trabajo (v1.0)
+    '''
+    model = Ot
+    http_method_names = ['get', 'post']
+
+    def get_form_class(self):
+        if self.request.user.groups.filter(name='super_members').exists():
+            return OtForm
+        else:
+            return OtFormNoSup
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        asset_id = self.kwargs.get('pk')
+        asset = Asset.objects.get(pk=asset_id)
+        kwargs['asset'] = asset
+        return kwargs
+
+    def form_valid(self, form):
+        ot = form.save(commit=False)
+        if isinstance(form, OtFormNoSup):
+            ot.super = self.request.user
+        ot.save()
+        return redirect(self.get_success_url())
+
+
+class OtUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar ordenes de trabajo (v1.0)
+    '''
+    model = Ot
+    http_method_names = ['get', 'post']
+
+    def get_form_class(self):
+        if self.request.user.groups.filter(name='super_members').exists():
+            return OtForm
+        else:
+            return OtFormNoSup
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        # Obtener la instancia actual de la orden de trabajo
+        ot_instance = self.get_object()
+        kwargs['asset'] = ot_instance.system.asset
+        return kwargs
+
+
 # Detalle de actividades
 class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     Detalle de actividades (v1.0)
     '''
     model = Task
+
+
+class TaskUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Task
+    template_name = 'got/task_form.html'
+    http_method_names = ['get', 'post']
+
+    def get_form_class(self):
+        if self.request.user.groups.filter(name='super_members').exists():
+            return ActForm
+        else:
+            return ActFormNoSup
 
 
 @permission_required('got.can_see_completely')
@@ -509,15 +656,35 @@ def RutaListView(request):
     return render(request, 'got/ruta_list.html', context)
 
 
-# Detalle de actividades
-class FailureDetailView(LoginRequiredMixin, generic.DetailView):
+class TaskCreate(CreateView):
     '''
-    Detalle de reportes de falla (v1.0)
+    Vista formulario para actualizar una actividad
     '''
-    model = FailureReport
+    model = Task
+    http_method_names = ['get', 'post']
+    form_class = RutActForm
+
+    def form_valid(self, form):
+        # Obtener el valor del parámetro pk desde la URL
+        pk = self.kwargs['pk']
+
+        # Obtener el objeto System relacionado con el pk
+        ruta = get_object_or_404(Ruta, pk=pk)
+
+        # Establecer el valor del campo system en el formulario
+        form.instance.ruta = ruta
+        form.instance.finished = False
+
+        # Llamar al método form_valid de la clase base
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        task = self.object
+        # Redirigir a la vista de detalle del objeto recién creado
+        return reverse('got:sys-detail', args=[task.ruta.system.id])
+
 
 # ------------------------------------- Formularios -------------------------#
-
 
 @permission_required('got.can_see_completely')
 def reschedule_task(request, pk):
@@ -545,22 +712,6 @@ def reschedule_task(request, pk):
 
     context = {'form': form, 'task': act, 'final_date': final_date}
     return render(request, 'got/task_reschedule.html', context)
-
-
-class OtCreate(CreateView):
-    '''
-    Vista formulario para crear ordenes de trabajo (v1.0)
-    '''
-    model = Ot
-    form_class = OtForm
-    http_method_names = ['get', 'post']
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        asset_id = self.kwargs.get('pk')
-        asset = Asset.objects.get(pk=asset_id)
-        kwargs['asset'] = asset
-        return kwargs
 
 
 class RutaCreate(CreateView):
@@ -594,65 +745,12 @@ class RutaCreate(CreateView):
         return kwargs
 
 
-class OtUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar ordenes de trabajo (v1.0)
-    '''
-    model = Ot
-    form_class = OtForm
-    http_method_names = ['get', 'post']
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Obtener la instancia actual de la orden de trabajo
-        ot_instance = self.get_object()
-        kwargs['asset'] = ot_instance.system.asset
-        return kwargs
-
-
 class OtDelete(DeleteView):
     '''
     Vista formulario para confirmar eliminacion de ordenes de trabajo (v1.0)
     '''
     model = Ot
     success_url = reverse_lazy('got:ot-list')
-
-
-class TaskCreate(CreateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
-    model = Task
-    form_class = RutActForm
-
-    def form_valid(self, form):
-        # Obtener el valor del parámetro pk desde la URL
-        pk = self.kwargs['pk']
-
-        # Obtener el objeto System relacionado con el pk
-        ruta = get_object_or_404(Ruta, pk=pk)
-
-        # Establecer el valor del campo system en el formulario
-        form.instance.ruta = ruta
-        form.instance.finished = False
-
-        # Llamar al método form_valid de la clase base
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        task = self.object
-        # Redirigir a la vista de detalle del objeto recién creado
-        return reverse('got:sys-detail', args=[task.ruta.system.id])
-
-
-class TaskUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
-    model = Task
-    form_class = ActForm
-    template_name = 'got/task_form.html'
-    http_method_names = ['get', 'post']
 
 
 class TaskDelete(DeleteView):
@@ -782,7 +880,6 @@ class RutaDelete(DeleteView):
 
 
 # Reportes
-@permission_required('got.can_see_completely')
 def report_pdf(request, num_ot):
     '''
     Funcion para crear reportes pdf
