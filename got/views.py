@@ -164,12 +164,14 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             system__asset=asset, tipo='r').exists()
 
         # Determina si el usuario pertenece al grupo 'santamarta_station'
-        user_in_santamarta_group = self.request.user.groups.filter(
-            name='santamarta_station').exists()
 
         # Filtrar sistemas basado en el grupo de usuario
-        if user_in_santamarta_group:
+        if self.request.user.groups.filter(name='santamarta_station').exists():
             systems = asset.system_set.filter(location='Santa Marta')
+        elif self.request.user.groups.filter(name='ctg_station').exists():
+            systems = asset.system_set.filter(location='Cartagena')
+        elif self.request.user.groups.filter(name='guyana_station').exists():
+            systems = asset.system_set.filter(location='Guyana')
         else:
             systems = asset.system_set.all()
 
@@ -245,6 +247,19 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
                 'equipo_form': equipo_form,
                 }
             return render(request, "got/system_detail.html", context)
+
+
+class SysDelete(DeleteView):
+    '''
+    Vista formulario para eliminar sistemas
+    '''
+    model = System
+
+    def get_success_url(self):
+        asset_code = self.object.asset.id
+        success_url = reverse_lazy(
+            'got:asset-detail', kwargs={'pk': asset_code})
+        return str(success_url)
 
 
 # ---------------------------- Failure Report ---------------------------- #
@@ -475,6 +490,13 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         ot = self.get_object()
         all_tasks_finished = ot.task_set.filter(finished=False).exists()
         context['all_tasks_finished'] = not all_tasks_finished
+
+        try:
+            failure_report = ot.failure_report
+        except FailureReport.DoesNotExist:
+            failure_report = None
+
+        context['failure_report'] = failure_report
 
         return context
 
@@ -794,21 +816,6 @@ class TaskDeleterut(DeleteView):
         return render(request, 'got/task_confirm_delete.html', context)
 
 
-class SysDelete(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
-    model = System
-
-    success_url = reverse_lazy('got:ot-list')
-
-    def get_success_url(self):
-        asset_code = self.object.asset.id
-        kwargs = {'pk': asset_code}
-        success_url = reverse_lazy('got:asset-detail', kwargs)
-        return success_url
-
-
 class EquipoUpdate(UpdateView):
     '''
     Vista formulario para actualizar una actividad
@@ -927,6 +934,8 @@ def finish_task(request, pk):
 @permission_required('got.can_see_completely')
 def indicadores(request):
 
+    m = 4
+
     area_filter = request.GET.get('area', None)
 
     top_assets = Asset.objects.annotate(
@@ -938,28 +947,28 @@ def indicadores(request):
 
     if area_filter:
         ots = len(Ot.objects.filter(
-            creation_date__month=3,
+            creation_date__month=m,
             creation_date__year=2024,
             system__asset__area=area_filter
             ))
         ot_finish = len(Ot.objects.filter(
-            creation_date__month=3,
+            creation_date__month=m,
             creation_date__year=2024, state='f',
             system__asset__area=area_filter))
         preventivo = len(Ot.objects.filter(
-            creation_date__month=3,
+            creation_date__month=m,
             creation_date__year=2024,
             tipo_mtto='p',
             system__asset__area=area_filter
             ))
         correctivo = len(Ot.objects.filter(
-            creation_date__month=3,
+            creation_date__month=m,
             creation_date__year=2024,
             tipo_mtto='c',
             system__asset__area=area_filter
             ))
         modificativo = len(Ot.objects.filter(
-            creation_date__month=3,
+            creation_date__month=m,
             creation_date__year=2024,
             tipo_mtto='m',
             system__asset__area=area_filter
@@ -967,15 +976,15 @@ def indicadores(request):
 
     else:
         ots = len(Ot.objects.filter(
-            creation_date__month=3, creation_date__year=2024))
+            creation_date__month=m, creation_date__year=2024))
         ot_finish = len(Ot.objects.filter(
-            creation_date__month=3, creation_date__year=2024, state='f'))
+            creation_date__month=m, creation_date__year=2024, state='f'))
         preventivo = len(Ot.objects.filter(
-            creation_date__month=3, creation_date__year=2024, tipo_mtto='p'))
+            creation_date__month=m, creation_date__year=2024, tipo_mtto='p'))
         correctivo = len(Ot.objects.filter(
-            creation_date__month=3, creation_date__year=2024, tipo_mtto='c'))
+            creation_date__month=m, creation_date__year=2024, tipo_mtto='c'))
         modificativo = len(Ot.objects.filter(
-            creation_date__month=3, creation_date__year=2024, tipo_mtto='m'))
+            creation_date__month=m, creation_date__year=2024, tipo_mtto='m'))
 
     if ots == 0:
         ind_cumplimiento = 0
@@ -994,6 +1003,7 @@ def indicadores(request):
         'ots': ots,
         'ots_asset': ots_per_asset,
         'asset_labels': asset_labels,
+        'ots_finished': ot_finish,
     }
     return render(request, 'got/indicadores.html', context)
 

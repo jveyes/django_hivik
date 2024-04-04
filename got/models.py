@@ -162,7 +162,7 @@ class Equipo(models.Model):
 class HistoryHour(models.Model):
 
     report_date = models.DateField()
-    hour = models.IntegerField()
+    hour = models.DecimalField(max_digits=5, decimal_places=2)
 
     reporter = models.ForeignKey(
         User,

@@ -1,6 +1,6 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
-{% block head %}
+{% block header %}
     {% if perms.got.view_asset or request.user|has_group:"buzos_members"  %}
         <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
     {% endif %}
@@ -12,9 +12,7 @@
 <!------------------------------------ Opciones (Crear OT/ Ver reporte de horas totales) ---------------------------------------->
 <section>
     <div class="d-flex">
-        {% if perms.got.add_ot or request.user|has_group:"santamarta_station" %}
-            <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
-        {% endif %}
+        <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
         {% if perms.got.add_ot %}
             <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
                 Crear nuevo sistema
@@ -162,6 +160,7 @@
 			<table class="table mt-1">
 				<thead>
 					<tr>
+						<th scope="col">Equipo</th>
 						<th scope="col">Codigo</th>
 						<th scope="col">Frecuencia</th>
 						<th scope="col">Control</th>
@@ -173,6 +172,7 @@
 				<tbody>
 					{% for ruta in page_obj_rutas %}
 					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
+						<th scope="row">{{ ruta.system.name }}</th>
 						<th scope="row">{{ ruta.name }}</th>
 						<td>{{ ruta.frecuency }}</td>
 						<td>{{ ruta.get_control_display }}</td>

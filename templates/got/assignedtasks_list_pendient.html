@@ -1,7 +1,7 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
-{% block head %}
+{% block header %}
 	Mis actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif %}{% if worker %}/{{ worker }}{% endif %}
 {% endblock %}
 

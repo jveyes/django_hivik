@@ -7,7 +7,7 @@
 		<p>¿Estas seguro que deseas eliminar el sistema: <strong>{{ system }}</strong>?</p>
 
 		<form action="" method="POST">{% csrf_token %}
-  			<input type="submit" action="" value="Si, Eliminar." />
+  			<input class="btn btn-danger" type="submit" action="" value="Si, Eliminar." />
 		</form>
 	</div>
 {% endblock %}

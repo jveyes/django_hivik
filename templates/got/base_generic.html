@@ -1,6 +1,6 @@
 {% load my_tags %}
-
-<!doctype html>
+{% obtener_asset_del_supervisor as asset_del_supervisor %}
+<!DOCTYPE html>
 <html lang="es">
 <head>
 	<!-- Metadatos  -->
@@ -10,7 +10,7 @@
     <meta name="keywords" content="Serport, Mantenimiento, actividades, activos">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Titulo -->
-    <title>Got</title>
+    <title>GOT</title>
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -20,7 +20,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/style.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+	{% block headtag %}{% endblock %}
 	<style>
 		.navbar-custom .navbar-nav .nav-link {
     		color: #000;
@@ -40,38 +40,46 @@
 	<!-- Barra de navegacion -->
 	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #cad3db;">
 		<div class="container-fluid">
-          <!-- Logo de serport -->
+        	<!-- Logo de serport -->
 		  	<a class="nav-link" href="{% url 'got:my-tasks' %}">
         		<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
 			</a>
+			<!-- Boton para barra de navegación responsive -->
         	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           		<span class="navbar-toggler-icon"></span>
         	</button>
+			<!-- Enlaces de navegación -->
         	<div class="collapse navbar-collapse" id="navbarSupportedContent">
         		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
-						<a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
-            		</li>
-					{% obtener_asset_del_supervisor as asset_del_supervisor %}
-					{% if asset_del_supervisor %}
-						<!-- Muestra el enlace directo al equipo del supervisor -->
+
+					<!-- Muestra el enlace directo al equipo del supervisor -->
+					{% if request.user|has_group:"maq_members" %}
 						<li class="nav-item {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}">
 							<a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
 						</li>
-					{% endif %}
-					{% if request.user|has_group:"buzos_members" %}
+					{% else %}
 						<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
 							<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
 						</li>
 					{% endif %}
+
+					<!-- Vistas publicas -->
+            		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
+            		</li>
 					<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
 				  	</li>
+
+					{% if not request.user|has_group:"serport_members" %}
+					  	<li class="nav-item">
+						  	<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
+							<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
+						</li>
+				  	{% endif %}
+
             		<!-- Opciones limitadas para supervisores de serport -->
             		{% if request.user|has_group:"super_members" %}
-            			<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-              				<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
-            			</li>
 						<li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
 							<a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
 					  	</li>
@@ -79,16 +87,12 @@
 							<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
 					  	</li>
             		{% endif %}
-					{% if not request.user|has_group:"serport_members" %}
-						<li class="nav-item">
-							<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
-							<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
-						</li>
-					{% endif %}
+
           		</ul>
+
           		<!-- Boton de logout -->
-				  <form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
-					<div style="color: #fff; padding-right: 15px;">
+				<form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
+					<div style="color: #000; padding-right: 15px;">
 						{{ user.get_username }}
 					</div>
 					<button class="btn btn-outline-danger" type="submit">
@@ -101,59 +105,57 @@
 
 	<!-- Bloque main -->
 	<main class="container mt-4">
+
 		<!-- Titulo de la pagina -->
-		<h1 class="mb-4">{% block head %}{% endblock %}</h1>
+		<h1 class="mb-4">{% block header %}{% endblock %}</h1>
 
 		<!-- Contenido -->
 		{% block content %}{% endblock %}
 
 		{% if is_paginated %}
-		<nav aria-label="Page navigation example">
-			<ul class="pagination">
-				{% if page_obj.has_previous %}
-					<li class="page-item">
-						<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page=1" tabindex="-1" aria-disabled="true">Primera</a>
-					</li>
-					<li class="page-item">
-						<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}"><i class="bi bi-caret-left-fill"></i></a>
-					</li>
-				{% endif %}
-	
-				{% for num in page_obj.paginator.page_range %}
-					{% if page_obj.number == num %}
-						<li class="page-item active" aria-current="page"><a class="page-link" href="#">{{ num }}</a></li>
-					{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-						<li class="page-item"><a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a></li>
+			<nav aria-label="Page navigation example">
+				<ul class="pagination">
+					{% if page_obj.has_previous %}
+						<li class="page-item">
+							<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page=1" tabindex="-1" aria-disabled="true">Primera</a>
+						</li>
+						<li class="page-item">
+							<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}"><i class="bi bi-caret-left-fill"></i></a>
+						</li>
 					{% endif %}
-				{% endfor %}
 	
-				{% if page_obj.has_next %}
-					<li class="page-item">
-						<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}"><i class="bi bi-caret-right-fill"></i></a>
-					</li>
-					<li class="page-item">
-						<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.paginator.num_pages }}">Última</a>
-					</li>
-				{% endif %}
-			</ul>
-		</nav>
-	{% endif %}
+					{% for num in page_obj.paginator.page_range %}
+						{% if page_obj.number == num %}
+							<li class="page-item active" aria-current="page"><a class="page-link" href="#">{{ num }}</a></li>
+						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+							<li class="page-item"><a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a></li>
+						{% endif %}
+					{% endfor %}
+	
+					{% if page_obj.has_next %}
+						<li class="page-item">
+							<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}"><i class="bi bi-caret-right-fill"></i></a>
+						</li>
+						<li class="page-item">
+							<a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ page_obj.paginator.num_pages }}">Última</a>
+						</li>
+					{% endif %}
+				</ul>
+			</nav>
+		{% endif %}
 	
 	</main>
 
-	<div class="container">
 	<hr class="bottom-line">
-	<footer>
-	  <p>
-		Departamento de mantenimiento - Serport SAS
-	  </p>
-	  <p>Version en desarrollo v1.5.2 </p>
+	<footer class="container">
+		<p>
+			Departamento de mantenimiento - Serport SAS
+	  	</p>
+	  	<p>Version en desarrollo v1.5.2 </p>
 	</footer>
 
 	<!-- javascript -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-	    <!-- Scripts que son comunes a todas las páginas -->
-		{% block javascript %}
-		{% endblock %}
+
 </body>
 </html>

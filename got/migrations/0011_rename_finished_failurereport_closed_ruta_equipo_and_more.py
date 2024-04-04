@@ -12,6 +12,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        
+        migrations.AddField(
+            model_name='ruta',
+            name='equipo',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo'),
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='ot',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot'),
+        ),
         migrations.AlterField(
             model_name='equipo',
             name='imagen',

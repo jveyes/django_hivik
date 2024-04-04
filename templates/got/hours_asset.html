@@ -1,6 +1,6 @@
 {% extends "got/base_generic.html" %}
 
-{% block head %}
+{% block header %}
 <a href="{% url 'got:asset-detail' asset.id %}"><i class="bi bi-arrow-90deg-left"></i></a>
 reporte de horas {{ asset.name }}
 {% endblock %}
@@ -10,10 +10,10 @@ reporte de horas {{ asset.name }}
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Guardar</button>
+    <button class="btn btn-primary" type="submit">Guardar</button>
 </form>
 
-<h3>Horometro actual {{ component.horometro }}</h3>
+<h3 class="mt-4">Horometro actual {{ component.horometro }}</h3>
 
 <!-- Mostrar el listado de registros en una tabla -->
 <div class="center">
