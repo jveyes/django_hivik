@@ -912,6 +912,7 @@ def finish_task(request, pk):
 
         if form.is_valid():
             act.news = form.cleaned_data['news']
+            act.evidence = form.cleaned_data['evidence']
             act.finished = form.cleaned_data['finished']
             act.save()
             return HttpResponseRedirect(reverse('got:my-tasks'))
