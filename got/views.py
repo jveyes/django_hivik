@@ -613,7 +613,7 @@ class OtCreate(CreateView):
         if isinstance(form, OtFormNoSup):
             ot.super = self.request.user
         ot.save()
-        return redirect(self.get_success_url())
+        return redirect('got:ot-detail', pk=ot.pk)
 
 
 class OtUpdate(UpdateView):
