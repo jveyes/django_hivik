@@ -37,9 +37,36 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('report_date', models.DateField()),
-                ('hour', models.IntegerField()),
+                ('hour', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('component', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hours', to='got.equipo')),
                 ('reporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
+        ),
+        migrations.AlterField(
+            model_name='equipo',
+            name='initial_hours',
+            field=models.IntegerField(default=0),
+        ),
+        migrations.AlterModelOptions(
+            name='failurereport',
+            options={'ordering': ['-moment']},
+        ),
+        migrations.AlterModelOptions(
+            name='historyhour',
+            options={'ordering': ['-report_date']},
+        ),
+        migrations.AlterModelOptions(
+            name='system',
+            options={'ordering': ['asset__name', 'group']},
+        ),
+        migrations.AddField(
+            model_name='equipo',
+            name='initial_hours',
+            field=models.IntegerField(default=10),
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='control',
+            field=models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1),
         ),
     ]

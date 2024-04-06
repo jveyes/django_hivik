@@ -14,7 +14,4 @@ class Migration(migrations.Migration):
             model_name='task',
             name='ruta',
         ),
-        migrations.DeleteModel(
-            name='Ruta',
-        ),
     ]

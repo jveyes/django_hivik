@@ -3,7 +3,7 @@
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
-
+import got.models
 
 class Migration(migrations.Migration):
 
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('tipo_mtto', models.CharField(choices=[('p', 'Preventivo'), ('c', 'Correctivo'), ('m', 'Modificativo')], max_length=1)),
                 ('super', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
-                ('info_contratista_pdf', models.FileField(upload_to='pdfs/', null=True, blank=True)),
+                ('info_contratista_pdf', models.FileField(upload_to=got.models.get_upload_path, null=True, blank=True)),
             ],
             options={
                 'ordering': ['-num_ot'],
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 ('fabricante', models.CharField(blank=True, max_length=50, null=True)),
                 ('feature', models.TextField()),
                 ('prom_hours', models.IntegerField(blank=True, default=0, null=True)),
-                ('imagen', models.ImageField(blank=True, null=True, upload_to='media/')),
+                ('imagen', models.ImageField(blank=True, null=True, upload_to=got.models.get_upload_path)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='equipos', to='got.system')),
             ],
             options={
@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ('procedimiento', models.TextField(blank=True, default='', null=True)),
                 ('suministros', models.TextField(blank=True, default='', null=True)),
                 ('news', models.TextField(blank=True, null=True)),
-                ('evidence', models.ImageField(blank=True, null=True, upload_to='media/')),
+                ('evidence', models.ImageField(blank=True, null=True, upload_to=got.models.get_upload_path)),
                 ('start_date', models.DateField(blank=True, null=True)),
                 ('men_time', models.IntegerField(default=0)),
                 ('finished', models.BooleanField()),

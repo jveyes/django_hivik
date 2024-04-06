@@ -104,6 +104,59 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
+@login_required
+def reschedule_task(request, pk):
+    '''
+    Vista formulario para reprogramar actividades (v1.0)
+    '''
+    act = get_object_or_404(Task, pk=pk)
+
+    time = act.men_time
+    final_date = act.start_date + timedelta(days=time)
+
+    if request.method == 'POST':
+        form = RescheduleTaskForm(request.POST, instance=act)
+
+        if form.is_valid():
+            act.start_date = form.cleaned_data['start_date']
+            act.news = form.cleaned_data['news']
+            act.men_time = form.cleaned_data['men_time']
+            act.save()
+            return HttpResponseRedirect(reverse('got:my-tasks'))
+
+    else:
+        # proposed_reschedule_date = date.today() + timedelta(weeks=1)
+        form = RescheduleTaskForm(instance=act)
+
+    context = {'form': form, 'task': act, 'final_date': final_date}
+    return render(request, 'got/task_reschedule.html', context)
+
+
+def finish_task(request, pk):
+    '''
+    Vista formulario para finalizar actividades (v1.1)
+    '''
+    act = get_object_or_404(Task, pk=pk)
+
+    time = act.men_time
+    final_date = act.start_date + timedelta(days=time)
+
+    if request.method == 'POST':
+        form = UpdateTaskForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            act.news = form.cleaned_data['news']
+            act.evidence = form.cleaned_data['evidence']
+            act.finished = form.cleaned_data['finished']
+            act.save()
+            return HttpResponseRedirect(reverse('got:my-tasks'))
+
+    else:
+        form = UpdateTaskForm()
+
+    context = {'form': form, 'task': act, 'final_date': final_date}
+    return render(request, 'got/task_finish_form.html', context)
+
 # ---------------------------- Activos (Assets) ---------------------------- #
 class AssetsListView(LoginRequiredMixin, generic.ListView):
 
@@ -263,6 +316,35 @@ class SysDelete(DeleteView):
         return str(success_url)
 
 
+class SysUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = System
+    form_class = SysForm
+
+# ---------------------------- Equipos ---------------------------- #
+class EquipoUpdate(UpdateView):
+    '''
+    Vista formulario para actualizar una actividad
+    '''
+    model = Equipo
+    form_class = EquipoFormUpdate
+    template_name = 'got/equipo_form.html'
+    http_method_names = ['get', 'post']
+
+
+class EquipoDelete(DeleteView):
+    '''
+    Vista formulario para eliminar actividades
+    '''
+    model = Equipo
+
+    def get_success_url(self):
+        sys_code = self.object.system.id
+        success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
+        return success_url
+
 # ---------------------------- Failure Report ---------------------------- #
 
 class FailureListView(LoginRequiredMixin, generic.ListView):
@@ -346,7 +428,6 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-# Detalle de actividades
 class FailureDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     Detalle de reportes de falla (v1.0)
@@ -501,6 +582,12 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
         return context
 
+    def actualizar_rutas_dependientes(self, ruta):
+        ruta.intervention_date = timezone.now()
+        ruta.save()
+        if ruta.dependencia is not None:
+            self.actualizar_rutas_dependientes(ruta.dependencia)
+
     def post(self, request, *args, **kwargs):
         ot = self.get_object()
         if request.user.groups.filter(name='super_members').exists():
@@ -516,8 +603,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
             rutas_relacionadas = Ruta.objects.filter(ot=ot)
             for ruta in rutas_relacionadas:
-                ruta.intervention_date = timezone.now()
-                ruta.save()
+                self.actualizar_rutas_dependientes(ruta)
 
             # Verificar y cerrar el reporte de falla relacionado, si existe
             if hasattr(ot, 'failure_report'):
@@ -638,7 +724,15 @@ class OtUpdate(UpdateView):
         return kwargs
 
 
-# Detalle de actividades
+class OtDelete(DeleteView):
+    '''
+    Vista formulario para confirmar eliminacion de ordenes de trabajo (v1.0)
+    '''
+    model = Ot
+    success_url = reverse_lazy('got:ot-list')
+
+
+# --------------------------- Actividades --------------------------- #
 class TaskDetailView(LoginRequiredMixin, generic.DetailView):
     '''
     Detalle de actividades (v1.0)
@@ -661,34 +755,7 @@ class TaskUpdate(UpdateView):
             return ActFormNoSup
 
 
-class RutaListView(LoginRequiredMixin, generic.ListView):
-    model = Ruta
-    paginate_by = 15
-    template_name = 'got/ruta_list.html'
-    context_object_name = 'ruta_list'
-
-    def get_queryset(self):
-
-        area_filter = self.request.GET.get('area_filter')
-        if area_filter:
-            queryset = sorted(
-                Ruta.objects.filter(system__asset__area=area_filter),
-                key=lambda t: t.next_date
-                )
-        else:
-            queryset = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        """
-        Agrega assets y area_filter al contexto.
-        """
-        context = super(RutaListView, self).get_context_data(**kwargs)
-        context['assets'] = Asset.objects.all()
-        context['area_filter'] = self.request.GET.get('area_filter')
-        return context
-
-
+# Para rutinas
 class TaskCreate(CreateView):
     '''
     Vista formulario para actualizar una actividad
@@ -715,75 +782,6 @@ class TaskCreate(CreateView):
         task = self.object
         # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[task.ruta.system.id])
-
-
-# ------------------------------------- Formularios -------------------------#
-
-@login_required
-def reschedule_task(request, pk):
-    '''
-    Vista formulario para reprogramar actividades (v1.0)
-    '''
-    act = get_object_or_404(Task, pk=pk)
-
-    time = act.men_time
-    final_date = act.start_date + timedelta(days=time)
-
-    if request.method == 'POST':
-        form = RescheduleTaskForm(request.POST, instance=act)
-
-        if form.is_valid():
-            act.start_date = form.cleaned_data['start_date']
-            act.news = form.cleaned_data['news']
-            act.men_time = form.cleaned_data['men_time']
-            act.save()
-            return HttpResponseRedirect(reverse('got:my-tasks'))
-
-    else:
-        # proposed_reschedule_date = date.today() + timedelta(weeks=1)
-        form = RescheduleTaskForm(instance=act)
-
-    context = {'form': form, 'task': act, 'final_date': final_date}
-    return render(request, 'got/task_reschedule.html', context)
-
-
-class RutaCreate(CreateView):
-    '''
-    Vista formulario para crear ordenes de trabajo (v1.0)
-    '''
-    model = Ruta
-    form_class = RutaForm
-
-    def form_valid(self, form):
-        # Obtener el valor del parámetro pk desde la URL
-        pk = self.kwargs['pk']
-
-        # Obtener el objeto System relacionado con el pk
-        system = get_object_or_404(System, pk=pk)
-
-        # Establecer el valor del campo system en el formulario
-        form.instance.system = system
-
-        # Llamar al método form_valid de la clase base
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        ruta = self.object
-        # Redirigir a la vista de detalle del objeto recién creado
-        return reverse('got:sys-detail', args=[ruta.system.id])
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
-        return kwargs
-
-
-class OtDelete(DeleteView):
-    '''
-    Vista formulario para confirmar eliminacion de ordenes de trabajo (v1.0)
-    '''
-    model = Ot
-    success_url = reverse_lazy('got:ot-list')
 
 
 class TaskDelete(DeleteView):
@@ -827,34 +825,64 @@ class TaskDeleterut(DeleteView):
         return render(request, 'got/task_confirm_delete.html', context)
 
 
-class EquipoUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
-    model = Equipo
-    form_class = EquipoFormUpdate
-    template_name = 'got/equipo_form.html'
-    http_method_names = ['get', 'post']
+# --------------------------- Rutinas --------------------------- #
+class RutaListView(LoginRequiredMixin, generic.ListView):
+    model = Ruta
+    paginate_by = 15
+    template_name = 'got/ruta_list.html'
+    context_object_name = 'ruta_list'
+
+    def get_queryset(self):
+
+        area_filter = self.request.GET.get('area_filter')
+        if area_filter:
+            queryset = sorted(
+                Ruta.objects.filter(system__asset__area=area_filter),
+                key=lambda t: t.next_date
+                )
+        else:
+            queryset = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Agrega assets y area_filter al contexto.
+        """
+        context = super(RutaListView, self).get_context_data(**kwargs)
+        context['assets'] = Asset.objects.all()
+        context['area_filter'] = self.request.GET.get('area_filter')
+        return context
 
 
-class SysUpdate(UpdateView):
+class RutaCreate(CreateView):
     '''
-    Vista formulario para actualizar una actividad
+    Vista formulario para crear ordenes de trabajo (v1.0)
     '''
-    model = System
-    form_class = SysForm
+    model = Ruta
+    form_class = RutaForm
 
+    def form_valid(self, form):
+        # Obtener el valor del parámetro pk desde la URL
+        pk = self.kwargs['pk']
 
-class EquipoDelete(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
-    model = Equipo
+        # Obtener el objeto System relacionado con el pk
+        system = get_object_or_404(System, pk=pk)
+
+        # Establecer el valor del campo system en el formulario
+        form.instance.system = system
+
+        # Llamar al método form_valid de la clase base
+        return super().form_valid(form)
 
     def get_success_url(self):
-        sys_code = self.object.system.id
-        success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
-        return success_url
+        ruta = self.object
+        # Redirigir a la vista de detalle del objeto recién creado
+        return reverse('got:sys-detail', args=[ruta.system.id])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
+        return kwargs
 
 
 class RutaUpdate(UpdateView):
@@ -897,6 +925,45 @@ class RutaDelete(DeleteView):
         return success_url
 
 
+@login_required
+def crear_ot_desde_ruta(request, ruta_id):
+    ruta = get_object_or_404(Ruta, pk=ruta_id)
+    nueva_ot = Ot(
+        description=f"Rutina de mantenimiento con código {ruta.name}",
+        state='x',  # Ejecución
+        super=request.user,
+        tipo_mtto='p',
+        system=ruta.system,
+    )
+    nueva_ot.save()
+
+    def copiar_tasks_y_actualizar_ot(ruta, ot):
+        for task in ruta.task_set.all():
+            Task.objects.create(
+                ot=ot,
+                responsible=task.responsible,
+                description=task.description,
+                procedimiento=task.procedimiento,
+                hse=task.hse,
+                suministros=task.suministros,
+                news=task.news,
+                evidence=task.evidence,
+                start_date=timezone.now().date(),
+                men_time=1,
+                finished=False,
+            )
+
+        ruta.ot = ot
+        ruta.save()
+
+        # Llamada recursiva para rutas dependientes
+        if ruta.dependencia:
+            copiar_tasks_y_actualizar_ot(ruta.dependencia, ot)
+
+    # Llamar a la función auxiliar con la ruta inicial y la OT recién creada
+    copiar_tasks_y_actualizar_ot(ruta, nueva_ot)
+    return redirect('got:ot-detail', pk=nueva_ot.pk)
+
 # Reportes
 def report_pdf(request, num_ot):
     '''
@@ -915,31 +982,6 @@ def report_pdf(request, num_ot):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-
-def finish_task(request, pk):
-    '''
-    Vista formulario para finalizar actividades (v1.1)
-    '''
-    act = get_object_or_404(Task, pk=pk)
-
-    time = act.men_time
-    final_date = act.start_date + timedelta(days=time)
-
-    if request.method == 'POST':
-        form = UpdateTaskForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            act.news = form.cleaned_data['news']
-            act.evidence = form.cleaned_data['evidence']
-            act.finished = form.cleaned_data['finished']
-            act.save()
-            return HttpResponseRedirect(reverse('got:my-tasks'))
-
-    else:
-        form = UpdateTaskForm()
-
-    context = {'form': form, 'task': act, 'final_date': final_date}
-    return render(request, 'got/task_finish_form.html', context)
 
 
 @login_required
@@ -1075,39 +1117,3 @@ def reportHoursAsset(request, asset_id):
     }
 
     return render(request, 'got/hours_asset.html', context)
-
-
-@login_required
-def crear_ot_desde_ruta(request, ruta_id):
-    ruta = get_object_or_404(Ruta, pk=ruta_id)
-    nueva_ot = Ot(
-        description=f"Rutina de mantenimiento con código {ruta.name}",
-        state='x',  # Ejecución
-        super=request.user,
-        tipo_mtto='p',
-        system=ruta.system,
-    )
-    nueva_ot.save()
-
-    # Copiar las Task de la Ruta a la nueva OT
-    for task in ruta.task_set.all():
-        Task.objects.create(
-            ot=nueva_ot,
-            responsible=task.responsible,
-            description=task.description,
-            procedimiento=task.procedimiento,
-            hse=task.hse,
-            suministros=task.suministros,
-            news=task.news,
-            evidence=task.evidence,
-            start_date=date.today(),
-            men_time=1,
-            finished=False,
-        )
-
-    # Actualizar el campo OT de la Ruta con la nueva OT
-    ruta.ot = nueva_ot
-    ruta.save()
-
-    # Redirige a la vista de detalle de la nueva OT
-    return redirect('got:ot-detail', pk=nueva_ot.pk)

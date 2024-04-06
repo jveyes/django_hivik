@@ -249,6 +249,13 @@ class Ruta(models.Model):
     ot = models.ForeignKey(
         Ot, on_delete=models.SET_NULL, null=True, blank=True
     )
+    dependencia = models.OneToOneField(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='dependiente'
+    )
 
     @property
     def next_date(self):
@@ -296,10 +303,13 @@ class Ruta(models.Model):
                 return 'v'
 
     def __str__(self):
-        return '%s - %s' % (self.code, self.system)
+        return '%s - %s - %s' % (self.code, self.system, self.name)
 
     def get_absolute_url(self):
         return reverse('got:sys-detail', args=[str(self.system.id)])
+
+    class Meta:
+        ordering = ['frecuency']
 
 
 class Task(models.Model):

@@ -3,6 +3,7 @@
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
+import got.models
 
 
 class Migration(migrations.Migration):
@@ -38,21 +39,11 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('causas', models.TextField()),
                 ('suggest_repair', models.TextField(blank=True, null=True)),
-                ('evidence', models.ImageField(blank=True, null=True, upload_to='media/')),
+                ('evidence', models.ImageField(blank=True, null=True, upload_to=got.models.get_upload_path)),
                 ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.equipo')),
                 ('reporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('related_ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
+                ('related_ot', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='failure_report', to='got.ot')),
                 ('closed', models.BooleanField(default=False)),
             ],
-        ),
-        migrations.AddField(
-            model_name='ruta',
-            name='equipo',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo'),
-        ),
-        migrations.AddField(
-            model_name='ruta',
-            name='ot',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot'),
         ),
     ]

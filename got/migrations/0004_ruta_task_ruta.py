@@ -11,15 +11,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='Ruta',
-            fields=[
-                ('code', models.CharField(max_length=50, primary_key=True, serialize=False)),
-                ('frecuency', models.IntegerField()),
-                ('intervention_date', models.DateField()),
-                ('system', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.system')),
-            ],
-        ),
         migrations.AddField(
             model_name='task',
             name='ruta',
