@@ -253,13 +253,19 @@ class Ruta(models.Model):
     @property
     def next_date(self):
         if self.control == 'd':
-            ndate = self.intervention_date + timedelta(days=self.frecuency)
-        else:
+            ndays = self.frecuency
+        elif self.control == 'h':
+            period = self.equipo.hours.filter(
+                    report_date__gte=self.intervention_date,
+                    report_date__lte=date.today()
+                ).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
+            inv = self.frecuency - period
             try:
-                ndays = int(self.frecuency/self.equipo.prom_hours)
-                ndate = self.intervention_date + timedelta(days=ndays)
+                ndays = int(inv/self.equipo.prom_hours)
             except (ZeroDivisionError, AttributeError):
-                ndate = self.intervention_date + timedelta(days=30)
+                ndays = int(self.frecuency/1)
+
+        ndate = self.intervention_date + timedelta(days=ndays)
         return ndate
 
     @property
@@ -268,24 +274,26 @@ class Ruta(models.Model):
         if self.control == 'd':
             percent = int((days_remaining / self.frecuency) * 100)
         else:
-            try:
-                ndays = int(self.frecuency/self.equipo.prom_hours)
-                percent = int((days_remaining / ndays) * 100)
-            except (ZeroDivisionError, AttributeError):
-                percent = 'n'
+            hours_period = self.equipo.hours.filter(
+                    report_date__gte=self.intervention_date,
+                    report_date__lte=date.today()
+                ).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
+            inv = self.frecuency - hours_period
+            percent = int((inv / self.frecuency) * 100)
         return percent
 
     @property
     def maintenance_status(self):
         percentage = self.percentage_remaining
-        if 25 <= percentage <= 100:
-            return 'c'
-        elif 5 <= percentage <= 26:
-            return 'p'
-        elif percentage == 'n':
-            return percentage
-        else:
+        if not self.ot:
             return 'v'
+        else:
+            if 25 <= percentage <= 100:
+                return 'c'
+            elif 5 <= percentage <= 24:
+                return 'p'
+            else:
+                return 'v'
 
     def __str__(self):
         return '%s - %s' % (self.code, self.system)

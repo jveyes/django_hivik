@@ -74,7 +74,8 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        queryset = Task.objects.filter(ot__isnull=False, start_date__isnull=False)
+        queryset = Task.objects.filter(
+            ot__isnull=False, start_date__isnull=False)
 
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('worker')
@@ -513,10 +514,10 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             ot.state = 'Finalizado'
             ot.save()
 
-            # Verificar y actualizar la ruta relacionada, si existe
-            if hasattr(ot, 'ruta'):
-                ot.ruta.intervention_date = timezone.now()
-                ot.ruta.save()
+            rutas_relacionadas = Ruta.objects.filter(ot=ot)
+            for ruta in rutas_relacionadas:
+                ruta.intervention_date = timezone.now()
+                ruta.save()
 
             # Verificar y cerrar el reporte de falla relacionado, si existe
             if hasattr(ot, 'failure_report'):
@@ -660,22 +661,32 @@ class TaskUpdate(UpdateView):
             return ActFormNoSup
 
 
-@permission_required('got.can_see_completely')
-def RutaListView(request):
+class RutaListView(LoginRequiredMixin, generic.ListView):
+    model = Ruta
+    paginate_by = 15
+    template_name = 'got/ruta_list.html'
+    context_object_name = 'ruta_list'
 
-    assets = Asset.objects.all()
+    def get_queryset(self):
 
-    area_filter = request.GET.get('area_filter')
-    if area_filter:
-        ruta = sorted(
-            Ruta.objects.filter(system__asset__area=area_filter),
-            key=lambda t: t.next_date
-            )
-    else:
-        ruta = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+        area_filter = self.request.GET.get('area_filter')
+        if area_filter:
+            queryset = sorted(
+                Ruta.objects.filter(system__asset__area=area_filter),
+                key=lambda t: t.next_date
+                )
+        else:
+            queryset = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+        return queryset
 
-    context = {'ruta_list': ruta, 'assets': assets, 'area_filter': area_filter}
-    return render(request, 'got/ruta_list.html', context)
+    def get_context_data(self, **kwargs):
+        """
+        Agrega assets y area_filter al contexto.
+        """
+        context = super(RutaListView, self).get_context_data(**kwargs)
+        context['assets'] = Asset.objects.all()
+        context['area_filter'] = self.request.GET.get('area_filter')
+        return context
 
 
 class TaskCreate(CreateView):
@@ -708,7 +719,7 @@ class TaskCreate(CreateView):
 
 # ------------------------------------- Formularios -------------------------#
 
-@permission_required('got.can_see_completely')
+@login_required
 def reschedule_task(request, pk):
     '''
     Vista formulario para reprogramar actividades (v1.0)
@@ -931,7 +942,7 @@ def finish_task(request, pk):
     return render(request, 'got/task_finish_form.html', context)
 
 
-@permission_required('got.can_see_completely')
+@login_required
 def indicadores(request):
 
     m = 4

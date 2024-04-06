@@ -331,10 +331,23 @@ class EquipoFormUpdate(forms.ModelForm):
 
 #  Form 9: Crear/editar nueva ruta
 class RutaForm(forms.ModelForm):
+
+    def clean(self):
+        cleaned_data = super().clean()
+        control = cleaned_data.get('control')
+        equipo = cleaned_data.get('equipo')
+
+        if control == 'h' and not equipo:
+            self.add_error(
+                'equipo',
+                'Seleccionar un equipo es obligatorio para el control en horas'
+                )
+        return cleaned_data
+
     def clean_frecuency(self):
         frecuency = self.cleaned_data['frecuency']
 
-        if frecuency <= 0:
+        if frecuency < 0:
             raise forms.ValidationError(
                 'El valor de la frecuencia no puede ser 0.'
                 )

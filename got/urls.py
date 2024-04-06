@@ -83,7 +83,7 @@ urlpatterns = [
         name='delete-task'),
 
     # ---------------------------- Rutinas view ----------------------------- #
-    path('rutas/', views.RutaListView, name="ruta-list"),
+    path('rutas/', views.RutaListView.as_view(), name="ruta-list"),
     path(
         'ruta/<str:pk>/create/',
         views.RutaCreate.as_view(),
