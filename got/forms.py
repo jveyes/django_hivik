@@ -359,7 +359,8 @@ class RutaForm(forms.ModelForm):
         labels = {
             'name': 'Codigo interno',
             'frecuency': 'Frecuencia',
-            'intervention_date': 'Fecha ultima intervención'
+            'intervention_date': 'Fecha ultima intervención',
+            'dependencia': 'Dependencia'
             }
         widgets = {
             'intervention_date': XYZ_DateInput(format=['%Y-%m-%d'],),
@@ -367,11 +368,10 @@ class RutaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         system = kwargs.pop('system')
-        asset = system.asset
-        super().__init__(*args, **kwargs)
+        super(RutaForm, self).__init__(*args, **kwargs)
         self.fields['equipo'].queryset = Equipo.objects.filter(system=system)
-        self.fields['ot'].queryset = Ot.objects.filter(
-            system__asset=asset)
+        self.fields['ot'].queryset = Ot.objects.filter(system__asset=system.asset)
+        self.fields['dependencia'].queryset = Ruta.objects.filter(system=system).exclude(code=self.instance.code if self.instance else None)
 
 
 class ReportHours(forms.ModelForm):
