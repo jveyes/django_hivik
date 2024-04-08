@@ -1076,7 +1076,7 @@ def indicadores(request):
         ots = len(Ot.objects.filter(
             creation_date__month=m, creation_date__year=2024))
         ot_finish = len(Ot.objects.filter(
-            creation_date__month=m, creation_date__year=2024, state='Finalizado'))
+            creation_date__month=m, creation_date__year=2024, state='f'))
 
         preventivo = len(Ot.objects.filter(
             creation_date__month=m, creation_date__year=2024, tipo_mtto='p'))
