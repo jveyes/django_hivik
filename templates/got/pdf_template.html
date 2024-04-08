@@ -125,7 +125,7 @@
     <table style="border-collapse: collapse; margin-top: 10px">
         <thead>
             <tr>
-                <td colspan="5" style="padding-top: 5px; text-align: center;  background-color: rgb(84, 141, 212); border: 1px solid black; height: auto;">
+                <td colspan="6" style="padding-top: 5px; text-align: center;  background-color: rgb(84, 141, 212); border: 1px solid black; height: auto;">
                     <h3>ACTIVIDADES REALIZADAS</h3>
                 </td>
             </tr>
@@ -133,7 +133,8 @@
                 <th style="width: 4%; text-align: center; border-left: 1px solid black;">#</th>
                 <th style="width: 60%;">Actividades</th>
                 <th>Responsable</th>
-                <th>Fecha</th>
+                <th>Fecha inicio</th>
+                <th>Fecha Finalización</th>
                 <th style="width: 5%; text-align: center; border-right: 1px solid black;">Tiempo total(D)</th>
             </tr>
         </thead>
@@ -152,6 +153,9 @@
                     <td style="text-align: center; border-bottom: 0.5px solid black;">
                         {{ act.start_date|date:"d/m/Y" }}
                     </td>
+                    <td style="text-align: center; border-bottom: 0.5px solid black;">
+                        {{ act.final_date|date:"d/m/Y" }}
+                    </td>
                     <td style="text-align: center; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
                         {{ act.men_time }}
                     </td>
@@ -159,7 +163,7 @@
                 {% if act.news %}
                     <tr>
                         <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
-                        <td colspan="4" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                        <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
                             {{act.news}}
                         </td>
                     </tr>
