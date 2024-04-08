@@ -2,6 +2,7 @@
 
 from django.db import migrations, models
 import got.models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -15,5 +16,19 @@ class Migration(migrations.Migration):
             model_name='equipo',
             name='manual_pdf',
             field=models.FileField(blank=True, null=True, upload_to=got.models.get_upload_pdfs),
+        ),
+        migrations.AlterModelOptions(
+            name='ruta',
+            options={'ordering': ['frecuency']},
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='dependencia',
+            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='dependiente', to='got.ruta'),
+        ),
+        migrations.AlterField(
+            model_name='equipo',
+            name='initial_hours',
+            field=models.IntegerField(default=0),
         ),
     ]

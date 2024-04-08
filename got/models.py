@@ -2,10 +2,11 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
-from django.db.models import Sum
+from django.db.models import Sum, Count, Case, When, IntegerField, Value
 from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
+from simple_history.models import HistoricalRecords
 
 
 def get_upload_path(instance, filename):
@@ -106,6 +107,26 @@ class System(models.Model):
 
     class Meta:
         ordering = ['asset__name', 'group']
+    
+    @property
+    def maintenance_percentage(self):
+        rutas = self.rutas.all()
+        if not rutas:
+            return None
+
+        total_value = 0
+
+        for ruta in rutas:
+            if ruta.maintenance_status == 'c':
+                total_value += 1
+            elif ruta.maintenance_status == 'p':
+                total_value += 0.5
+
+        max_possible_value = len(rutas)
+        if max_possible_value == 0:
+            return None
+
+        return round((total_value / max_possible_value) * 100, 2)
 
 
 class Equipo(models.Model):
@@ -209,13 +230,11 @@ class Ot(models.Model):
     )
     state = models.CharField(choices=STATUS, default='x', max_length=50)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
-    info_contratista_pdf = models.FileField(
-        upload_to=get_upload_path,
-        null=True,
-        blank=True
-        )
+    info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)
+    ot_aprobada = models.FileField(upload_to=get_upload_path,null=True, blank=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE)
+    history = HistoricalRecords()
 
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
@@ -239,6 +258,7 @@ class Ruta(models.Model):
     control = models.CharField(choices=CONTROL, max_length=1)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
+    history = HistoricalRecords()
 
     system = models.ForeignKey(
         System, on_delete=models.CASCADE, related_name='rutas'
@@ -340,6 +360,7 @@ class Task(models.Model):
     start_date = models.DateField(null=True, blank=True)
     men_time = models.IntegerField(default=0)
     finished = models.BooleanField()
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.description
@@ -355,6 +376,9 @@ class Task(models.Model):
     @property
     def final_date(self):
         return self.start_date + timedelta(days=self.men_time)
+
+    class Meta:
+        permissions = (('can_reschedule_task', 'Reprogramar actividades'),)
 
 
 class FailureReport(models.Model):
@@ -385,7 +409,7 @@ class FailureReport(models.Model):
         default=list,
         blank=True
     )
-
+    history = HistoricalRecords()
     related_ot = models.OneToOneField(
         'Ot',
         on_delete=models.SET_NULL,

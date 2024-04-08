@@ -60,6 +60,12 @@
                 <td><a href="{{ ot.info_contratista_pdf.url }}" target="_blank">Ver PDF</a></td>
             </tr>
         {% endif %}
+        {% if ot.ot_aprobada %}
+            <tr>
+                <th>Orden recibida: </th>
+                <td><a href="{{ ot.ot_aprobada.url }}" target="_blank">Ver PDF</a></td>
+            </tr>
+        {% endif %}
     </tbody>
 </table>
 
@@ -68,6 +74,15 @@
         <h4>Reporte de Falla Relacionado</h4>
         <a href="{% url 'got:failure-report-detail' failure_report.pk %}">
             Ver Reporte de Falla #{{ failure_report.pk }}
+        </a>
+    </section>
+{% endif %}
+
+{% if ruta_id %}
+    <section>
+        <h4>Rutina de mantenimiento</h4>
+        <a href="{% url 'got:sys-detail' ot.system.pk %}">
+            Ver ruta de mantenimiento {{ ruta_id.name }}
         </a>
     </section>
 {% endif %}

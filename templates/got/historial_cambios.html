@@ -1,0 +1,6 @@
+{% for cambio in historial_modelo1 %}
+    <p>{{ cambio.instance }} fue modificado en {{ cambio.history_date }} por {{ cambio.history_user }}</p>
+{% endfor %}
+{% for cambio in historial_modelo2 %}
+    <p>{{ cambio.instance }} fue modificado en {{ cambio.history_date }} por {{ cambio.history_user }}</p>
+{% endfor %}

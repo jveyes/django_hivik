@@ -23,6 +23,7 @@ class Migration(migrations.Migration):
                 ('system', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.system')),
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
                 ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo')),
+                ('control', models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1))
             ],
         ),
         migrations.AddField(
@@ -45,5 +46,6 @@ class Migration(migrations.Migration):
                 ('related_ot', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='failure_report', to='got.ot')),
                 ('closed', models.BooleanField(default=False)),
             ],
+            options={'ordering': ['-moment']},
         ),
     ]

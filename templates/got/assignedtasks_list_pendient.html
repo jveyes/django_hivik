@@ -57,7 +57,7 @@
 				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Responsable</th>
 				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Fecha de Inicio</th>
 				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">Fecha de finalización</th>
-				{% if perms.got.can_see_completely %}
+				{% if perms.got.can_reschedule_task %}
 					<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
 						Reprogramar
 					</th>
@@ -65,22 +65,24 @@
 			</tr>
 		</thead>
 		<tbody>
+
 			{% if task_list %}
 			
 				{% for act in task_list %}
 					<tr>
 						<td><strong>{{act.ot.num_ot}}</strong></td>
-						<td><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
-						<td class="{% if act.is_overdue %}text-danger{% endif %}"><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+						<td class="{% if act.is_overdue %}text-danger{% endif %}"><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
+						<td><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
 						<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
 						<td>{{act.start_date|date:"d/m/Y"}}</td>
 						<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
-						{% if perms.got.can_see_completely %}
+						
+						{% if perms.got.can_reschedule_task %}
 							<td style="text-align: center;">
 								{% if act.is_overdue %}
-								<a href="{% url 'got:reschedule-task' act.id %}">
-									<i class="bi bi-calendar-x"></i>
-								</a>
+									<a href="{% url 'got:reschedule-task' act.id %}">
+										<i class="bi bi-calendar-x"></i>
+									</a>
 								{% endif %}
 							</td>
 						{% endif %}
@@ -90,6 +92,7 @@
 			{% else %}
 				<p>No hay actividades pendientes.</p>
 			{% endif %}
+			
 		</tbody>
 	</table>
 </section>

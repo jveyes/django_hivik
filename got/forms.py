@@ -6,6 +6,25 @@ from .models import (
 from django.contrib.auth.models import User, Group
 
 
+# Form 1: Crear/editar sistema
+class SysForm(forms.ModelForm):
+
+    '''
+    - asset_detail.html (modal para crear).
+    - system_form.html
+    '''
+
+    class Meta:
+        model = System
+        exclude = ['asset',]
+        labels = {
+            'name': 'Sistema',
+            'group': 'Grupo',
+            'location': 'Ubicación',
+            'state': 'Estado'
+        }
+
+# Wid 1
 class UserChoiceField(forms.ModelChoiceField):
     '''
     Objeto widget para desplegar nombre y apellido de los usuarios
@@ -13,7 +32,7 @@ class UserChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return f'{obj.first_name} {obj.last_name}'
 
-
+# Wid 2
 class XYZ_DateInput(forms.DateInput):
     '''
     Objeto para desplegar calendario en fechas de formularios
@@ -25,11 +44,13 @@ class XYZ_DateInput(forms.DateInput):
         super().__init__(**kwargs)
 
 
+# Form 2: reprogramación de actividades
 class RescheduleTaskForm(forms.ModelForm):
+
     '''
-    Form 1: reprogramación de actividades
     - "assignedtasks_list_pendient_user.html"
     '''
+
     news = forms.CharField(
         widget=forms.Textarea(attrs={'rows': 4}),
         required=False,
@@ -44,22 +65,28 @@ class RescheduleTaskForm(forms.ModelForm):
             'men_time': 'Tiempo de ejecución (Dias)'
             }
         widgets = {
-            'start_date': forms.DateInput(
-                format='%d/%m/%Y', attrs={'type': 'date'}
-                ),
+            'start_date': XYZ_DateInput(format=['%Y-%m-%d']),
             }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        men_time = cleaned_data.get('men_time')
 
-# Form 3: Actualizar actividad
-class UpdateTaskForm(forms.ModelForm):
+        if not start_date and not men_time:
+            raise forms.ValidationError('Debe proporcionar una nueva fecha de inicio y/o tiempo de ejecución.')
+        
+        return cleaned_data
+
+
+# Form 3: Finalizar actividad
+class FinishTask(forms.ModelForm):
+
     '''
-    Formulario ubicado en "assignedtasks_list_pendient_user.html"
+    - task_detail.html
     '''
-    news = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        required=False,
-        label='Novedades',
-        )
+
+    news = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, label='Novedades',)
 
     class Meta:
         model = Task
@@ -70,29 +97,16 @@ class UpdateTaskForm(forms.ModelForm):
                 'finished': 'Finalizar'
                 }
         widgets = {
-            'responsible': forms.Select(attrs={'class': 'form-control'}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+            'finished': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
-# Form 4: Crear nuevo sistema
-class SysForm(forms.ModelForm):
-    class Meta:
-        model = System
-        exclude = ['asset',]
-        labels = {
-            'name': 'Sistema',
-            'gruop': 'Grupo',
-            'location': 'Ubicación',
-            'state': 'Estado'
-        }
-
-
-# Form 5: Crear nueva orden de trabajo
+# Form 4: Crear nueva orden de trabajo
 class OtForm(forms.ModelForm):
 
     super = UserChoiceField(
-        queryset=User.objects.none(),  # La queryset se define en __init__
+        queryset=User.objects.none(),
         label='Supervisor',
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
@@ -105,7 +119,8 @@ class OtForm(forms.ModelForm):
             'system': 'Sistema',
             'state': 'Estado',
             'tipo_mtto': 'Tipo de mantenimiento',
-            'info_contratista_pdf': 'Informe externo'
+            'info_contratista_pdf': 'Informe externo',
+            'ot_aprobada': 'OT aprobada'
         }
         widgets = {
             'info_contratista_pdf': forms.FileInput(
@@ -304,11 +319,10 @@ class EquipoFormUpdate(forms.ModelForm):
 
     class Meta:
         model = Equipo
-        exclude = ['system', 'horometro', 'prom_hours']
+        exclude = ['system', 'horometro', 'prom_hours', 'code']
         labels = {
             'name': 'Nombre',
             'date_inv': 'Fecha de ingreso al inventario',
-            'code': 'Codigo interno',
             'model': 'Modelo',
             'serial': '# Serial',
             'marca': 'Marca',

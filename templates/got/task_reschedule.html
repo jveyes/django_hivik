@@ -1,12 +1,12 @@
 {% extends "got/base_generic.html" %}
 
-{% block head %}Reprogramacion de actividad {{task.ot.num_ot}} - {{task.description}}{% endblock %}
+{% block header %}Reprogramacion de actividad {{task.ot.num_ot}} - {{task.description}}{% endblock %}
 
 {% block content %}
     <div class="container">
         <p>Responsable: {{task.responsible.first_name}} {{task.responsible.last_name}}</p>
     <p>Fecha de inicio: {{task.start_date}}</p>
-    <p {% if activity.is_overdue %}class="text-danger"{% endif %}>Fecha de vencimiento: {{final_date}}</p>
+    <p {% if activity.is_overdue %}class="text-danger"{% endif %}>Fecha de vencimiento: {{ task.final_date }}</p>
 
     <form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
         <table>

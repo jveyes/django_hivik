@@ -55,10 +55,17 @@
 									<td class="pt-0"><strong>Marca:</strong></td>  
 									<td class="pt-0">{{equipo.marca}}</td>
 								</tr>
-								<tr>
-									<td class="pt-0"><strong>Serial:</strong></td>  
-									<td class="pt-0">{{equipo.serial}}</td>
-								</tr>
+								{% if system.asset.area == 'v' %}
+									<tr>
+										<td class="pt-0"><strong>Placa:</strong></td>  
+										<td class="pt-0">{{equipo.serial}}</td>
+									</tr>
+								{% else %}	
+									<tr>
+										<td class="pt-0"><strong>Serial:</strong></td>  
+										<td class="pt-0">{{equipo.serial}}</td>
+									</tr>
+								{% endif %}
 								<tr>
 									<td class="pt-0"><strong>Fecha ingreso:</strong></td>  
 									<td class="pt-0">{{equipo.date_inv}}</td>

@@ -27,11 +27,6 @@ class Migration(migrations.Migration):
             name='tipo',
             field=models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2),
         ),
-        migrations.AlterField(
-            model_name='ot',
-            name='creation_date',
-            field=models.DateField(auto_now_add=True),
-        ),
         migrations.CreateModel(
             name='HistoryHour',
             fields=[
@@ -41,32 +36,8 @@ class Migration(migrations.Migration):
                 ('component', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hours', to='got.equipo')),
                 ('reporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
-        ),
-        migrations.AlterField(
-            model_name='equipo',
-            name='initial_hours',
-            field=models.IntegerField(default=0),
-        ),
-        migrations.AlterModelOptions(
-            name='failurereport',
-            options={'ordering': ['-moment']},
-        ),
-        migrations.AlterModelOptions(
-            name='historyhour',
-            options={'ordering': ['-report_date']},
-        ),
-        migrations.AlterModelOptions(
-            name='system',
-            options={'ordering': ['asset__name', 'group']},
-        ),
-        migrations.AddField(
-            model_name='equipo',
-            name='initial_hours',
-            field=models.IntegerField(default=10),
-        ),
-        migrations.AddField(
-            model_name='ruta',
-            name='control',
-            field=models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1),
+            options={
+                'ordering': ['-report_date'],
+            },
         ),
     ]

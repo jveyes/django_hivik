@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count, Q
 from django.template.loader import get_template
@@ -21,7 +21,7 @@ from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport
 )
 from .forms import (
-    RescheduleTaskForm, OtForm, ActForm, UpdateTaskForm, SysForm,
+    RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
     OtFormNoSup, ActFormNoSup
@@ -41,13 +41,21 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     Vista 1: consulta para listado de actividades pendientes y enlace directo a
     cada actividad.
 
-    - Para supervisores mostrara el listado de actividades pendientes para
-      todos los activos (Opciones de filtrado por activos/responsables y
-      boton para reprogramar).
+    - Supervisores --> listado de actividades pendientes de todos los activos.
+                        Boton filtrado por activo.
+                        Boton filtrado por responsables
+                        Boton para reprogramar.
 
-    - Para buzos y talleres mostrara listado de actividades pendientes por cada
-      activo.
+    - Talleres --> listado de actividades pendientes propias.
+                    Boton filtrar por activo.
+    
+    - Buzos --> Listado de actividades pendientes de sus activos.
+                Boton para filtrar por activo.
+                Boton para reprogramar.
 
+    - Maquinistas --> Listado de actividades pendientes de su embarcación.
+                      Boton para filtrar por responsable. 
+                    
     '''
 
     model = Task
@@ -56,13 +64,22 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        serport_group = Group.objects.get(name='serport_members')
+        current_user = self.request.user
+        all_users = User.objects.none()
+
+        if current_user.groups.filter(name='super_members').exists():
+            all_users = User.objects.all()
+        elif current_user.groups.filter(name__in=['maq_members', 'buzos_members']).exists():
+            talleres = Group.objects.get(name='serport_members')
+            taller_list = list(talleres.user_set.all())
+            taller_list.append(current_user)
+            all_users = User.objects.filter(id__in=[user.id for user in taller_list])
 
         asset_id = self.request.GET.get('asset_id')
         worker_id = self.request.GET.get('worker')
         # contexto adicional:
         context['asset'] = Asset.objects.all()
-        context['serport_members'] = serport_group.user_set.all()
+        context['serport_members'] = all_users
         if asset_id:  # Nombre assets para filtrar
             context['selected_asset_name'] = Asset.objects.get(id=asset_id)
             context['asset_id'] = asset_id
@@ -74,88 +91,80 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return context
 
     def get_queryset(self):
-        queryset = Task.objects.filter(
-            ot__isnull=False, start_date__isnull=False)
+        queryset = Task.objects.filter(ot__isnull=False, start_date__isnull=False)
+        current_user = self.request.user
 
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('worker')
 
         maq_group = Group.objects.get(name='maq_members')
+        buzos_group = Group.objects.get(name='buzos_members')
         users_maq = maq_group.user_set.all()
+        users_buzos = buzos_group.user_set.all()
+        
         # Filtrar actividades por activo y/o usuario.
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
         if responsable_id:
             queryset = queryset.filter(responsible=responsable_id)
+
         # Para filtrar actividades para usuarios supervisores.
-        if self.request.user.has_perm("got.can_see_completely"):
+        if current_user.has_perm("got.can_see_completely"):
             queryset = queryset.filter(finished=False).order_by('start_date')
+
         # Para filtrar actividades usuarios maquinistas.
-        elif self.request.user in users_maq:
-            queryset = queryset.filter(
-                finished=False,
-                ot__system__asset__supervisor=self.request.user)
-        # Para buzos y talleres.
+        elif current_user in users_maq:
+            queryset = queryset.filter(finished=False, ot__system__asset__supervisor=current_user)
+
+        # Para filtrar actividades usuarios buzos.
+        elif current_user in users_buzos:
+            if current_user.groups.filter(name='santamarta_station').exists():
+                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Santa Marta')
+            elif current_user.groups.filter(name='ctg_station').exists():
+                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Cartagena')
+            elif current_user.groups.filter(name='guyana_station').exists():
+                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Guyana')
+            else:
+                queryset = queryset.filter(finished=False, ot__system__asset__area='b')
+
+        # talleres.
         else:
-            queryset = queryset.filter(
-                Q(responsible=self.request.user) & Q(finished=False)
-                ).order_by('start_date')
+            queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
         return queryset
 
 
-@login_required
-def reschedule_task(request, pk):
+class Reschedule_task(UpdateView):
+
     '''
-    Vista formulario para reprogramar actividades (v1.0)
+    Funcionalidad para reprogramar actividades.
+    Supervisores, buzos y maquinistas.
     '''
-    act = get_object_or_404(Task, pk=pk)
 
-    time = act.men_time
-    final_date = act.start_date + timedelta(days=time)
+    model = Task
+    form_class = RescheduleTaskForm
+    template_name = 'got/task_reschedule.html'
+    success_url = reverse_lazy('got:my-tasks')
 
-    if request.method == 'POST':
-        form = RescheduleTaskForm(request.POST, instance=act)
+    def form_valid(self, form):
+        return super().form_valid(form)
+    
 
-        if form.is_valid():
-            act.start_date = form.cleaned_data['start_date']
-            act.news = form.cleaned_data['news']
-            act.men_time = form.cleaned_data['men_time']
-            act.save()
-            return HttpResponseRedirect(reverse('got:my-tasks'))
+class Finish_task(UpdateView):
 
-    else:
-        # proposed_reschedule_date = date.today() + timedelta(weeks=1)
-        form = RescheduleTaskForm(instance=act)
-
-    context = {'form': form, 'task': act, 'final_date': final_date}
-    return render(request, 'got/task_reschedule.html', context)
-
-
-def finish_task(request, pk):
     '''
-    Vista formulario para finalizar actividades (v1.1)
+    Funcionalidad para reprogramar actividades
     '''
-    act = get_object_or_404(Task, pk=pk)
 
-    time = act.men_time
-    final_date = act.start_date + timedelta(days=time)
+    model = Task
+    form_class = FinishTask
+    template_name = 'got/task_finish_form.html'
+    http_method_names = ['get', 'post']
+    success_url = reverse_lazy('got:my-tasks')
 
-    if request.method == 'POST':
-        form = UpdateTaskForm(request.POST, request.FILES)
+    def form_valid(self, form):
+        return super().form_valid(form)
 
-        if form.is_valid():
-            act.news = form.cleaned_data['news']
-            act.evidence = form.cleaned_data['evidence']
-            act.finished = form.cleaned_data['finished']
-            act.save()
-            return HttpResponseRedirect(reverse('got:my-tasks'))
-
-    else:
-        form = UpdateTaskForm()
-
-    context = {'form': form, 'task': act, 'final_date': final_date}
-    return render(request, 'got/task_finish_form.html', context)
 
 # ---------------------------- Activos (Assets) ---------------------------- #
 class AssetsListView(LoginRequiredMixin, generic.ListView):
@@ -178,11 +187,10 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
         queryset = Asset.objects.all()
 
         area = self.request.GET.get('area')
-        # Filtro de equipos de buceo para grupo de buzos.
         user_groups = self.request.user.groups.values_list('name', flat=True)
+
         if 'buzos_members' in user_groups:
             queryset = queryset.filter(area='b')
-        # Filtrado por area del activo.
         if area:
             queryset = queryset.filter(area=area)
 
@@ -217,22 +225,21 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         rotativos = Equipo.objects.filter(
             system__asset=asset, tipo='r').exists()
 
-        # Determina si el usuario pertenece al grupo 'santamarta_station'
-
         # Filtrar sistemas basado en el grupo de usuario
         if self.request.user.groups.filter(name='santamarta_station').exists():
             systems = asset.system_set.filter(location='Santa Marta')
+            sys = asset.system_set.filter(location='Santa Marta').exclude(state='x')
         elif self.request.user.groups.filter(name='ctg_station').exists():
             systems = asset.system_set.filter(location='Cartagena')
+            sys = asset.system_set.filter(location='Cartagena').exclude(state='x')
         elif self.request.user.groups.filter(name='guyana_station').exists():
             systems = asset.system_set.filter(location='Guyana')
+            sys = asset.system_set.filter(location='Guyana').exclude(state='x')
         else:
             systems = asset.system_set.all()
+            sys = asset.system_set.exclude(state='x')
 
-        rutas = sorted(  # Filtrado de rutinas que pertenecen a este Asset
-            Ruta.objects.filter(system__in=systems),
-            key=lambda t: t.next_date
-        )
+        rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
         # Limitar a mostrar 10 sistemas
         paginator = Paginator(systems, 10)
         page_number = self.request.GET.get('page')
@@ -377,9 +384,6 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
             supervised_assets = Asset.objects.filter(
                 supervisor=self.request.user)
 
-            # Filtra los reportes de falla cuyos equipos pertenecen a un
-            # sistema que a su vez pertenece a un asset supervisado por
-            # el usuario
             queryset = queryset.filter(
                 equipo__system__asset__in=supervised_assets)
         elif self.request.user.groups.filter(name='buzos_members').exists():
@@ -424,8 +428,44 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.reporter = self.request.user
-        # Guarda el formulario con el reporter asignado
-        return super().form_valid(form)
+        self.object = form.save()  # Guarda el objeto y lo mantiene en self.object
+
+        # Preparar el contexto para la plantilla de correo
+        context = {
+            'reporter': self.object.reporter,
+            'moment': self.object.moment,
+            'equipo': self.object.equipo,
+            'description': self.object.description,
+            'causas': self.object.causas,
+            'suggest_repair': self.object.suggest_repair,
+            'impact': self.object.impact,
+            'critico': self.object.critico,
+            'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
+        }
+
+        # Renderizar la plantilla de correo
+        email_body = render_to_string('failure_report_email.txt', context)
+
+        # Obtener correos de super miembros
+        super_members_group = Group.objects.get(name='super_members')
+        super_members_emails = super_members_group.user_set.values_list('email', flat=True)
+
+        # Preparar y enviar el correo
+        email = EmailMessage(
+            subject='Nuevo Reporte de Falla',
+            body=email_body,
+            from_email=settings.EMAIL_HOST_USER,
+            to=list(super_members_emails),
+        )
+
+        # Adjuntar imagen de evidencia si está presente
+        if self.object.evidence:
+            email.attach_file(self.object.evidence.path)
+
+        email.send()
+
+        return super(FailureReportForm, self).form_valid(form)
+
 
 
 class FailureDetailView(LoginRequiredMixin, generic.DetailView):
@@ -459,7 +499,6 @@ class FailureReportUpdate(LoginRequiredMixin, UpdateView):
         return form
 
     def form_valid(self, form):
-        form.instance.reporter = self.request.user
         return super().form_valid(form)
 
 
@@ -484,8 +523,6 @@ def crear_ot_failure_report(request, fail_id):
 
 
 # --------------------------- Ordenes de trabajo --------------------------- #
-
-# Ordenes de trabajo
 class OtListView(LoginRequiredMixin, generic.ListView):
     '''
     Vista generica para listado de ordenes de trabajo (v1.0)
@@ -522,10 +559,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
             # Obtén el/los asset(s) supervisado(s) por el usuario
             supervised_assets = Asset.objects.filter(
                 supervisor=self.request.user)
-
-            # Filtra los reportes de falla cuyos equipos pertenecen a un
-            # sistema que a su vez pertenece a un asset supervisado por
-            # el usuario
             queryset = queryset.filter(system__asset__in=supervised_assets)
         elif self.request.user.groups.filter(name='buzos_members').exists():
             # Obtén el/los asset(s) supervisado(s) por el usuario
@@ -580,6 +613,17 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
         context['failure_report'] = failure_report
 
+        try:
+            ruta_asociada = ot.ruta_set.first()  # Asume que hay una relación inversa llamada 'ruta_set'
+        except AttributeError:
+            ruta_asociada = None
+
+        # Si hay una ruta asociada, agregar su ID al contexto
+        if ruta_asociada:
+            context['ruta_id'] = ruta_asociada
+        else:
+            context['ruta_id'] = None
+
         return context
 
     def actualizar_rutas_dependientes(self, ruta):
@@ -598,7 +642,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         state_form = FinishOtForm(request.POST)
 
         if 'finish_ot' in request.POST and state_form.is_valid():
-            ot.state = 'Finalizado'
+            ot.state = 'x'
             ot.save()
 
             rutas_relacionadas = Ruta.objects.filter(ot=ot)
@@ -836,12 +880,9 @@ class RutaListView(LoginRequiredMixin, generic.ListView):
 
         area_filter = self.request.GET.get('area_filter')
         if area_filter:
-            queryset = sorted(
-                Ruta.objects.filter(system__asset__area=area_filter),
-                key=lambda t: t.next_date
-                )
+            queryset = sorted(Ruta.objects.filter(system__asset__area=area_filter).exclude(system__state='x'), key=lambda t: t.next_date)
         else:
-            queryset = sorted(Ruta.objects.all(), key=lambda t: t.next_date)
+            queryset = sorted(Ruta.objects.exclude(system__state='x'), key=lambda t: t.next_date)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -983,7 +1024,6 @@ def report_pdf(request, num_ot):
     return response
 
 
-
 @login_required
 def indicadores(request):
 
@@ -991,8 +1031,11 @@ def indicadores(request):
 
     area_filter = request.GET.get('area', None)
 
-    top_assets = Asset.objects.annotate(
-        num_ots=Count('system__ot')).order_by('-num_ots')[:5]
+    # top_assets = Asset.objects.annotate(num_ots=Count('system__ot')).order_by('-num_ots')[:5]
+    assets = Asset.objects.annotate(num_ots=Count('system__ot'))
+    if area_filter:
+        assets = assets.filter(area=area_filter)
+    top_assets = assets.order_by('-num_ots')[:5]
     ots_per_asset = [asset.num_ots for asset in top_assets]
     asset_labels = [asset.name for asset in top_assets]
 
@@ -1004,10 +1047,12 @@ def indicadores(request):
             creation_date__year=2024,
             system__asset__area=area_filter
             ))
+
         ot_finish = len(Ot.objects.filter(
             creation_date__month=m,
-            creation_date__year=2024, state='f',
+            creation_date__year=2024, state='Finalizado',
             system__asset__area=area_filter))
+
         preventivo = len(Ot.objects.filter(
             creation_date__month=m,
             creation_date__year=2024,
@@ -1031,7 +1076,8 @@ def indicadores(request):
         ots = len(Ot.objects.filter(
             creation_date__month=m, creation_date__year=2024))
         ot_finish = len(Ot.objects.filter(
-            creation_date__month=m, creation_date__year=2024, state='f'))
+            creation_date__month=m, creation_date__year=2024, state='Finalizado'))
+
         preventivo = len(Ot.objects.filter(
             creation_date__month=m, creation_date__year=2024, tipo_mtto='p'))
         correctivo = len(Ot.objects.filter(
@@ -1117,3 +1163,16 @@ def reportHoursAsset(request, asset_id):
     }
 
     return render(request, 'got/hours_asset.html', context)
+
+
+class HistorialCambiosView(generic.TemplateView):
+    template_name = 'got/historial_cambios.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['modelo1'] = FailureReport.history.all()
+        context['modelo2'] = Ot.history.all()
+        context['modelo3'] = Ruta.history.all()
+        context['modelo4'] = Task.history.all()
+        # Agrega tantos contextos como modelos tengas
+        return context

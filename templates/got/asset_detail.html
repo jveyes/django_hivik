@@ -96,6 +96,7 @@
                         <th scope="col">Nombre</th>
                         <th scope="col">Ubicación</th>
                         <th scope="col">Estado</th>
+                        <th scope="col">Mantenimiento</th>
                         {% if perms.got.add_ot %}
                             <th scope="col">Acciones</th>
                         {% endif %}
@@ -108,7 +109,8 @@
                             <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
                             <td>{{ sys.location }}</td>
                             <td>{{ sys.get_state_display }}</td>
-                            {% if perms.got.add_ot %}
+                            <td>{% if sys.maintenance_percentage %}{{ sys.maintenance_percentage }}%{% endif %}</td>
+                            {% if perms.got.change_system %}
                                 <td>
                                     <a class="" href="{% url 'got:sys-update' sys.id %}"><i class="bi bi-pen"></i></a>
                                     <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>

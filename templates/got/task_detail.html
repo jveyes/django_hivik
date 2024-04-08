@@ -8,7 +8,7 @@
 <div class="container">
     {%  if task.responsible == user or perms.got.add_system %}
         <a class="btn btn-primary" role="button" href="{% url 'got:finish-task' task.id %}">
-            Modificar
+            Finalizar
         </a>
     {% endif %}
     {% if not request.user|has_group:"serport_members" %}
@@ -24,6 +24,10 @@
             <td>{{task.start_date}}</td>
         </tr>
         <tr>
+            <th>Fecha de vencimiento: </th>
+            <td>{{task.final_date}}</td>
+        </tr>
+        <tr>
             <th>Responsable: </th>
             <td>{{task.responsible.first_name}} {{task.responsible.last_name}}</td>
         </tr>
@@ -32,13 +36,29 @@
             <td>{% if task.finished %}Completado{%else%}Pendiente{% endif %}</td>
         </tr>
         <tr>
+            <th>Sistema: </th>
+            <td>{{task.ot.system}}</td>
+        </tr> 
+        <tr>
             <th>Descripción: </th>
             <td>{{task.description}}</td>
         </tr> 
         <tr>
             <th>Novedades: </th>
             <td>{{task.news}}</td>
+        </tr>  
+        <tr>
+            <th>Procedimiento: </th>
+            <td>{{task.procedimiento}}</td>
         </tr>         
+        <tr>
+            <th>Precauciones de seguridad: </th>
+            <td>{{task.hse}}</td>
+        </tr>  
+        <tr>
+            <th>Suministros: </th>
+            <td>{{task.suministros}}</td>
+        </tr>  
     </tbody>
 </table>
 

@@ -8,23 +8,11 @@ app_name = 'got'
 '''
 urlpatterns = [
     # ---------------------------- Main views ------------------------------ #
-    path(
-        "",
-        views.AssignedTaskByUserListView.as_view(),
-        name="my-tasks"
-    ),
+    path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
 
     # ---------------------------- Assets view ----------------------------- #
-    path(  # LIST VIEW
-        "assets/",
-        views.AssetsListView.as_view(),
-        name="asset-list"
-    ),
-    path(  # DETAIL VIEW
-        "assets/<int:pk>/",
-        views.AssetDetailView.as_view(),
-        name="asset-detail"
-    ),
+    path("assets/", views.AssetsListView.as_view(), name="asset-list"),
+    path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
 
     # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
@@ -56,10 +44,6 @@ urlpatterns = [
         views.TaskDetailView.as_view(),
         name="task-detail"
     ),
-    path(
-        "task/<int:pk>/reschedule/",
-        views.reschedule_task,
-        name='reschedule-task'),
     path('task/<str:pk>/create/',
          views.TaskCreate.as_view(),
          name='task-create'),
@@ -71,7 +55,9 @@ urlpatterns = [
         'task/<int:pk>/delete/',
         views.TaskDelete.as_view(),
         name='task-delete'),
-    path('task/<int:pk>/finish/', views.finish_task, name='finish-task'),
+
+    path("task/<int:pk>/reschedule/", views.Reschedule_task.as_view(), name='reschedule-task'),
+    path('task/<int:pk>/finish/', views.Finish_task.as_view(), name='finish-task'),
 
     path(
         'task-rut/<int:pk>/update/',
@@ -151,4 +137,5 @@ urlpatterns = [
         views.crear_ot_failure_report,
         name='failure-report-crear-ot'
     ),
+    path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
 ]

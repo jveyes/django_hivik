@@ -70,12 +70,59 @@
             <td colspan="2" class="data info">{{ot.description}}</td>
         </tr>
     </table>
-    
+
     <hr>
-        
+
+    <div style="margin-top: 20px">
+        {% if ot.failure_report %}
+            <table style="margin-top: 15px;">
+                <tr>
+                    <td colspan="2">
+                        <strong>REPORTE DE FALLA #{{ot.failure_report.id}} - {{ot.failure_report.moment}}</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Reportado por: </strong></td>
+                    <td class="data info">{{ ot.failure_report.reporter.first_name }} {{ ot.failure_report.reporter.last_name }}</td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Equipo afectado:</strong></td>
+                    <td class="data info">{{ot.failure_report.equipo}}</td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Detalle: </strong></td>
+                    <td colspan="2" class="data info">{{ot.failure_report.description}}</td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Posibles causas: </strong></td>
+                    <td colspan="2" class="data info">{{ot.failure_report.causas}}</td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Reparación sugerida: </strong></td>
+                    <td colspan="2" class="data info">{{ot.failure_report.suggest_repair}}</td>
+                </tr>
+                <tr>
+                    <td class="data" style="width: 105px;"><strong>Impacto de falla: </strong></td>
+                    <td colspan="2" class="data info">
+                        {% for code in ot.failure_report.impact %}
+                            {% if code == 'i' %}
+                                Integridad del equipo/sistema -
+                            {% elif code == 's' %}
+                                La seguridad personal -
+                            {% elif code == 'm' %}
+                                El medio ambiente -
+                            {% elif code == 'o' %}
+                                El desarrollo normal de las operaciones -
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            </table>
+        {% endif %}
+    </div>        
     
 
-    <table style="border-collapse: collapse;">
+    <table style="border-collapse: collapse; margin-top: 10px">
         <thead>
             <tr>
                 <td colspan="5" style="padding-top: 5px; text-align: center;  background-color: rgb(84, 141, 212); border: 1px solid black; height: auto;">
@@ -109,26 +156,29 @@
                         {{ act.men_time }}
                     </td>
                 </tr>
+                {% if act.news %}
+                    <tr>
+                        <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
+                        <td colspan="4" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                            {{act.news}}
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
 
-    <h2>Novedades</h2>
 
-    <div>
-        {% for act in ot.task_set.all %}
-            {% if act.news %}
-                <div>
-                    <p>{{act.news}}</p>
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
     
     <hr>
 
     <h2>Evidencias</h2>
-    <div>
+    <div style="text-align: center;">
+        {% if ot.failure_report.evidence %}
+            <div>
+                <img src="{{ ot.failure_report.evidence.url }}">
+            </div>
+        {% endif %}
         {% for act in ot.task_set.all %}
             {% if act.evidence %}
                 <div>
@@ -138,7 +188,7 @@
         {% endfor %}
     </div>
 
-    <table style=" border-collapse: collapse;">
+    <table style=" border-collapse: collapse; margin-top: 10px;">
         <tr style="height: 60px;">
             <td style="padding-left: 5px; border: 0.5px solid black; text-align: center;">
                 <img src="https://hivik.s3.us-east-2.amazonaws.com/static/firma+nestor.png" style="width: 150px; height: auto;">

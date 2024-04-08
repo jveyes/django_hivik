@@ -1,0 +1,24 @@
+Reporte de Falla Registrado #{{ id }}
+----------------------------------
+
+Reportado por: {{ reporter.get_full_name }}
+Fecha y hora del reporte: {{ moment }}
+
+Equipo afectado: {{ equipo.name }}
+Descripción de la falla:
+{{ description }}
+
+Causas sugeridas:
+{{ causas }}
+
+Sugerencias de reparación:
+{{ suggest_repair }}
+
+Impacto:
+{% for code in impact %}
+- {{ code.get_display }}
+{% endfor %}
+
+{{ "Crítico: Sí" if critico else "Crítico: No" }}
+
+Para más detalles {{ report_url }}

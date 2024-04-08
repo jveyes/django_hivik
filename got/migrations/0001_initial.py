@@ -47,13 +47,13 @@ class Migration(migrations.Migration):
                 ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.asset')),
             ],
             options={
-                'ordering': ['asset__name', 'gruop'],
+                'ordering': ['asset__name', 'group'],
             },
         ),
         migrations.CreateModel(
             name='Ot',
             fields=[
-                ('creation_date', models.DateField(auto_now=True)),
+                ('creation_date', models.DateField(auto_now_add=True)),
                 ('num_ot', models.AutoField(primary_key=True, serialize=False)),
                 ('description', models.TextField()),
                 ('state', models.CharField(choices=[('a', 'Abierto'), ('x', 'En ejecucion'), ('f', 'Finalizado'), ('c', 'Cancelado')], default='x', max_length=50)),
@@ -61,6 +61,7 @@ class Migration(migrations.Migration):
                 ('super', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
                 ('info_contratista_pdf', models.FileField(upload_to=got.models.get_upload_path, null=True, blank=True)),
+                ('ot_aprobada', models.FileField(blank=True, null=True, upload_to=got.models.get_upload_path)),
             ],
             options={
                 'ordering': ['-num_ot'],
@@ -102,5 +103,8 @@ class Migration(migrations.Migration):
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ot')),
                 ('responsible', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
             ],
+            options={
+                'permissions': (('can_reschedule_task', 'Reprogramar actividades'),),
+            },
         ),
     ]
