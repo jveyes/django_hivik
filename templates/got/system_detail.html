@@ -25,7 +25,7 @@
 					<tr style="height: 20%;">
 						<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
 							<h2>{{equipo.name}}</h2>
-							{% if perms.got.add_system %}
+							{% if perms.got.add_equipo %}
 								<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
 								<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
 							{% endif %}
