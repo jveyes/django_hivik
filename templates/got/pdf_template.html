@@ -164,7 +164,31 @@
                     <tr>
                         <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
                         <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
-                            {{act.news}}
+                            {{act.news|linebreaksbr}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if act.procedimiento %}
+                    <tr>
+                        <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
+                        <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                            Procedimiento: <br> {{act.procedimiento|linebreaksbr}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if act.suministros %}
+                    <tr>
+                        <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
+                        <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                            Suministros: <br> {{act.suministros|linebreaksbr}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if act.hse %}
+                    <tr>
+                        <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
+                        <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                            Precauciones de seguridad: {{act.hse}}
                         </td>
                     </tr>
                 {% endif %}
