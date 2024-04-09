@@ -30,7 +30,7 @@ urlpatterns = [
         views.EquipoDelete.as_view(),
         name='equipo-delete'
     ),
-
+    path('system/<int:pk>/new_equipo/', views.EquipoCreateView.as_view(), name='equipo-create'),
     # ---------------------------- OTs view --------------------------------- #
     path("ots/", views.OtListView.as_view(), name="ot-list"),
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"),

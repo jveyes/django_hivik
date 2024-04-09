@@ -1,5 +1,4 @@
 {% extends "got/base_generic.html" %}
-{% load widget_tweaks %}
 
 {% block header %}
 	<a href="{% url 'got:asset-detail' system.asset.id %}"><i class="bi bi-arrow-90deg-left"></i></a>
@@ -9,9 +8,10 @@
 {% block content %}
 
 {% if perms.got.add_system %}
-	<button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#equipoModal">
+	<!-- <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#equipoModal"> -->
+	<a class="btn btn-primary space" href="{% url 'got:equipo-create' system.asset.id %}">
 		Crear nuevo componente
-	</button>
+	</a>
 {% endif %}
 
 
@@ -210,29 +210,10 @@
 	</div>
 </section>
 <!-- Fin de rutinas -->
-	
-<!-- Formulario modal para Componentes -->
-<!-- <div class="modal fade" id="comModal" tabindex="-1" aria-labelledby="comModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      	<div class="modal-content">
-        	<div class="modal-header">
-          		<h5 class="modal-title" id="comModalLabel">Crear nuevo componente</h5>
-          		<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        	</div>
-        	<div class="modal-body">
-          		<form method="post" action="" enctype="multipart/form-data">{% csrf_token %}
-            		<table>
-              			{{ equipo_form.as_table }}
-            		</table>
-            		<button type="submit" class="btn btn-primary">Agregar</button>
-          		</form>
-        	</div>
-    	</div>
-    </div>
-</div> -->
+
 
 <!-- Modal -->
-<div class="modal fade" id="equipoModal" tabindex="-1" aria-labelledby="equipoModalLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="equipoModal" tabindex="-1" aria-labelledby="equipoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -254,7 +235,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 
 {% endblock %}

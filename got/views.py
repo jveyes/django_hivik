@@ -288,26 +288,26 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     model = System
 
     # Formulario para crear, modificar o eliminar actividades
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['equipo_form'] = EquipoForm()
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['equipo_form'] = EquipoForm()
+    #     return context
 
-    def post(self, request, *args, **kwargs):
-        sys = self.get_object()
-        equipo_form = EquipoForm(request.POST, request.FILES)
+    # def post(self, request, *args, **kwargs):
+    #     sys = self.get_object()
+    #     equipo_form = EquipoForm(request.POST, request.FILES)
 
-        if equipo_form.is_valid():
-            eq = equipo_form.save(commit=False)
-            eq.system = sys
-            eq.save()
-            return redirect(request.path)
-        else:
-            context = {
-                'system': sys,
-                'equipo_form': equipo_form,
-                }
-            return render(request, "got/system_detail.html", context)
+    #     if equipo_form.is_valid():
+    #         eq = equipo_form.save(commit=False)
+    #         eq.system = sys
+    #         eq.save()
+    #         return redirect(request.path)
+    #     else:
+    #         context = {
+    #             'system': sys,
+    #             'equipo_form': equipo_form,
+    #             }
+    #         return render(request, "got/system_detail.html", context)
 
 
 class SysDelete(DeleteView):
@@ -331,6 +331,19 @@ class SysUpdate(UpdateView):
     form_class = SysForm
 
 # ---------------------------- Equipos ---------------------------- #
+
+class EquipoCreateView(CreateView):
+    model = Equipo
+    form_class = EquipoForm
+    template_name = 'got/equipo_form.html'
+
+    def form_valid(self, form):
+        form.instance.system = System.objects.get(pk=self.kwargs['pk'])
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse('got:sys-detail', kwargs={'pk': self.object.system.pk})
+
 class EquipoUpdate(UpdateView):
     '''
     Vista formulario para actualizar una actividad
@@ -391,9 +404,6 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
             supervised_assets = Asset.objects.filter(
                 area='b')
 
-            # Filtra los reportes de falla cuyos equipos pertenecen a un
-            # sistema que a su vez pertenece a un asset supervisado por
-            # el usuario
             queryset = queryset.filter(
                 equipo__system__asset__in=supervised_assets)
 
@@ -642,7 +652,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         state_form = FinishOtForm(request.POST)
 
         if 'finish_ot' in request.POST and state_form.is_valid():
-            ot.state = 'x'
+            ot.state = 'f'
             ot.save()
 
             rutas_relacionadas = Ruta.objects.filter(ot=ot)
