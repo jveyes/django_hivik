@@ -282,15 +282,19 @@ class Ruta(models.Model):
         if self.control == 'd':
             ndays = self.frecuency
         elif self.control == 'h':
-            period = self.equipo.hours.filter(
-                    report_date__gte=self.intervention_date,
-                    report_date__lte=date.today()
-                ).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
+            period = self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
             inv = self.frecuency - period
             try:
                 ndays = int(inv/self.equipo.prom_hours)
             except (ZeroDivisionError, AttributeError):
                 ndays = int(self.frecuency/1)
+        elif self.control == 'h' and not self.ot:
+            inv = self.frecuency - self.equipo.horometro
+            try:
+                ndays = int(inv/self.equipo.prom_hours)
+            except (ZeroDivisionError, AttributeError):
+                ndays = int(self.frecuency/1)
+
 
         ndate = date.today() + timedelta(days=ndays)
         return ndate
