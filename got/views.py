@@ -454,7 +454,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         }
 
         # Renderizar la plantilla de correo
-        email_body = render_to_string('failure_report_email.txt', context)
+        email_body = render_to_string('got/failure_report_email.txt', context)
 
         # Obtener correos de super miembros
         super_members_group = Group.objects.get(name='super_members')
