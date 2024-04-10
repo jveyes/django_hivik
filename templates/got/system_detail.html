@@ -141,12 +141,12 @@
 				</thead>
 				<tbody>
 					{% for ruta in system.rutas.all %}
-					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
+					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
 						<th scope="row">{{ ruta.name }}</th>
 						<td>{{ ruta.frecuency }}</td>
 						<td>{{ ruta.get_control_display }}</td>
 						<td>{% if ruta.ot %}{{ ruta.intervention_date }}{% else %}---{% endif %}</td>
-						<td>{% if ruta.ot %}{{ ruta.next_date }}{% else %}---{% endif %}</td>
+						<td>{{ ruta.next_date }}</td>
 						<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
 						<td>
 							<a href="{% url 'got:crear_ot_desde_ruta' ruta.code %}" class="btn btn-success btn-sm"><i class="bi bi-clipboard-plus"></i></a>

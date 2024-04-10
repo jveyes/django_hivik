@@ -313,7 +313,9 @@ class Ruta(models.Model):
     def maintenance_status(self):
         percentage = self.percentage_remaining
         if not self.ot:
-            return 'v'
+            return 'e'
+        elif percentage <= 10 and not self.ot:
+            return 'p'
         else:
             if 25 <= percentage <= 100:
                 return 'c'

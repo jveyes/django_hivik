@@ -72,7 +72,7 @@
 					<tr>
 						<td><strong>{{act.ot.num_ot}}</strong></td>
 						<td class="{% if act.is_overdue %}text-danger{% endif %}"><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
-						<td><a href="{{ act.get_absolute_url }}">{{act.description}}</a></td>
+						<td><a class="btn btn-primary" role="button" href="{% url 'got:finish-task' act.id %}">{{act.description}}</a></td>
 						<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
 						<td>{{act.start_date|date:"d/m/Y"}}</td>
 						<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
