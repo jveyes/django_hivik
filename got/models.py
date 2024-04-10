@@ -320,6 +320,8 @@ class Ruta(models.Model):
             return 'e'
         elif percentage <= 10 and not self.ot:
             return 'p'
+        elif self.ot.state=='x':
+            return 'p'
         else:
             if 25 <= percentage <= 100:
                 return 'c'
