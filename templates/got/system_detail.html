@@ -163,7 +163,7 @@
 							<div id="collapse{{ ruta.code }}" class="collapse">
 								<h3>Actividades:</h3>
 
-								{% if perms.got.add_system %}
+								{% if perms.got.add_equipo %}
 									<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary"><i class="bi bi-clipboard2-plus-fill"></i></a>
 								{% endif %}
 								{% if ruta.dependencia %}
