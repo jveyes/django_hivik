@@ -112,7 +112,7 @@ class System(models.Model):
     def maintenance_percentage(self):
         rutas = self.rutas.all()
         if not rutas:
-            return None
+            return 0
 
         total_value = 0
 
@@ -121,6 +121,9 @@ class System(models.Model):
                 total_value += 1
             elif ruta.maintenance_status == 'p':
                 total_value += 0.5
+            elif ruta.maintenance_status == 'e' and ruta.next_date > date.today():
+                total_value += 1
+            
 
         max_possible_value = len(rutas)
         if max_possible_value == 0:
