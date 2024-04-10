@@ -175,7 +175,7 @@
 									{% for task in ruta.task_set.all %}
 										<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
 
-											{% if perms.got.add_system %}
+											{% if perms.got.add_equipo %}
 												<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
 												<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
 											{% endif %}
