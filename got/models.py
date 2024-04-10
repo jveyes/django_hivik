@@ -292,7 +292,7 @@ class Ruta(models.Model):
             except (ZeroDivisionError, AttributeError):
                 ndays = int(self.frecuency/1)
 
-        ndate = self.intervention_date + timedelta(days=ndays)
+        ndate = date.today() + timedelta(days=ndays)
         return ndate
 
     @property
