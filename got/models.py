@@ -284,6 +284,7 @@ class Ruta(models.Model):
     def next_date(self):
         if self.control == 'd':
             ndays = self.frecuency
+            return self.intervention_date + timedelta(days=ndays)
         elif self.control == 'h':
             period = self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
             inv = self.frecuency - period
@@ -297,10 +298,8 @@ class Ruta(models.Model):
                 ndays = int(inv/self.equipo.prom_hours)
             except (ZeroDivisionError, AttributeError):
                 ndays = int(self.frecuency/1)
-
-
-        ndate = date.today() + timedelta(days=ndays)
-        return ndate
+        
+        return date.today() + timedelta(days=ndays)
 
     @property
     def percentage_remaining(self):
