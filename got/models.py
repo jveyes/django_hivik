@@ -98,6 +98,7 @@ class System(models.Model):
     state = models.CharField(choices=STATUS, default='m', max_length=1)
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    history = HistoricalRecords()
 
     def __str__(self):
         return '%s/%s' % (self.asset, self.name)
@@ -239,6 +240,12 @@ class Ot(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE)
     history = HistoricalRecords()
 
+    def all_tasks_finished(self):
+        related_tasks = self.task_set.all()  # Asume que la relación inversa se llama 'task_set'
+        if related_tasks.exists() and all(task.finished for task in related_tasks):
+            return True
+        return False
+
     def __str__(self):
         return '%s - %s' % (self.num_ot, self.description)
 
@@ -263,9 +270,7 @@ class Ruta(models.Model):
     intervention_date = models.DateField()
     history = HistoricalRecords()
 
-    system = models.ForeignKey(
-        System, on_delete=models.CASCADE, related_name='rutas'
-        )
+    system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
     equipo = models.ForeignKey(
         Equipo, on_delete=models.SET_NULL, null=True, blank=True
         )

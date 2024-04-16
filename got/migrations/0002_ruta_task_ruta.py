@@ -48,4 +48,22 @@ class Migration(migrations.Migration):
             ],
             options={'ordering': ['-moment']},
         ),
+        migrations.AddField(
+            model_name='equipo',
+            name='tipo',
+            field=models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2),
+        ),
+        migrations.CreateModel(
+            name='HistoryHour',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('report_date', models.DateField()),
+                ('hour', models.DecimalField(decimal_places=2, max_digits=5)),
+                ('component', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hours', to='got.equipo')),
+                ('reporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'ordering': ['-report_date'],
+            },
+        ),
     ]

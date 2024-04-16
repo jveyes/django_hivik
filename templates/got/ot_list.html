@@ -6,64 +6,62 @@
 {% block content %}
     <section class="container d-flex justify-content-between flex-wrap align-items-center">
 
-
-    <div class="container">
     <!-- Opciones de filtrado -->
 
     <!-- Enlace sin filtros -->
-    <div class="btn-group" role="group">
-        <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-        Filtrar por equipo
-        </button>
-        <ul class="dropdown-menu">
-            <li><a href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
-            {% for a in asset %}
-                <li><a href="{% url 'got:ot-list' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% if request.user|has_group:"super_members" %}
         <div class="btn-group" role="group">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            Filtrar supervisor
+                Filtrar por equipo
             </button>
             <ul class="dropdown-menu">
-                <li><a href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
-                {% for u in super_members %}
-                    <li><a href="{% url 'got:ot-list' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
+                {% for a in asset %}
+                    <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
                 {% endfor %}
             </ul>
         </div>
-    {% endif %}
-    </div>
 
-    <div class="btn-group" role="group" aria-label="Estado de OT">
-        <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
-        <label class="btn btn-outline-primary" for="Todos" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
+        {% if request.user|has_group:"super_members" %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filtrar supervisor
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
+                    {% for u in super_members %}
+                        <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?asset_id={{ some_asset_id }}&responsable={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
 
-        <input type="radio" class="btn-check" name="state" id="abierto" autocomplete="off" {% if request.GET.state == 'a' %}checked{% endif %}>
-        <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}?state=a'">Abierto</label>
-      
-        <input type="radio" class="btn-check" name="state" id="ejecucion" autocomplete="off" {% if request.GET.state == 'x' %}checked{% endif %}>
-        <label class="btn btn-outline-primary" for="ejecucion" onclick="window.location.href='{% url 'got:ot-list' %}?state=x'">En ejecución</label>
-      
-        <input type="radio" class="btn-check" name="state" id="finalizado" autocomplete="off" {% if request.GET.state == 'f' %}checked{% endif %}>
-        <label class="btn btn-outline-primary" for="finalizado" onclick="window.location.href='{% url 'got:ot-list' %}?state=f'">Finalizado</label>
+        <div class="btn-group" role="group" aria-label="Estado de OT">
+            <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
+            <label class="btn btn-outline-primary" for="Todos" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
+
+            <input type="radio" class="btn-check" name="state" id="abierto" autocomplete="off" {% if request.GET.state == 'a' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}?state=a'">Abierto</label>
         
-        <input type="radio" class="btn-check" name="state" id="cancelado" autocomplete="off" {% if request.GET.state == 'c' %}checked{% endif %}>
-        <label class="btn btn-outline-primary" for="cancelado" onclick="window.location.href='{% url 'got:ot-list' %}?state=c'">Cancelado</label>
-    </div>
+            <input type="radio" class="btn-check" name="state" id="ejecucion" autocomplete="off" {% if request.GET.state == 'x' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="ejecucion" onclick="window.location.href='{% url 'got:ot-list' %}?state=x'">En ejecución</label>
+        
+            <input type="radio" class="btn-check" name="state" id="finalizado" autocomplete="off" {% if request.GET.state == 'f' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="finalizado" onclick="window.location.href='{% url 'got:ot-list' %}?state=f'">Finalizado</label>
+            
+            <input type="radio" class="btn-check" name="state" id="cancelado" autocomplete="off" {% if request.GET.state == 'c' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="cancelado" onclick="window.location.href='{% url 'got:ot-list' %}?state=c'">Cancelado</label>
+        </div>
     
 
-    <div style="padding: 10px 0">
-        <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
-            <div class="input-group flex-nowrap" style="width: 500px;">
-                <span class="input-group-text" id="addon-wrapping">Descripción</span>
-                <input type="text" name="keyword" class="form-control" placeholder="">
-                <input type="submit" value="Buscar" class="btn btn-primary">
-            </div>  
-        </form>
-    </div>
+        <div style="padding: 10px 0">
+            <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
+                <div class="input-group flex-nowrap" style="width: 500px;">
+                    <span class="input-group-text" id="addon-wrapping">Descripción</span>
+                    <input type="text" name="keyword" class="form-control" placeholder="">
+                    <input type="submit" value="Buscar" class="btn btn-primary">
+                </div>  
+            </form>
+        </div>
 
     </section>
       
@@ -84,9 +82,8 @@
             </tr>
         </thead>
         <tbody>
-            {% if ot_list %}
-                {% for ot in ot_list %}
-                <tr>
+            {% for ot in ot_list %}
+                <tr class="{% if ot.all_tasks_finished and ot.state != 'f' %}table-success{% endif %}">
                     <th scope="row">OT-{{ ot.num_ot }}</td>
                     <td>{{ot.creation_date|date:"d/m/Y"}}</td>
                     <td><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
@@ -94,11 +91,11 @@
                     <td>{{ot.super.first_name}} {{ot.super.last_name}}</td>
                     <td>{{ot.get_state_display}}</td>
                 </tr>
-                {% endfor %}
-                
-            {% else %}
-                <p>No hay ordenes de trabajo en la registrados.</p>
-            {% endif %}
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay ordenes de trabajo registrados.</td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 

@@ -18,7 +18,7 @@ from django.utils import timezone
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, HistoricalSystem
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
@@ -1184,5 +1184,30 @@ class HistorialCambiosView(generic.TemplateView):
         context['modelo2'] = Ot.history.all()
         context['modelo3'] = Ruta.history.all()
         context['modelo4'] = Task.history.all()
+        context['modelo5'] = System.history.all()
         # Agrega tantos contextos como modelos tengas
+        return context
+
+
+class BitacoraView(generic.TemplateView):
+    template_name = 'got/bitacora.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        asset_id = self.kwargs.get('asset_id')
+        asset = get_object_or_404(Asset, pk=asset_id)
+        
+        ots = Ot.objects.filter(system__asset=asset).order_by('-creation_date')
+        
+        # Fetching all historical records for systems related to this asset
+        # history_items = HistoricalSystem.objects.filter(asset_id=asset_id, history_change_reason__contains="location change")
+        history_items = System.history.filter(asset_id=asset_id, history_change_reason__contains="location change")
+
+
+        # Combining and sorting all items for display
+        combined_items = list(ots) + list(history_items)
+        combined_items.sort(key=lambda x: x.history_date if hasattr(x, 'history_date') else x.creation_date, reverse=True)
+
+        context['combined_items'] = combined_items
+        context['asset'] = asset
         return context

@@ -138,4 +138,5 @@ urlpatterns = [
         name='failure-report-crear-ot'
     ),
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
+    path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 ]

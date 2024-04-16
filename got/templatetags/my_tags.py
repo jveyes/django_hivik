@@ -1,6 +1,8 @@
 from django import template
-from got.models import Asset, FailureReport
+from got.models import Asset, FailureReport, System
 from django.contrib.auth.models import Group
+from simple_history.models import HistoricalRecords
+
 
 register = template.Library()
 
@@ -26,3 +28,15 @@ def has_group(user, group_name):
 @register.filter(name='get_impact_display')
 def get_impact_display(impact_code):
     return FailureReport().get_impact_display(impact_code)
+
+
+@register.filter
+def is_instance_of(item, cls_name):
+    try:
+        cls = eval(cls_name)
+        return isinstance(item, cls)
+    except NameError:
+        # Handle the case where cls_name is not defined
+        if cls_name == 'HistoricalSystem':
+            return isinstance(item, type(System.history.first()))
+        return False
