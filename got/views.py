@@ -410,15 +410,131 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
+# class FailureReportForm(LoginRequiredMixin, CreateView):
+
+#     '''
+#     Formulario para reportar fallas en los equipos de activo.
+#     '''
+
+#     model = FailureReport
+#     form_class = failureForm
+#     http_method_names = ['get', 'post']
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         asset_id = self.kwargs.get('asset_id')
+#         asset = get_object_or_404(Asset, pk=asset_id)
+#         context['asset_main'] = asset
+#         return context
+
+#     def get_form(self, form_class=None):
+#         form = super().get_form(form_class)
+#         asset_id = self.kwargs.get('asset_id')
+#         asset = get_object_or_404(Asset, pk=asset_id)
+#         form.fields['equipo'].queryset = Equipo.objects.filter(
+#             system__asset=asset
+#         )
+#         return form
+
+#     def form_valid(self, form):
+#         form.instance.reporter = self.request.user
+#         self.object = form.save()  # Guarda el objeto y lo mantiene en self.object
+
+#         # Preparar el contexto para la plantilla de correo
+#         context = {
+#             'reporter': self.object.reporter,
+#             'moment': self.object.moment,
+#             'equipo': self.object.equipo,
+#             'description': self.object.description,
+#             'causas': self.object.causas,
+#             'suggest_repair': self.object.suggest_repair,
+#             'impact': self.object.impact,
+#             'critico': self.object.critico,
+#             'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
+#         }
+
+#         # Renderizar la plantilla de correo
+#         email_body = render_to_string('got/failure_report_email.txt', context)
+
+#         # Obtener correos de super miembros
+#         super_members_group = Group.objects.get(name='super_members')
+#         super_members_emails = super_members_group.user_set.values_list('email', flat=True)
+
+#         # Preparar y enviar el correo
+#         email = EmailMessage(
+#             subject='Nuevo Reporte de Falla',
+#             body=email_body,
+#             from_email=settings.EMAIL_HOST_USER,
+#             to=list(super_members_emails),
+#         )
+
+#         # Adjuntar imagen de evidencia si está presente
+#         if self.object.evidence:
+#             email.attach_file(self.object.evidence.path)
+
+#         email.send()
+
+#         return super(FailureReportForm, self).form_valid(form)
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.http import HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic.edit import CreateView
+from django.contrib.auth.models import Group
+from django.conf import settings
+
 class FailureReportForm(LoginRequiredMixin, CreateView):
-
-    '''
-    Formulario para reportar fallas en los equipos de activo.
-    '''
-
     model = FailureReport
     form_class = failureForm
     http_method_names = ['get', 'post']
+
+    def send_email(self, context):
+        """Sends an email compiled from the given context."""
+        subject = 'Nuevo Reporte de Falla'
+        email_template_name = 'got/failure_report_email.txt'
+        
+        email_body_html = render_to_string(email_template_name, context)
+        email_body_plain = strip_tags(email_body_html)
+        
+        email = EmailMessage(
+            subject,
+            email_body_plain,
+            settings.EMAIL_HOST_USER,
+            [user.email for user in Group.objects.get(name='super_members').user_set.all()],
+            reply_to=[settings.EMAIL_HOST_USER]
+        )
+        email.content_subtype = 'html'  # Main content is now text/html
+        
+        if self.object.evidence:
+            email.attach_file(self.object.evidence.path)
+        
+        email.send()
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        self.object.reporter = self.request.user
+        self.object.save()
+        
+        # Sending the email after the form is saved
+        context = self.get_email_context()  # Collect information to be sent in the email
+        self.send_email(context)  # Send the email
+
+        return HttpResponseRedirect(self.get_success_url())  # Redirect after POST
+
+    def get_email_context(self):
+        """Builds the context dictionary for the email."""
+        return {
+            'reporter': self.object.reporter,
+            'moment': self.object.moment.strftime('%Y-%m-%d %H:%M'),
+            'equipo': self.object.equipo.name,
+            'description': self.object.description,
+            'causas': self.object.causas,
+            'suggest_repair': self.object.suggest_repair,
+            'impact': self.object.get_impact_display(),
+            'critico': 'Yes' if self.object.critico else 'No',
+            'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
+        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -431,50 +547,10 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         form = super().get_form(form_class)
         asset_id = self.kwargs.get('asset_id')
         asset = get_object_or_404(Asset, pk=asset_id)
-        form.fields['equipo'].queryset = Equipo.objects.filter(
-            system__asset=asset
-        )
+        form.fields['equipo'].queryset = Equipo.objects.filter(system__asset=asset)
         return form
 
-    def form_valid(self, form):
-        form.instance.reporter = self.request.user
-        self.object = form.save()  # Guarda el objeto y lo mantiene en self.object
 
-        # Preparar el contexto para la plantilla de correo
-        context = {
-            'reporter': self.object.reporter,
-            'moment': self.object.moment,
-            'equipo': self.object.equipo,
-            'description': self.object.description,
-            'causas': self.object.causas,
-            'suggest_repair': self.object.suggest_repair,
-            'impact': self.object.impact,
-            'critico': self.object.critico,
-            'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
-        }
-
-        # Renderizar la plantilla de correo
-        email_body = render_to_string('got/failure_report_email.txt', context)
-
-        # Obtener correos de super miembros
-        super_members_group = Group.objects.get(name='super_members')
-        super_members_emails = super_members_group.user_set.values_list('email', flat=True)
-
-        # Preparar y enviar el correo
-        email = EmailMessage(
-            subject='Nuevo Reporte de Falla',
-            body=email_body,
-            from_email=settings.EMAIL_HOST_USER,
-            to=list(super_members_emails),
-        )
-
-        # Adjuntar imagen de evidencia si está presente
-        if self.object.evidence:
-            email.attach_file(self.object.evidence.path)
-
-        email.send()
-
-        return super(FailureReportForm, self).form_valid(form)
 
 
 
