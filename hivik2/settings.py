@@ -87,10 +87,10 @@ load_dotenv()
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "dao4gcco5kbsfa",
-        "USER": "ztklwuglyluaih",
+        "NAME": "dbmaster",
+        "USER": "dbmasteruser",
         "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "HOST": "ec2-52-6-117-96.compute-1.amazonaws.com",
+        "HOST": "ls-eff0c3a4061237c27e40bc1fc4bab86621d123dc.c1488e8iswlk.us-east-1.rds.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
 }
