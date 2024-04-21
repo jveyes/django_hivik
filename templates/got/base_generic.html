@@ -1,5 +1,6 @@
 {% load my_tags %}
 {% obtener_asset_del_supervisor as asset_del_supervisor %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,9 +20,27 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/style.css">
+    <!-- <link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/style.css"> -->
+	<link href="https://fonts.googleapis.com/css?family=Anton%7CBaskervville%7CRaleway&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"/>
+
 	{% block headtag %}{% endblock %}
 	<style>
+		*, ::before, ::after {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+			font-family: "Poppins", sans-serif;
+		}
+
+		.class-test {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			padding: 8px 0;
+			justify-content: space-between;
+		}
+
 		.navbar-custom .navbar-nav .nav-link {
     		color: #000;
 		}
@@ -32,6 +51,97 @@
 		.nav-link {
 			color: #000 !important; /* Negro */
 		}
+
+		.bottom-line {
+			margin-top: 25px;
+		}
+
+		a {
+		text-decoration: none; /* Elimina la línea de abajo */
+		color: black; /* Color del texto */
+		}
+		
+		a:hover {
+		background-color: yellowgreen; /* Cambia el color del texto en hover */
+		color: #fff;
+		}
+
+		.space {
+		margin: 30px 20px;
+		}
+
+		td, th {
+		padding: 10px;
+		}
+
+		.mi-tabla-borde-externo {
+		border-collapse: separate;
+		border-spacing: 0;
+		border: 1px solid #333; 
+		width: 100%;
+		border-radius: 10px;
+		overflow: hidden; 
+		}
+
+		.mi-tabla-borde-externo th, .mi-tabla-borde-externo td {
+		border-bottom: 1px solid #dee2e6;
+		}
+
+		.mi-tabla-borde-externo tr:last-child th, .mi-tabla-borde-externo tr:last-child td {
+		border-bottom: none;
+		}
+
+		.radioOptions {
+		display: flex;
+		gap: 10px;
+		align-items: center;
+		}
+
+		.radioOptions label {
+		margin-right: 5px;
+		}
+
+		.form-group {
+		margin-bottom: 15px;
+		}
+
+		.form-group label {
+		display: block;
+		margin-bottom: 5px;
+		}
+
+		.form-group input,
+		.form-group textarea,
+		.form-group select {
+		width: 100%;
+		padding: 8px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		}
+
+		.formulario-centrado {
+		width: 80%; /* Ancho del formulario */
+		margin: 0 auto; /* Centra el formulario horizontalmente */
+		padding: 20px;
+		box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Opcional: Añade un poco de sombra para resaltar el formulario */
+		}
+		.custom-checkbox {
+		display: block; /* Asegura que el contenedor de cada checkbox ocupe toda la anchura disponible */
+		margin-bottom: 5px; /* Reduce el espacio entre cada checkbox */
+		}
+
+		.custom-checkbox label {
+		display: flex;
+		align-items: center; /* Alinea verticalmente el checkbox con el texto */
+		margin-bottom: 0; /* Elimina o reduce el margen inferior predeterminado */
+		}
+
+		.custom-checkbox input[type="checkbox"] {
+		margin-right: 10px; /* Espacio entre el checkbox y el texto */
+		margin-bottom: 0px; /* Espacio entre el checkbox y el texto */
+		}
+
+
 
 	</style>
 </head>
@@ -107,7 +217,9 @@
 	<main class="container mt-4">
 
 		<!-- Titulo de la pagina -->
-		<h1 class="mb-4">{% block header %}{% endblock %}</h1>
+		<h1>
+			{% block header %}{% endblock %}
+		</h2>
 
 		<!-- Contenido -->
 		{% block content %}{% endblock %}
@@ -127,7 +239,7 @@
 					{% for num in page_obj.paginator.page_range %}
 						{% if page_obj.number == num %}
 							<li class="page-item active" aria-current="page"><a class="page-link" href="#">{{ num }}</a></li>
-						{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+						{% elif num > page_obj.number|add:'-20' and num < page_obj.number|add:'20' %}
 							<li class="page-item"><a class="page-link" href="{{ request.path }}?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a></li>
 						{% endif %}
 					{% endfor %}

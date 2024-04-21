@@ -38,9 +38,8 @@ class Asset(models.Model):
 
     name = models.CharField(max_length=50)
     area = models.CharField(max_length=1, choices=AREA, default='a')
-    supervisor = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True
-        )
+    supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
 
     # Propiedades adicionales para barcos
     bandera = models.CharField(
@@ -148,11 +147,7 @@ class Equipo(models.Model):
     marca = models.CharField(max_length=50, null=True, blank=True)
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
-    imagen = models.ImageField(
-        upload_to=get_upload_path,
-        null=True,
-        blank=True
-        )
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
     manual_pdf = models.FileField(
         upload_to=get_upload_pdfs,
         null=True,

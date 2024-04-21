@@ -241,7 +241,7 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
         rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
         # Limitar a mostrar 10 sistemas
-        paginator = Paginator(systems, 10)
+        paginator = Paginator(systems, 20)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -286,28 +286,6 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     '''
 
     model = System
-
-    # Formulario para crear, modificar o eliminar actividades
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['equipo_form'] = EquipoForm()
-    #     return context
-
-    # def post(self, request, *args, **kwargs):
-    #     sys = self.get_object()
-    #     equipo_form = EquipoForm(request.POST, request.FILES)
-
-    #     if equipo_form.is_valid():
-    #         eq = equipo_form.save(commit=False)
-    #         eq.system = sys
-    #         eq.save()
-    #         return redirect(request.path)
-    #     else:
-    #         context = {
-    #             'system': sys,
-    #             'equipo_form': equipo_form,
-    #             }
-    #         return render(request, "got/system_detail.html", context)
 
 
 class SysDelete(DeleteView):
@@ -549,9 +527,6 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         asset = get_object_or_404(Asset, pk=asset_id)
         form.fields['equipo'].queryset = Equipo.objects.filter(system__asset=asset)
         return form
-
-
-
 
 
 class FailureDetailView(LoginRequiredMixin, generic.DetailView):

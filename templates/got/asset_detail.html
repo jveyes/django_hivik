@@ -1,35 +1,56 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
+
 {% block header %}
+
     {% if perms.got.view_asset or request.user|has_group:"buzos_members"  %}
         <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
     {% endif %}
     {{ asset.name }}
+
 {% endblock %}
 
 {% block content %}
 
+<ul class="nav nav-tabs justify-content-end" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
+            General
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">
+            Rutinas
+        </button>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
+    </li>
+    <li class="nav-item">
+    </li>
+    <a class="nav-link disabled" href="{% url 'got:horas-asset' asset.id %}" {% if not rotativos %}aria-disabled="true" disabled{% endif %}>
+            Reporte total de horas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'got:failure-report-create' asset.id %}">Reportar falla</a>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
+
 <!------------------------------------ Opciones (Crear OT/ Ver reporte de horas totales) ---------------------------------------->
-<section>
-    <div class="d-flex">
-        <a class="btn btn-primary space" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
-        {% if perms.got.add_ot %}
-            <button type="button" class="btn btn-primary space" data-bs-toggle="modal" data-bs-target="#sysModal">
-                Crear nuevo sistema
-            </button>
-        {% endif %}
-        {% if rotativos %}
-            <a class="btn btn-secondary space" href="{% url 'got:horas-asset' asset.id %}">Reporte total de horas</a>
-        {% endif %}
-        <a class="btn btn-secondary space" href="{% url 'got:failure-report-create' asset.id %}">Reporte de falla</a>
-    </div>
-</section>
 
 
-
+<!-- Informacion general -->
 <section class="d-flex">
     <div class="" style="min-width: 350px;">
         <table class="table table-dark mt-0 mb-0 table-striped">
+            <thead>
+                {% if asset.imagen %}
+                    <img src="{{ asset.imagen.url }}" style="width: 450px;" class="" loading="lazy">
+                {% endif %}
+            </thead>
             <tbody>
                 <tr>
                     <th colspan="2" class="text-center">Información general</th>
@@ -88,6 +109,7 @@
     </div>
 
     <div class="ms-4 flex-grow-1">
+        <h2 class="mt-4">Sistemas</h2>
         {% if asset.system_set.all %}
             <table class="table table-striped mi-tabla-borde-externo mt-0">
                 <thead>
@@ -153,6 +175,10 @@
         {% endif %}
     </div>
 </section>
+
+</div>
+
+<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
 
 <!-- Rutinas -->
 <section class="container mt-4">
@@ -276,5 +302,7 @@
             </div>
         </div>
     </div>
+</div>
+
 </div>
 {% endblock %}
