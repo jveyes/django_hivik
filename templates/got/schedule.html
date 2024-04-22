@@ -72,7 +72,7 @@
             ctx.fillStyle = 'black';
             ctx.textBaseline = 'middle';
             data.datasets[0].data.forEach((datapoint, index) => {
-                ctx.fillText(datapoint.name, 10, y.getPixelForValue(index));
+                ctx.fillText(datapoint.name, 10, y.getPixelForValue(index-0.5));
             })
             
         }
@@ -85,7 +85,7 @@
         options: {
             layout: {
                 padding: {
-                    left: 100
+                    left: 0
                 }
             },
             indexAxis: 'y',
