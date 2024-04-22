@@ -1103,15 +1103,11 @@ def indicadores(request):
     labels = ['Preventivo', 'Correctivo', 'Modificativo']
 
     if area_filter:
-        ots = len(Ot.objects.filter(
-            creation_date__month=m,
-            creation_date__year=2024,
-            system__asset__area=area_filter
-            ))
+        ots = len(Ot.objects.filter(creation_date__month=m, creation_date__year=2024, system__asset__area=area_filter))
 
         ot_finish = len(Ot.objects.filter(
             creation_date__month=m,
-            creation_date__year=2024, state='Finalizado',
+            creation_date__year=2024, state='f',
             system__asset__area=area_filter))
 
         preventivo = len(Ot.objects.filter(
@@ -1262,3 +1258,15 @@ class BitacoraView(generic.TemplateView):
         context['combined_items'] = combined_items
         context['asset'] = asset
         return context
+    
+import pandas as pd
+@login_required
+def schedule(request, pk):
+
+    tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, finished=False)
+    asset = get_object_or_404(Asset, pk=pk)
+    context = {
+        'tasks': tasks,
+        'asset': asset,
+    }
+    return render(request, 'got/schedule.html', context)

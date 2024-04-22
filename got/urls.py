@@ -13,6 +13,7 @@ urlpatterns = [
     # ---------------------------- Assets view ----------------------------- #
     path("assets/", views.AssetsListView.as_view(), name="asset-list"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
+    path("assets/<int:pk>/schedule/", views.schedule, name="schedule"),
 
     # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
@@ -132,11 +133,7 @@ urlpatterns = [
         views.FailureReportUpdate.as_view(),
         name='failure-report-update'
     ),
-    path(
-        'report-failure/<int:fail_id>/crear_ot/',
-        views.crear_ot_failure_report,
-        name='failure-report-crear-ot'
-    ),
+    path('report-failure/<int:fail_id>/crear_ot/', views.crear_ot_failure_report, name='failure-report-crear-ot'),
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 ]

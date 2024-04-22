@@ -347,12 +347,10 @@ class Task(models.Model):
     Actividades (v1.0)
     '''
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
-    ruta = models.ForeignKey(
-        Ruta, on_delete=models.CASCADE, null=True, blank=True
-        )
+    ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, null=True, blank=True)
     responsible = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
+        on_delete=models.SET_NULL,  
         null=True,
         blank=True
     )
@@ -386,7 +384,7 @@ class Task(models.Model):
     @property
     def final_date(self):
         return self.start_date + timedelta(days=self.men_time)
-
+ 
     class Meta:
         permissions = (('can_reschedule_task', 'Reprogramar actividades'),)
 
