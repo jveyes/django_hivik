@@ -21,7 +21,12 @@
         label: 'Weekly Sales',
         data: [
                 {% for task in tasks %}
-                    {x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'], y: '{{task.description}}', name: "{{task.responsible.first_name}} {{task.responsible.last_name}}"},
+                    {
+                        x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
+                        y: '{{task.description}}',
+                        name: '{{task.responsible.first_name}} {{task.responsible.last_name}}',
+                        status: '{{task.finished}}',
+                    },
                 {% endfor %}
             ],
         backgroundColor: [
