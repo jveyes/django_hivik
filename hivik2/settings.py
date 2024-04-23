@@ -89,8 +89,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "dbmaster",
         "USER": "dbmasteruser",
-        # "PASSWORD": os.getenv('DATABASE_PASSWORD'),
-        "PASSWORD": "t6jELNCIb<gBNRzQOvh78*X*C4,N$Tn;",
+        "PASSWORD": os.getenv('DATABASE_PASSWORD'),
+        # "PASSWORD": "t6jELNCIb<gBNRzQOvh78*X*C4,N$Tn;",
         "HOST": "ls-eff0c3a4061237c27e40bc1fc4bab86621d123dc.c1488e8iswlk.us-east-1.rds.amazonaws.com",
         "DATABASE_PORT": "5432",
     }
