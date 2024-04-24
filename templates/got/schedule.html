@@ -8,18 +8,32 @@
 {% endblock %}
 
 {% block content %}
-      <div class="chartBox">
-        <canvas id="myChart"></canvas>
-      </div>
+        <div style="display: flex">
+            <!-- <div style="width: 40%">
+                <table style="font-size: 10px">
+                    {% for task in tasks %}
+                    <tr >
+                        <th >
+                            {{task.description}}
+                        </th>
+                    </tr>
+                    {% endfor %}  
+                </table>
+            </div> -->
+            <div class="chartBox">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
     <script>
     // setup 
     const data = {
-      datasets: [{
-        label: 'Weekly Sales',
-        data: [
+
+        datasets: [{
+            label: '',
+            data: [
                 {% for task in tasks %}
                     {
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
@@ -27,31 +41,31 @@
                         name: '{{task.responsible.first_name}} {{task.responsible.last_name}}',
                         status: '{{task.finished}}',
                     },
-                {% endfor %}
+                {% endfor %}         
             ],
-        backgroundColor: [
-          'rgba(255, 26, 104, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)',
-          'rgba(0, 0, 0, 0.2)'
-        ],
-        borderColor: [
-          'rgba(255, 26, 104, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(0, 0, 0, 1)'
-        ],
-        borderWidth: 1,
-        borderSkipped: false,
-        borderRadius: 15,
-        barPercentage: 0.5,
-      }]
+            backgroundColor: [
+                'rgba(255, 26, 104, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(0, 0, 0, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 26, 104, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(0, 0, 0, 1)'
+            ],
+            borderWidth: 1,
+            borderSkipped: false,
+            borderRadius: 15,
+            barPercentage: 0.5,
+        }]
     };
 
     const todayLine = {
@@ -69,49 +83,112 @@
         }
     }
 
+    function wrapText(text, maxWidth, ctx) {
+        const words = text.split(' ');
+        let line = '';
+        const lines = [];
+
+        for (const word of words) {
+            const testLine = line + word + ' ';
+            const metrics = ctx.measureText(testLine);
+            const testWidth = metrics.width;
+
+            if (testWidth > maxWidth && line.length > 0) {
+            lines.push(line.trim());
+            line = word + ' ';
+            } else {
+            line = testLine;
+            }
+        }
+
+        if (line.trim().length > 0) {
+            lines.push(line.trim());
+        }
+
+        return lines;
+    }
+
     const assignedTasks = {
         id: 'assignedTasks',
         afterDatasetsDraw(chart, arg, pluginOptions) {
             const {ctx, data, chartArea: {top, bottom, left, right }, scales: {x, y} } = chart;
+            const maxWidth = right - left - 550;
             ctx.font = 'bolder 12px sans-serif';
             ctx.fillStyle = 'black';
             ctx.textBaseline = 'middle';
             data.datasets[0].data.forEach((datapoint, index) => {
-                ctx.fillText(datapoint.name, 10, y.getPixelForValue(index-0.5));
-            })
+                const description = datapoint.y;
+                const lines = wrapText(description, maxWidth, ctx);
+                const lineHeight = 16; 
+                const startY = y.getPixelForValue(index);
+                const lineCount = lines.length;
+                const totalHeight = lineCount * lineHeight;
+                const offsetY = -totalHeight / 2 + lineHeight / 2;
+                for (let i = 0; i < lineCount; i++) {
+                    const line = lines[i];
+                    ctx.fillText(line, left - 380, startY + offsetY + i * lineHeight);
+                }
+            });
             
         }
-    }
+    };
 
     // config 
     const config = {
         type: 'bar',
         data,
         options: {
+            responsive: true,
+            indexAxis: 'y',
             layout: {
                 padding: {
-                    left: 0
-                }
+                    left: 400
+                },
             },
-            indexAxis: 'y',
             scales: {
                 x: {
+                    
+                    display: true,
                     position: 'top',
                     type: 'time',
                     time: {
                         unit: 'day'
                     },
-                    min: '2024-03-30',
-                    max: '2024-04-30',
+                    min: '2024-04-15',
+                    max: '2024-05-15',
+                    padding: {top: 20, left: 0, right: 0, bottom: 0}
+                },
+                y: {
+                    display: false,
+                    align: 'start',
+                    padding: {top: 0, left: 100, right: 0, bottom: 0}
+                    // text: 'Value',
+                    // title: {
+                    //     color: '#911',
+                    //     font: {
+                    //         family: 'Comic Sans MS',
+                    //         size: 20,
+                    //         weight: 'bold',
+                    //         lineHeight: 1.2,
+                    //     },
+                    // }
                 }
             },
+            
             plugins: {
                 legend: {
                     display: false
-                }
-            }
+                },
+                label: {
+
+                },
+            },
+
         },
-        plugins: [todayLine, assignedTasks]
+        plugins: [
+            todayLine,
+            assignedTasks
+        ]
     };
 
     // render init block

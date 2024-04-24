@@ -1263,7 +1263,7 @@ import pandas as pd
 @login_required
 def schedule(request, pk):
 
-    tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, finished=False)
+    tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, ot__state='x')
     asset = get_object_or_404(Asset, pk=pk)
     context = {
         'tasks': tasks,
