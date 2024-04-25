@@ -119,6 +119,7 @@
                     <th scope="col">Novedades</th>
                     <th scope="col">Responsable</th>
                     <th scope="col">Estado</th>
+                    <th scope="col">Fechas</th>
                     <th scope="col">Acciones</th>
                 </tr>
             </thead>
@@ -127,10 +128,11 @@
                 {% for act in ot.task_set.all %}
                     <tr>
                         <th scope="row">{{forloop.counter}}</th>
-                        <td><a href="{% url 'got:task-detail' act.id %}"> {{ act.description }}</a></td>
+                        <td><a href="{% url 'got:finish-task' act.id %}"> {{ act.description }}</a></td>
                         <td>{{ act.news }}</td>
                         <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
                         <td>{% if act.finished %}Completado{%else%}Pendiente{% endif %}</td>
+                        <td>{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
                         {% if not request.user|has_group:"serport_members" %}
                             <td>
                                 <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>

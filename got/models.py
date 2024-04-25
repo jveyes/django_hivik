@@ -221,12 +221,7 @@ class Ot(models.Model):
     creation_date = models.DateField(auto_now_add=True)
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
-    super = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
+    super = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     state = models.CharField(choices=STATUS, default='x', max_length=50)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)

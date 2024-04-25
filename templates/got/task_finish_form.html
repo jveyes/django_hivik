@@ -4,6 +4,7 @@
 
 {% block content %}
     <div class="container">
+        <p><a href="{{ task.ot.get_absolute_url }}">Orden de trabajo # - {{ task.ot.num_ot }}</a></p>
         <p>Responsable: {{task.responsible.first_name}} {{task.responsible.last_name}}</p>
         <p {% if activity.is_overdue %}class="text-danger"{% endif %}>Fecha de vencimiento: {{ task.final_date }}</p>
 
