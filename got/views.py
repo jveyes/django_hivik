@@ -1054,7 +1054,6 @@ def crear_ot_desde_ruta(request, ruta_id):
                 description=task.description,
                 procedimiento=task.procedimiento,
                 hse=task.hse,
-                suministros=task.suministros,
                 news=task.news,
                 evidence=task.evidence,
                 start_date=timezone.now().date(),
