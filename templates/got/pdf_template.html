@@ -210,7 +210,7 @@
         {% for act in ot.task_set.all %}
             {% if act.evidence %}
                 <div>
-                    <img src="{{ act.evidence.url }}">
+                    <img src="{{ act.evidence.url }}" style="width: 200px; height: auto;">
                 </div>
             {% endif %}
         {% endfor %}

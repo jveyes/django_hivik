@@ -226,6 +226,7 @@ class Ot(models.Model):
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)
     ot_aprobada = models.FileField(upload_to=get_upload_path,null=True, blank=True)
+    suministros = models.TextField(default="", blank=True, null=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE)
     history = HistoricalRecords()
@@ -258,6 +259,7 @@ class Ruta(models.Model):
     control = models.CharField(choices=CONTROL, max_length=1)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
+    suministros = models.TextField(default="", blank=True, null=True)
     history = HistoricalRecords()
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
@@ -353,7 +355,6 @@ class Task(models.Model):
     description = models.TextField()
     procedimiento = models.TextField(default="", blank=True, null=True)
     hse = models.TextField(default="", blank=True, null=True)
-    suministros = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(
         upload_to=get_upload_path,

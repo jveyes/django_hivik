@@ -8,21 +8,10 @@
 {% endblock %}
 
 {% block content %}
-        <div style="display: flex">
-            <!-- <div style="width: 40%">
-                <table style="font-size: 10px">
-                    {% for task in tasks %}
-                    <tr >
-                        <th >
-                            {{task.description}}
-                        </th>
-                    </tr>
-                    {% endfor %}  
-                </table>
-            </div> -->
-            <div class="chartBox">
-                <canvas id="myChart"></canvas>
-            </div>
+        <div>{{ gantt_chart_div|safe }}</div>
+
+        <div class="chartBox">
+            <canvas id="myChart"></canvas>
         </div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
@@ -37,7 +26,7 @@
                 {% for task in tasks %}
                     {
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
-                        y: '{{task.description}}',
+                        y: 'Actividad {{forloop.counter}}',
                         name: '{{task.responsible.first_name}} {{task.responsible.last_name}}',
                         status: '{{task.finished}}',
                     },
@@ -83,31 +72,6 @@
         }
     }
 
-    function wrapText(text, maxWidth, ctx) {
-        const words = text.split(' ');
-        let line = '';
-        const lines = [];
-
-        for (const word of words) {
-            const testLine = line + word + ' ';
-            const metrics = ctx.measureText(testLine);
-            const testWidth = metrics.width;
-
-            if (testWidth > maxWidth && line.length > 0) {
-            lines.push(line.trim());
-            line = word + ' ';
-            } else {
-            line = testLine;
-            }
-        }
-
-        if (line.trim().length > 0) {
-            lines.push(line.trim());
-        }
-
-        return lines;
-    }
-
     const assignedTasks = {
         id: 'assignedTasks',
         afterDatasetsDraw(chart, arg, pluginOptions) {
@@ -142,7 +106,7 @@
             indexAxis: 'y',
             layout: {
                 padding: {
-                    left: 400
+                    left: 0
                 },
             },
             scales: {
@@ -154,42 +118,25 @@
                     time: {
                         unit: 'day'
                     },
-                    min: '2024-04-15',
+                    min: '{{min_date|date:"Y-m-d"}}',
                     max: '2024-05-15',
                     padding: {top: 20, left: 0, right: 0, bottom: 0}
                 },
-                y: {
-                    display: false,
-                    align: 'start',
-                    padding: {top: 0, left: 100, right: 0, bottom: 0}
-                    // text: 'Value',
-                    // title: {
-                    //     color: '#911',
-                    //     font: {
-                    //         family: 'Comic Sans MS',
-                    //         size: 20,
-                    //         weight: 'bold',
-                    //         lineHeight: 1.2,
-                    //     },
-                    // }
-                }
-            },
+                },
             
             plugins: {
                 legend: {
                     display: false
-                },
-                label: {
-
                 },
             },
 
         },
         plugins: [
             todayLine,
-            assignedTasks
         ]
     };
+
+    
 
     // render init block
     const myChart = new Chart(

@@ -120,15 +120,15 @@ class OtForm(forms.ModelForm):
             'state': 'Estado',
             'tipo_mtto': 'Tipo de mantenimiento',
             'info_contratista_pdf': 'Informe externo',
-            'ot_aprobada': 'OT aprobada'
+            'ot_aprobada': 'OT aprobada',
+            'suministros': 'Suministros'
         }
         widgets = {
-            'info_contratista_pdf': forms.FileInput(
-                attrs={'class': 'form-control'}
-                ),
+            'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
             'tipo_mtto': forms.Select(attrs={'class': 'form-control'}),
             'system': forms.Select(attrs={'class': 'form-control'}),
             'state': forms.Select(attrs={'class': 'form-control'}),
+            'suministros': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -150,15 +150,15 @@ class OtFormNoSup(forms.ModelForm):
             'system': 'Sistema',
             'state': 'Estado',
             'tipo_mtto': 'Tipo de mantenimiento',
-            'info_contratista_pdf': 'Informe externo'
+            'info_contratista_pdf': 'Informe externo',
+            'suministros': 'Suministros'
         }
         widgets = {
-            'info_contratista_pdf': forms.FileInput(
-                attrs={'class': 'form-control'}
-                ),
+            'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
             'tipo_mtto': forms.Select(attrs={'class': 'form-control'}),
             'system': forms.Select(attrs={'class': 'form-control'}),
             'state': forms.Select(attrs={'class': 'form-control'}),
+            'suministros': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -197,9 +197,7 @@ class ActForm(forms.ModelForm):
         widgets = {
             'responsible': forms.Select(attrs={'class': 'form-control'}),
             'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'description': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
             }
 
@@ -224,9 +222,7 @@ class ActFormNoSup(forms.ModelForm):
         }
         widgets = {
             'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'description': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
@@ -248,29 +244,18 @@ class RutActForm(forms.ModelForm):
             'responsible',
             'description',
             'procedimiento',
-            'suministros',
             'hse'
             ]
         labels = {
             'responsible': 'Responsable(Opcional)',
             'description': 'Descripción',
             'procedimiento': 'Procedimiento',
-            'suministros': 'Suministros',
             'hse': 'Precauciones de seguridad',
             }
         widgets = {
-            'description': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
-            'procedimiento': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
-            'hse': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
-            'suministros': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'procedimiento': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'hse': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'responsible': forms.Select(attrs={'class': 'form-control'}),
             }
 
@@ -374,10 +359,12 @@ class RutaForm(forms.ModelForm):
             'name': 'Codigo interno',
             'frecuency': 'Frecuencia',
             'intervention_date': 'Fecha ultima intervención',
-            'dependencia': 'Dependencia'
+            'dependencia': 'Dependencia',
+            'suministros': 'Suministros'
             }
         widgets = {
             'intervention_date': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'suministros': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             }
 
     def __init__(self, *args, **kwargs):

@@ -25,8 +25,10 @@ class Migration(migrations.Migration):
                 ('system', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.system')),
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
                 ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo')),
-                ('control', models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1))
+                ('control', models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1)),
+                ('dependencia', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='dependiente', to='got.ruta'))
             ],
+            options={'ordering': ['frecuency']},
         ),
         migrations.AddField(
             model_name='task',

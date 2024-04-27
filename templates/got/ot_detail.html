@@ -136,8 +136,32 @@
                         {% if not request.user|has_group:"serport_members" %}
                             <td>
                                 <a class="" href="{% url 'got:task-update' act.id %}"><i class="bi bi-pen"></i></a>
-                                <a class="" href="{% url 'got:task-delete' act.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
+                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#delete{{ act.id }}">
+                                    <i class="bi bi-file-earmark-minus-fill"></i>
+                                </button>
                             </td>
+
+                            <!-- Modal para la creación de OT -->
+                            <div class="modal fade" id="delete{{ act.id }}" tabindex="-1" aria-labelledby="deleteLabel{{ act.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteLabel{{ act.id }}">Eliminar actividad: </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {{act.description}}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form method="post" action="{% url 'got:ot-detail' ot.num_ot %}" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="delete_task_id" value="{{ act.id }}">
+                                                <button type="submit" class="btn btn-danger" name="delete_task">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         {% endif %}
                     </tr>
                 {% endfor %}
