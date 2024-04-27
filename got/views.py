@@ -1266,104 +1266,104 @@ class BitacoraView(generic.TemplateView):
         context['asset'] = asset
         return context
 
-# from django.db.models import Min
-# import plotly.figure_factory as ff
-# from django.shortcuts import render
+from django.db.models import Min
+import plotly.figure_factory as ff
+from django.shortcuts import render
 
-# def split_text(text, max_length=30):
-#     """ Divide el texto en dos líneas si es más largo que `max_length`. """
-#     if len(text) <= max_length:
-#         return text
-#     # Intenta encontrar el punto medio óptimo para dividir el texto
-#     middle = len(text) // 2
-#     left_space = text.rfind(' ', 0, middle)
-#     right_space = text.find(' ', middle)
+def split_text(text, max_length=30):
+    """ Divide el texto en dos líneas si es más largo que `max_length`. """
+    if len(text) <= max_length:
+        return text
+    # Intenta encontrar el punto medio óptimo para dividir el texto
+    middle = len(text) // 2
+    left_space = text.rfind(' ', 0, middle)
+    right_space = text.find(' ', middle)
 
-#     # Elegir el punto de división más cercano al centro
-#     if left_space == -1 and right_space == -1:
-#         # No hay espacios, realizar un corte duro en max_length
-#         split_point = max_length
-#     elif left_space == -1:
-#         split_point = right_space
-#     elif right_space == -1:
-#         split_point = left_space
-#     else:
-#         # Elegir el punto de espacio más cercano al centro
-#         split_point = left_space if (middle - left_space) <= (right_space - middle) else right_space
+    # Elegir el punto de división más cercano al centro
+    if left_space == -1 and right_space == -1:
+        # No hay espacios, realizar un corte duro en max_length
+        split_point = max_length
+    elif left_space == -1:
+        split_point = right_space
+    elif right_space == -1:
+        split_point = left_space
+    else:
+        # Elegir el punto de espacio más cercano al centro
+        split_point = left_space if (middle - left_space) <= (right_space - middle) else right_space
 
-#     return text[:split_point] + '<br>' + text[split_point:].strip()
+    return text[:split_point] + '<br>' + text[split_point:].strip()
 
-# @login_required
-# def schedule(request, pk):
+@login_required
+def schedule(request, pk):
 
-#     tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, ot__state='x')
-#     asset = get_object_or_404(Asset, pk=pk)
-#     min_date = tasks.aggregate(Min('start_date'))['start_date__min']
+    tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, ot__state='x')
+    asset = get_object_or_404(Asset, pk=pk)
+    min_date = tasks.aggregate(Min('start_date'))['start_date__min']
 
-#     df = []
-#     for task in tasks:
-#         # Acortar la descripción si es muy larga para el eje Y
-#         wrapped_description = split_text(task.description, 15)
-#         df.append(dict(Task=wrapped_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
-#         # short_description = (task.description[:30] + '...') if len(task.description) > 33 else task.description
-#         # df.append(dict(Task=short_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
+    df = []
+    for task in tasks:
+        # Acortar la descripción si es muy larga para el eje Y
+        wrapped_description = split_text(task.description, 15)
+        df.append(dict(Task=wrapped_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
+        # short_description = (task.description[:30] + '...') if len(task.description) > 33 else task.description
+        # df.append(dict(Task=short_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
 
-#     # Configurar colores y demás
-#     unique_tasks = {task['Task'] for task in df}
-#     num_unique_tasks = len(unique_tasks)
-#     base_colors = ['#7BDFF2', '#B2F7EF', '#EFF7F6', '#F7D6E0', '#F2B5D4']
-#     colors = (base_colors * ((num_unique_tasks // len(base_colors)) + 1))[:num_unique_tasks]
+    # Configurar colores y demás
+    unique_tasks = {task['Task'] for task in df}
+    num_unique_tasks = len(unique_tasks)
+    base_colors = ['#7BDFF2', '#B2F7EF', '#EFF7F6', '#F7D6E0', '#F2B5D4']
+    colors = (base_colors * ((num_unique_tasks // len(base_colors)) + 1))[:num_unique_tasks]
 
-#     fig = ff.create_gantt(df, index_col='Task', show_colorbar=True, group_tasks=True, showgrid_x=True, showgrid_y=True, colors=colors)
+    fig = ff.create_gantt(df, index_col='Task', show_colorbar=True, group_tasks=True, showgrid_x=True, showgrid_y=True, colors=colors)
 
-#     # Ajustar márgenes para permitir más espacio para las etiquetas
-#     fig.update_layout(margin=dict(l=200))  # Ajusta el margen izquierdo según sea necesario
+    # Ajustar márgenes para permitir más espacio para las etiquetas
+    fig.update_layout(margin=dict(l=200))  # Ajusta el margen izquierdo según sea necesario
 
-#     # Añadir tooltips para mostrar la descripción completa al pasar el mouse
-#     fig.update_traces(hoverinfo="text", hovertext=[d['Description'] for d in df])
+    # Añadir tooltips para mostrar la descripción completa al pasar el mouse
+    fig.update_traces(hoverinfo="text", hovertext=[d['Description'] for d in df])
 
-#     total_width = 2000
-#     left_margin = total_width * 0.2
+    total_width = 2000
+    left_margin = total_width * 0.2
 
-#     height_per_task = 100  # Altura en píxeles por tarea, ajusta según necesites
-#     total_height = height_per_task * num_unique_tasks
-#     start_dates = [task['Start'] for task in df]
-#     fig.update_xaxes(
-#         tickangle=0,
-#         tickmode='auto',
-#         tickformat='%d',  # Mostrar solo el día
-#         tickvals=start_dates,  # Usar los valores de inicio extraídos
-#         side='top'  # Mover las marcas de fecha a la parte superior
-#     )
+    height_per_task = 100  # Altura en píxeles por tarea, ajusta según necesites
+    total_height = height_per_task * num_unique_tasks
+    start_dates = [task['Start'] for task in df]
+    fig.update_xaxes(
+        tickangle=0,
+        tickmode='auto',
+        tickformat='%d',  # Mostrar solo el día
+        tickvals=start_dates,  # Usar los valores de inicio extraídos
+        side='top'  # Mover las marcas de fecha a la parte superior
+    )
 
 
-#     fig.update_layout(
-#         height=500 + 50 * num_unique_tasks,
-#         margin=dict(l=0, r=50, t=50, b=50),  # Ajustar márgenes derecho, superior e inferior también si es necesario
-#         # width=total_width,
-#         # height=total_height,
-#         legend=dict(
-#             x=0,
-#             y=0,
-#             traceorder="normal",
-#             font=dict(
-#                 family="sans-serif",
-#                 size=12,
-#                 color="black"
-#             ),
-#             bgcolor="LightSteelBlue",
-#             bordercolor="Black",
-#             borderwidth=2,
-#             orientation="h"
-#         ),
-#     )
+    fig.update_layout(
+        height=500 + 50 * num_unique_tasks,
+        margin=dict(l=0, r=50, t=50, b=50),  # Ajustar márgenes derecho, superior e inferior también si es necesario
+        # width=total_width,
+        # height=total_height,
+        legend=dict(
+            x=0,
+            y=0,
+            traceorder="normal",
+            font=dict(
+                family="sans-serif",
+                size=12,
+                color="black"
+            ),
+            bgcolor="LightSteelBlue",
+            bordercolor="Black",
+            borderwidth=2,
+            orientation="h"
+        ),
+    )
 
-#     gantt_chart_div = fig.to_html(full_html=False)
+    gantt_chart_div = fig.to_html(full_html=False)
 
-#     context = {
-#         'tasks': tasks,
-#         'asset': asset,
-#         'min_date': min_date,
-#         'gantt_chart_div': gantt_chart_div
-#     }
-#     return render(request, 'got/schedule.html', context)
+    context = {
+        'tasks': tasks,
+        'asset': asset,
+        'min_date': min_date,
+        'gantt_chart_div': gantt_chart_div
+    }
+    return render(request, 'got/schedule.html', context)
