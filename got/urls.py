@@ -13,7 +13,9 @@ urlpatterns = [
     # ---------------------------- Assets view ----------------------------- #
     path("assets/", views.AssetsListView.as_view(), name="asset-list"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
-    path("assets/<int:pk>/schedule/", views.schedule, name="schedule"),## esto es un coment
+    
+    path("assets/<int:pk>/schedule2/", views.schedule, name="schedule"),
+
 
     # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
