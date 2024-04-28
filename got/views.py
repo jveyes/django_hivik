@@ -1299,70 +1299,10 @@ def schedule(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     min_date = tasks.aggregate(Min('start_date'))['start_date__min']
 
-    df = []
-    for task in tasks:
-        # Acortar la descripción si es muy larga para el eje Y
-        wrapped_description = split_text(task.description, 15)
-        df.append(dict(Task=wrapped_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
-        # short_description = (task.description[:30] + '...') if len(task.description) > 33 else task.description
-        # df.append(dict(Task=short_description, Start=task.start_date, Finish=task.final_date, Description=task.description))
-
-    # Configurar colores y demás
-    unique_tasks = {task['Task'] for task in df}
-    num_unique_tasks = len(unique_tasks)
-    base_colors = ['#7BDFF2', '#B2F7EF', '#EFF7F6', '#F7D6E0', '#F2B5D4']
-    colors = (base_colors * ((num_unique_tasks // len(base_colors)) + 1))[:num_unique_tasks]
-
-    fig = ff.create_gantt(df, index_col='Task', show_colorbar=True, group_tasks=True, showgrid_x=True, showgrid_y=True, colors=colors)
-
-    # Ajustar márgenes para permitir más espacio para las etiquetas
-    fig.update_layout(margin=dict(l=200))  # Ajusta el margen izquierdo según sea necesario
-
-    # Añadir tooltips para mostrar la descripción completa al pasar el mouse
-    fig.update_traces(hoverinfo="text", hovertext=[d['Description'] for d in df])
-
-    total_width = 2000
-    left_margin = total_width * 0.2
-
-    height_per_task = 100  # Altura en píxeles por tarea, ajusta según necesites
-    total_height = height_per_task * num_unique_tasks
-    start_dates = [task['Start'] for task in df]
-    fig.update_xaxes(
-        tickangle=0,
-        tickmode='auto',
-        tickformat='%d',  # Mostrar solo el día
-        tickvals=start_dates,  # Usar los valores de inicio extraídos
-        side='top'  # Mover las marcas de fecha a la parte superior
-    )
-
-
-    fig.update_layout(
-        height=500 + 50 * num_unique_tasks,
-        margin=dict(l=0, r=50, t=50, b=50),  # Ajustar márgenes derecho, superior e inferior también si es necesario
-        # width=total_width,
-        # height=total_height,
-        legend=dict(
-            x=0,
-            y=0,
-            traceorder="normal",
-            font=dict(
-                family="sans-serif",
-                size=12,
-                color="black"
-            ),
-            bgcolor="LightSteelBlue",
-            bordercolor="Black",
-            borderwidth=2,
-            orientation="h"
-        ),
-    )
-
-    gantt_chart_div = fig.to_html(full_html=False)
 
     context = {
         'tasks': tasks,
         'asset': asset,
         'min_date': min_date,
-        'gantt_chart_div': gantt_chart_div
     }
     return render(request, 'got/schedule.html', context)

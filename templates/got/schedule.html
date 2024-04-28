@@ -8,9 +8,8 @@
 {% endblock %}
 
 {% block content %}
-        <div>{{ gantt_chart_div|safe }}</div>
 
-        <div class="chartBox">
+        <div class="chartBox mt-5">
             <canvas id="myChart"></canvas>
         </div>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
@@ -26,30 +25,15 @@
                 {% for task in tasks %}
                     {
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
-                        y: 'Actividad {{forloop.counter}}',
+                        y: '{{task.ot.description}}',
                         name: '{{task.responsible.first_name}} {{task.responsible.last_name}}',
                         status: '{{task.finished}}',
+                        activityDescription: '{{ task.description }}'
                     },
                 {% endfor %}         
             ],
-            backgroundColor: [
-                'rgba(255, 26, 104, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(0, 0, 0, 0.2)'
-            ],
-            borderColor: [
-                'rgba(255, 26, 104, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(0, 0, 0, 1)'
-            ],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
             borderSkipped: false,
             borderRadius: 15,
@@ -72,31 +56,6 @@
         }
     }
 
-    const assignedTasks = {
-        id: 'assignedTasks',
-        afterDatasetsDraw(chart, arg, pluginOptions) {
-            const {ctx, data, chartArea: {top, bottom, left, right }, scales: {x, y} } = chart;
-            const maxWidth = right - left - 550;
-            ctx.font = 'bolder 12px sans-serif';
-            ctx.fillStyle = 'black';
-            ctx.textBaseline = 'middle';
-            data.datasets[0].data.forEach((datapoint, index) => {
-                const description = datapoint.y;
-                const lines = wrapText(description, maxWidth, ctx);
-                const lineHeight = 16; 
-                const startY = y.getPixelForValue(index);
-                const lineCount = lines.length;
-                const totalHeight = lineCount * lineHeight;
-                const offsetY = -totalHeight / 2 + lineHeight / 2;
-                for (let i = 0; i < lineCount; i++) {
-                    const line = lines[i];
-                    ctx.fillText(line, left - 380, startY + offsetY + i * lineHeight);
-                }
-            });
-            
-        }
-    };
-
     // config 
     const config = {
         type: 'bar',
@@ -104,14 +63,13 @@
         options: {
             responsive: true,
             indexAxis: 'y',
-            layout: {
-                padding: {
-                    left: 0
-                },
-            },
+            // layout: {
+            //     padding: {
+            //         left: 0
+            //     },
+            // },
             scales: {
                 x: {
-                    
                     display: true,
                     position: 'top',
                     type: 'time',
@@ -122,9 +80,24 @@
                     max: '2024-05-15',
                     padding: {top: 20, left: 0, right: 0, bottom: 0}
                 },
-                },
+            },
             
             plugins: {
+                tooltip: {
+                    enabled: true,
+                    callbacks: {
+                        label: function(context) {
+                        var dataPoint = context.raw;
+                        return [
+                            `Fecha inicio: ${dataPoint.x[0]}`,
+                            `Fecha fin: ${dataPoint.x[1]}`,
+                            `Responsable: ${dataPoint.name}`,
+                            `Estado: ${dataPoint.status ? 'Finalizado' : 'En proceso'}`,
+                            `Descripción: ${dataPoint.activityDescription}`,
+                        ];
+                        }
+                    }
+                },
                 legend: {
                     display: false
                 },
