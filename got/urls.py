@@ -13,8 +13,7 @@ urlpatterns = [
     # ---------------------------- Assets view ----------------------------- #
     path("assets/", views.AssetsListView.as_view(), name="asset-list"),
     path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
-    
-    path("assets/<int:pk>/schedule2/", views.schedule, name="schedule"),
+    path("assets/<int:pk>/schedule/", views.schedule, name="schedule"),
 
 
     # ---------------------------- Systems view ----------------------------- #
@@ -23,9 +22,7 @@ urlpatterns = [
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
     # ---------------------------- Equipos view ----------------------------- #
-    path(  # UPDATE VIEW
-        'equipo/<str:pk>/update/',
-        views.EquipoUpdate.as_view(),
+    path('equipo/<str:pk>/update/', views.EquipoUpdate.as_view(),
         name='equipo-update'
     ),
     path(  # DELETE VIEW
