@@ -26,12 +26,6 @@
 
 	{% block headtag %}{% endblock %}
 	<style>
-		*, ::before, ::after {
-			padding: 0;
-			margin: 0;
-			box-sizing: border-box;
-			font-family: "Poppins", sans-serif;
-		}
 
 		.class-test {
 			display: flex;
@@ -117,54 +111,6 @@
 		padding: 8px;
 		border: 1px solid #ccc;
 		border-radius: 4px;
-		}
-
-		.formulario-centrado {
-		width: 80%; /* Ancho del formulario */
-		margin: 0 auto; /* Centra el formulario horizontalmente */
-		padding: 20px;
-		box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Opcional: Añade un poco de sombra para resaltar el formulario */
-		}
-		.custom-checkbox {
-		display: block; /* Asegura que el contenedor de cada checkbox ocupe toda la anchura disponible */
-		margin-bottom: 5px; /* Reduce el espacio entre cada checkbox */
-		}
-
-		.custom-checkbox label {
-		display: flex;
-		align-items: center; /* Alinea verticalmente el checkbox con el texto */
-		margin-bottom: 0; /* Elimina o reduce el margen inferior predeterminado */
-		}
-
-		.custom-checkbox input[type="checkbox"] {
-		margin-right: 10px; /* Espacio entre el checkbox y el texto */
-		margin-bottom: 0px; /* Espacio entre el checkbox y el texto */
-		}
-
-		.chartMenu {
-			width: 100vw;
-			height: 40px;
-			background: #1A1A1A;
-			color: rgba(54, 162, 235, 1);
-		}
-		.chartMenu p {
-			padding: 10px;
-			font-size: 20px;
-		}
-		.chartCard {
-			width: 100vw;
-			height: calc(100vh - 40px);
-			background: rgba(54, 162, 235, 0.2);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-		.chartBox {
-			width: 100%;
-			padding: 0px;
-			border-radius: 20px;
-			border: solid 3px rgba(54, 162, 235, 1);
-			background: white;
 		}
 
 	</style>

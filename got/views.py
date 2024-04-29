@@ -7,7 +7,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
 from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Min
 from django.template.loader import get_template
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
@@ -31,7 +31,8 @@ from .forms import (
 from datetime import timedelta, date
 from xhtml2pdf import pisa
 from io import BytesIO
-
+from collections import defaultdict
+import itertools
 
 # ---------------------------- Main views ------------------------------------#
 # ---------------------------- Mis actividades ------------------------------ #
@@ -239,9 +240,12 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             systems = asset.system_set.all()
             sys = asset.system_set.exclude(state='x')
 
+        other_asset_systems = System.objects.filter(location=asset.name).exclude(asset=asset)
+        combined_systems = (sys.union(other_asset_systems)).order_by('group')
         rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
+        
         # Limitar a mostrar 10 sistemas
-        paginator = Paginator(systems, 20)
+        paginator = Paginator(combined_systems, 20)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -253,6 +257,8 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         context['page_obj'] = page_obj
         context['page_obj_rutas'] = page_obj_rutas
         context['rotativos'] = rotativos
+        context['other_asset_systems'] = other_asset_systems
+        context['add_sys'] = combined_systems
 
         return context
 
@@ -1265,32 +1271,6 @@ class BitacoraView(generic.TemplateView):
         context['asset'] = asset
         return context
 
-from django.db.models import Min
-import plotly.figure_factory as ff
-from django.shortcuts import render
-
-def split_text(text, max_length=30):
-    """ Divide el texto en dos líneas si es más largo que `max_length`. """
-    if len(text) <= max_length:
-        return text
-    # Intenta encontrar el punto medio óptimo para dividir el texto
-    middle = len(text) // 2
-    left_space = text.rfind(' ', 0, middle)
-    right_space = text.find(' ', middle)
-
-    # Elegir el punto de división más cercano al centro
-    if left_space == -1 and right_space == -1:
-        # No hay espacios, realizar un corte duro en max_length
-        split_point = max_length
-    elif left_space == -1:
-        split_point = right_space
-    elif right_space == -1:
-        split_point = left_space
-    else:
-        # Elegir el punto de espacio más cercano al centro
-        split_point = left_space if (middle - left_space) <= (right_space - middle) else right_space
-
-    return text[:split_point] + '<br>' + text[split_point:].strip()
 
 @login_required
 def schedule(request, pk):
@@ -1299,10 +1279,43 @@ def schedule(request, pk):
     asset = get_object_or_404(Asset, pk=pk)
     min_date = tasks.aggregate(Min('start_date'))['start_date__min']
 
+    color_palette = itertools.cycle([
+        'rgba(255, 99, 132, 0.2)',   # rojo
+        'rgba(54, 162, 235, 0.2)',   # azul
+        'rgba(255, 206, 86, 0.2)',   # amarillo
+        'rgba(75, 192, 192, 0.2)',   # verde agua
+        'rgba(153, 102, 255, 0.2)',  # púrpura
+        'rgba(255, 159, 64, 0.2)',   # naranja
+    ])
+
+    # Mapear cada responsable a un color
+    responsibles = set(task.responsible.username for task in tasks if task.responsible)
+    responsible_colors = {res: next(color_palette) for res in responsibles}
+
+    chart_data = []
+    for task in tasks:
+        if task.finished:
+            color = "rgba(192, 192, 192, 0.5)"
+            border_color = "rgba(192, 192, 192, 1)"
+        else:
+            # Obtener el color asignado al responsable de esta tarea
+            color = responsible_colors.get(task.responsible.username, "rgba(54, 162, 235, 0.2)")
+            border_color = color.replace('0.2', '1') 
+        chart_data.append({
+            'start_date': task.start_date,
+            'final_date': task.final_date,
+            'description': task.ot.description,
+            'name': f"{task.responsible.first_name} {task.responsible.last_name}",
+            'status': task.finished,
+            'activity_description': task.description,
+            'background_color': color,
+            'border_color': border_color
+        })
 
     context = {
-        'tasks': tasks,
+        'tasks': chart_data,
         'asset': asset,
         'min_date': min_date,
+        'responsibles': responsible_colors,
     }
     return render(request, 'got/schedule.html', context)

@@ -3,9 +3,6 @@ from . import views
 
 app_name = 'got'
 
-'''
-13
-'''
 urlpatterns = [
     # ---------------------------- Main views ------------------------------ #
     path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
@@ -22,14 +19,8 @@ urlpatterns = [
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
     # ---------------------------- Equipos view ----------------------------- #
-    path('equipo/<str:pk>/update/', views.EquipoUpdate.as_view(),
-        name='equipo-update'
-    ),
-    path(  # DELETE VIEW
-        'equipo/<str:pk>/delete/',
-        views.EquipoDelete.as_view(),
-        name='equipo-delete'
-    ),
+    path('equipo/<str:pk>/update/', views.EquipoUpdate.as_view(), name='equipo-update'),
+    path('equipo/<str:pk>/delete/', views.EquipoDelete.as_view(), name='equipo-delete'),
     path('system/<int:pk>/new_equipo/', views.EquipoCreateView.as_view(), name='equipo-create'),
     # ---------------------------- OTs view --------------------------------- #
     path("ots/", views.OtListView.as_view(), name="ot-list"),
@@ -39,61 +30,24 @@ urlpatterns = [
     path("ots/<int:pk>/delete/", views.OtDelete.as_view(), name="ot-delete"),
 
     # ---------------------------- Taks view ----------------------------- #
-    path(  # DETALLE DE ACTIVIDADES
-        "task/<int:pk>/",
-        views.TaskDetailView.as_view(),
-        name="task-detail"
-    ),
-    path('task/<str:pk>/create/',
-         views.TaskCreate.as_view(),
-         name='task-create'),
-    path(
-        'task/<int:pk>/update/',
-        views.TaskUpdate.as_view(),
-        name='task-update'),
-    path(
-        'task/<int:pk>/delete/',
-        views.TaskDelete.as_view(),
-        name='task-delete'),
+    path("task/<int:pk>/", views.TaskDetailView.as_view(), name="task-detail"),
+    path('task/<str:pk>/create/', views.TaskCreate.as_view(), name='task-create'),
+    path('task/<int:pk>/update/', views.TaskUpdate.as_view(), name='task-update'),
+    path('task/<int:pk>/delete/', views.TaskDelete.as_view(), name='task-delete'),
 
     path("task/<int:pk>/reschedule/", views.Reschedule_task.as_view(), name='reschedule-task'),
     path('task/<int:pk>/finish/', views.Finish_task.as_view(), name='finish-task'),
 
-    path(
-        'task-rut/<int:pk>/update/',
-        views.TaskUpdaterut.as_view(),
-        name='update-task'),
-    path(
-        'delete_task/<int:pk>/',
-        views.TaskDeleterut.as_view(),
-        name='delete-task'),
+    path('task-rut/<int:pk>/update/', views.TaskUpdaterut.as_view(), name='update-task'),
+    path('delete_task/<int:pk>/', views.TaskDeleterut.as_view(), name='delete-task'),
 
     # ---------------------------- Rutinas view ----------------------------- #
     path('rutas/', views.RutaListView.as_view(), name="ruta-list"),
-    path(
-        'ruta/<str:pk>/create/',
-        views.RutaCreate.as_view(),
-        name='ruta-create'
-        ),
-    path(
-        'ruta/<str:pk>/update/',
-        views.RutaUpdate.as_view(),
-        name='ruta-update'
-        ),
-    path(
-        'ruta/<str:pk>/update/',
-        views.RutaUpdateOT.as_view(),
-        name='ruta-update-ot'
-        ),
-    path(
-        'ruta/<str:pk>/delete/',
-        views.RutaDelete.as_view(), name='ruta-delete'
-        ),
-    path(
-        'ruta/<int:ruta_id>/crear_ot/',
-        views.crear_ot_desde_ruta,
-        name='crear_ot_desde_ruta'
-    ),
+    path('ruta/<str:pk>/create/', views.RutaCreate.as_view(), name='ruta-create'),
+    path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'),
+    path('ruta/<str:pk>/update/', views.RutaUpdateOT.as_view(), name='ruta-update-ot'),
+    path('ruta/<str:pk>/delete/',views.RutaDelete.as_view(), name='ruta-delete'),
+    path('ruta/<int:ruta_id>/crear_ot/',views.crear_ot_desde_ruta,name='crear_ot_desde_ruta'),
 
     # ---------------------------- Reportes --------------------------------- #
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report'),
@@ -101,37 +55,17 @@ urlpatterns = [
 
     # ---------------------------- History hour view ------------------------ #
     path("reportehoras/<str:component>/", views.reporthours, name='horas'),
-    path(
-        "reportehorasasset/<int:asset_id>/",
-        views.reportHoursAsset,
-        name='horas-asset'
-        ),
+    path("reportehorasasset/<int:asset_id>/",views.reportHoursAsset,name='horas-asset'),
 
     # ---------------------------- Reportes de falla view ------------------- #
     # LISTADO REPORTES DE FALLA
-    path(
-        "report-failure/",
-        views.FailureListView.as_view(),
-        name="failure-report-list"
-    ),
+    path("report-failure/", views.FailureListView.as_view(), name="failure-report-list"),
     # DETALLE REPORTES DE FALLA
-    path(
-        "report-failure/<int:pk>/",
-        views.FailureDetailView.as_view(),
-        name="failure-report-detail"
-    ),
+    path("report-failure/<int:pk>/", views.FailureDetailView.as_view(), name="failure-report-detail"),
     # FORMULARIO CREACION DE REPORTE DE FALLA
-    path(
-        'report-failure/<int:asset_id>/create/',
-        views.FailureReportForm.as_view(),
-        name='failure-report-create'
-    ),
+    path('report-failure/<int:asset_id>/create/', views.FailureReportForm.as_view(), name='failure-report-create'),
     # FORMULARIO ACTUALIZACION DE REPORTE DE FALLA
-    path(
-        'report-failure/<int:pk>/update/',
-        views.FailureReportUpdate.as_view(),
-        name='failure-report-update'
-    ),
+    path('report-failure/<int:pk>/update/', views.FailureReportUpdate.as_view(), name='failure-report-update'),
     path('report-failure/<int:fail_id>/crear_ot/', views.crear_ot_failure_report, name='failure-report-crear-ot'),
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
