@@ -63,6 +63,13 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     template_name = 'got/assignedtasks_list_pendient.html'
     paginate_by = 15
 
+    def dispatch(self, request, *args, **kwargs):
+        current_user = request.user
+        if current_user.groups.filter(name='gerencia').exists():
+            return redirect('got:asset-list')
+
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         current_user = self.request.user

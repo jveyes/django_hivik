@@ -144,12 +144,14 @@
 					{% endif %}
 
 					<!-- Vistas publicas -->
+					{% if not request.user|has_group:"gerencia" %}
             		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
             		</li>
 					<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
 				  	</li>
+					{% endif %}
 
 					{% if not request.user|has_group:"serport_members" %}
 					  	<li class="nav-item">
@@ -163,10 +165,12 @@
 						<li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
 							<a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
 					  	</li>
-						<li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-							<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
-					  	</li>
             		{% endif %}
+					{% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
+					<li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
+					</li>
+				{% endif %}
 
           		</ul>
 
