@@ -451,21 +451,6 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
 #         super_members_group = Group.objects.get(name='super_members')
 #         super_members_emails = super_members_group.user_set.values_list('email', flat=True)
 
-#         # Preparar y enviar el correo
-#         email = EmailMessage(
-#             subject='Nuevo Reporte de Falla',
-#             body=email_body,
-#             from_email=settings.EMAIL_HOST_USER,
-#             to=list(super_members_emails),
-#         )
-
-#         # Adjuntar imagen de evidencia si está presente
-#         if self.object.evidence:
-#             email.attach_file(self.object.evidence.path)
-
-#         email.send()
-
-#         return super(FailureReportForm, self).form_valid(form)
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -486,16 +471,17 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         email_template_name = 'got/failure_report_email.txt'
         
         email_body_html = render_to_string(email_template_name, context)
-        email_body_plain = strip_tags(email_body_html)
+        # email_body_plain = strip_tags(email_body_html)
         
         email = EmailMessage(
             subject,
-            email_body_plain,
+            # email_body_plain,
+            email_body_html,
             settings.EMAIL_HOST_USER,
             [user.email for user in Group.objects.get(name='super_members').user_set.all()],
             reply_to=[settings.EMAIL_HOST_USER]
         )
-        email.content_subtype = 'html'  # Main content is now text/html
+        # email.content_subtype = 'html'
         
         if self.object.evidence:
             email.attach_file(self.object.evidence.path)
@@ -515,6 +501,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
 
     def get_email_context(self):
         """Builds the context dictionary for the email."""
+        impacts_display = [self.object.get_impact_display(code) for code in self.object.impact]
         return {
             'reporter': self.object.reporter,
             'moment': self.object.moment.strftime('%Y-%m-%d %H:%M'),
@@ -522,8 +509,8 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
             'description': self.object.description,
             'causas': self.object.causas,
             'suggest_repair': self.object.suggest_repair,
-            'impact': self.object.get_impact_display(),
-            'critico': 'Yes' if self.object.critico else 'No',
+            'impact': impacts_display, 
+            'critico': 'Sí' if self.object.critico else 'No',
             'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
         }
 

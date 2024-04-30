@@ -15,10 +15,14 @@ Sugerencias de reparación:
 {{ suggest_repair }}
 
 Impacto:
-{% for code in impact %}
-- {{ code.get_display }}
+{% for display in impact %}
+- {{ display }}
 {% endfor %}
 
-{{ "Crítico: Sí" if critico else "Crítico: No" }}
+{% if critico %}
+Crítico: Sí
+{% else %}
+Crítico: No
+{% endif %}
 
 Para más detalles {{ report_url }}
