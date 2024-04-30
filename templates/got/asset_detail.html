@@ -27,8 +27,7 @@
         <a class="nav-link" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
     </li>
     <li class="nav-item">
-    </li>
-    <a class="nav-link" href="{% url 'got:horas-asset' asset.id %}" {% if not rotativos %}aria-disabled="true" disabled{% endif %}>
+        <a class="nav-link" href="{% url 'got:horas-asset' asset.id %}" {% if not rotativos %}aria-disabled="true" disabled{% endif %}>
             Reporte total de horas
         </a>
     </li>
@@ -51,7 +50,7 @@
         <table class="table table-dark mt-0 mb-0 table-striped">
             <thead>
                 {% if asset.imagen %}
-                    <img src="{{ asset.imagen.url }}" style="width: 450px;" class="" loading="lazy">
+                    <img src="{{ asset.imagen.url }}" style="max-width: 450px;" class="" loading="lazy">
                 {% endif %}
             </thead>
             <tbody>
@@ -112,7 +111,12 @@
     </div>
 
     <div class="ms-4 flex-grow-1">
-        <h2 class="mt-4">Sistemas</h2>
+        <div class="d-flex">
+            <h2 class="mt-4">Sistemas</h2>
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#sysModal">
+                <i class="bi bi-plus-circle-dotted"></i>
+            </button>
+        </div>
         {% if asset.system_set.all %}
             <table class="table table-striped mi-tabla-borde-externo mt-0">
                 <thead>
@@ -285,8 +289,7 @@
 	</div>
 </section>
 
-
-
+</div>
 
 <div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -305,7 +308,5 @@
             </div>
         </div>
     </div>
-</div>
-
 </div>
 {% endblock %}
