@@ -69,4 +69,8 @@ urlpatterns = [
     path('report-failure/<int:fail_id>/crear_ot/', views.crear_ot_failure_report, name='failure-report-crear-ot'),
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
+
+    # ---------------------------- Django rest framework ----------------------- #
+    path("rest/", views.AssetGetCreate.as_view()),
+    path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),
 ]

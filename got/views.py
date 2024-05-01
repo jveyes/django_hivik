@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count, Q, Min
 from django.template.loader import get_template
@@ -15,6 +15,9 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.utils import timezone
 # from django.contrib import messages
+
+from rest_framework import generics
+from .serializers import AssetSerializer
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
@@ -33,6 +36,18 @@ from xhtml2pdf import pisa
 from io import BytesIO
 from collections import defaultdict
 import itertools
+
+
+
+class AssetGetCreate(generics.ListCreateAPIView):
+    queryset = Asset.objects.all()
+    serializer_class = AssetSerializer
+
+
+class AssetUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Asset.objects.all()
+    serializer_class = AssetSerializer
+
 
 # ---------------------------- Main views ------------------------------------#
 # ---------------------------- Mis actividades ------------------------------ #
@@ -400,65 +415,6 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
 
         return queryset
 
-
-# class FailureReportForm(LoginRequiredMixin, CreateView):
-
-#     '''
-#     Formulario para reportar fallas en los equipos de activo.
-#     '''
-
-#     model = FailureReport
-#     form_class = failureForm
-#     http_method_names = ['get', 'post']
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         asset_id = self.kwargs.get('asset_id')
-#         asset = get_object_or_404(Asset, pk=asset_id)
-#         context['asset_main'] = asset
-#         return context
-
-#     def get_form(self, form_class=None):
-#         form = super().get_form(form_class)
-#         asset_id = self.kwargs.get('asset_id')
-#         asset = get_object_or_404(Asset, pk=asset_id)
-#         form.fields['equipo'].queryset = Equipo.objects.filter(
-#             system__asset=asset
-#         )
-#         return form
-
-#     def form_valid(self, form):
-#         form.instance.reporter = self.request.user
-#         self.object = form.save()  # Guarda el objeto y lo mantiene en self.object
-
-#         # Preparar el contexto para la plantilla de correo
-#         context = {
-#             'reporter': self.object.reporter,
-#             'moment': self.object.moment,
-#             'equipo': self.object.equipo,
-#             'description': self.object.description,
-#             'causas': self.object.causas,
-#             'suggest_repair': self.object.suggest_repair,
-#             'impact': self.object.impact,
-#             'critico': self.object.critico,
-#             'report_url': self.request.build_absolute_uri(self.object.get_absolute_url()),
-#         }
-
-#         # Renderizar la plantilla de correo
-#         email_body = render_to_string('got/failure_report_email.txt', context)
-
-#         # Obtener correos de super miembros
-#         super_members_group = Group.objects.get(name='super_members')
-#         super_members_emails = super_members_group.user_set.values_list('email', flat=True)
-
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.http import HttpResponseRedirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import CreateView
-from django.contrib.auth.models import Group
-from django.conf import settings
 
 class FailureReportForm(LoginRequiredMixin, CreateView):
     model = FailureReport

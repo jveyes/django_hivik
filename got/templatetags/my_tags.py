@@ -40,3 +40,4 @@ def is_instance_of(item, cls_name):
         if cls_name == 'HistoricalSystem':
             return isinstance(item, type(System.history.first()))
         return False
+

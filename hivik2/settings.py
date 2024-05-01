@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'storages',
     'widget_tweaks',
     'simple_history',
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -57,7 +59,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True 
 
 ROOT_URLCONF = 'hivik2.urls'
 
