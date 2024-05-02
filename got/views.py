@@ -17,7 +17,7 @@ from django.utils import timezone
 # from django.contrib import messages
 
 from rest_framework import generics
-from .serializers import AssetSerializer
+from .serializers import AssetSerializer, SystemSerializer
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
@@ -47,6 +47,26 @@ class AssetGetCreate(generics.ListCreateAPIView):
 class AssetUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
     queryset = Asset.objects.all()
     serializer_class = AssetSerializer
+
+
+class SystemGetCreate(generics.ListCreateAPIView):
+    queryset = System.objects.all()
+    serializer_class = SystemSerializer
+
+
+class SystemUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
+    queryset = System.objects.all()
+    serializer_class = SystemSerializer
+
+
+class EquipoGetCreate(generics.ListCreateAPIView):
+    queryset = System.objects.all()
+    serializer_class = SystemSerializer
+
+
+class EquipoUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
+    queryset = System.objects.all()
+    serializer_class = SystemSerializer
 
 
 # ---------------------------- Main views ------------------------------------#

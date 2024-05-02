@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Asset, System 
+from .models import Asset, System, Equipo
+
 
 class AssetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,4 +21,10 @@ class AssetSerializer(serializers.ModelSerializer):
 class SystemSerializer(serializers.ModelSerializer):
     class Meta:
         model = System
+        fields = '__all__'
+
+
+class EquipoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Equipo
         fields = '__all__'

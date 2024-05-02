@@ -73,4 +73,6 @@ urlpatterns = [
     # ---------------------------- Django rest framework ----------------------- #
     path("rest/", views.AssetGetCreate.as_view()),
     path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),
+    path("rest/sys", views.SystemGetCreate.as_view()),
+    path("rest/sys/<int:pk>", views.SystemUpdateDelete.as_view()),
 ]
