@@ -1225,7 +1225,7 @@ class BitacoraView(generic.TemplateView):
         return context
 
 
-def truncate_text(text, length=32):
+def truncate_text(text, length=45):
     """Trunca el texto a una longitud especificada y añade '...' si es necesario."""
     if len(text) > length:
         return text[:length] + '...'
