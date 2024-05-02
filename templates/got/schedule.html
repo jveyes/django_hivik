@@ -28,6 +28,9 @@
 		background: white;
 	}
 </style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 {% endblock %}
 
 {% block header %}
@@ -58,7 +61,7 @@
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
                         y: '{{task.description}}',
                         name: '{{task.name}}',
-                        status: '{{task.status}}',
+                        status: '{{task.status_code}}',
                         activityDescription: '{{ task.activity_description }}'
                     },
                 {% endfor %}         
@@ -96,7 +99,17 @@
     }
 
     const status = {
-        id: 'status'
+        id: 'status',
+        afterDatasetsDraw(chart, args, pluginOptions) {
+            const {ctx, data, chartArea: {top, bottom, left, right}, scales: {x, y}} = chart;
+            ctx.save();
+            ctx.font = 'bolder 12px sans-serif';
+            ctx.fillStyle = 'black';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            data.datasets[0].data.forEach((datapoint, index) => {ctx.fillText(datapoint.status, right + 50, y .getPixelForValue(index));})
+            ctx.restore();
+        }
     }
 
     // config 
@@ -127,7 +140,7 @@
                 y: {
                 ticks: {
                     font: {
-                        size: 14,  
+                        size: 16,  
                         weight: 'bold', 
                     }
                 }

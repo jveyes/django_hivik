@@ -94,7 +94,7 @@
         <div class="btn-group">
             <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-outline-primary" aria-current="page">Imprimir detalle</a>
             <a href="{% url 'got:ot-update' ot.num_ot %}" class="btn btn-outline-primary">Actualizar</a>
-            <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger">Eliminar</a>
+            <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn {% if has_activities %}btn-danger disabled{% else %}btn-danger{% endif %}">Eliminar</a>
         </div>
     </section>
 

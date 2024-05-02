@@ -623,6 +623,9 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         all_tasks_finished = ot.task_set.filter(finished=False).exists()
         context['all_tasks_finished'] = not all_tasks_finished
 
+        has_activities = ot.task_set.exists()
+        context['has_activities'] = has_activities
+
         try:
             failure_report = ot.failure_report
         except FailureReport.DoesNotExist:
@@ -631,7 +634,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         context['failure_report'] = failure_report
 
         try:
-            ruta_asociada = ot.ruta_set.first()  # Asume que hay una relación inversa llamada 'ruta_set'
+            ruta_asociada = ot.ruta_set.first()
         except AttributeError:
             ruta_asociada = None
 
@@ -1222,6 +1225,36 @@ class BitacoraView(generic.TemplateView):
         return context
 
 
+def truncate_text(text, length=32):
+    """Trunca el texto a una longitud especificada y añade '...' si es necesario."""
+    if len(text) > length:
+        return text[:length] + '...'
+    return text
+
+
+def calculate_status_code(task):
+    """Calcula el estado numérico para una tarea basada en su OT."""
+    ot_tasks = Task.objects.filter(ot=task.ot)
+
+    if not ot_tasks:
+        return None
+
+    # Obtener la fecha de inicio más temprana y la fecha final más tardía
+    earliest_start_date = min(t.start_date for t in ot_tasks)
+    latest_final_date = max(t.final_date for t in ot_tasks)
+
+    today = date.today()
+
+    if latest_final_date < today:
+        return 0
+    elif earliest_start_date < today < latest_final_date:
+        return 1
+    elif earliest_start_date > today:
+        return 2
+
+    return None
+
+
 @login_required
 def schedule(request, pk):
 
@@ -1251,15 +1284,17 @@ def schedule(request, pk):
             # Obtener el color asignado al responsable de esta tarea
             color = responsible_colors.get(task.responsible.username, "rgba(54, 162, 235, 0.2)")
             border_color = color.replace('0.2', '1') 
+        
         chart_data.append({
             'start_date': task.start_date,
             'final_date': task.final_date,
-            'description': task.ot.description,
+            'description': truncate_text(task.ot.description),
             'name': f"{task.responsible.first_name} {task.responsible.last_name}",
             'status': task.finished,
             'activity_description': task.description,
             'background_color': color,
-            'border_color': border_color
+            'border_color': border_color,
+            'status_code': calculate_status_code(task),
         })
 
     context = {
