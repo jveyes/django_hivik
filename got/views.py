@@ -82,6 +82,26 @@ class SystemList(generics.ListAPIView):
         if asset_id is not None:
             queryset = queryset.filter(asset_id=asset_id)
         return queryset
+    
+
+from django.http import JsonResponse
+from rest_framework.parsers import JSONParser
+from .models import System
+from .serializers import SystemSerializer
+from rest_framework.decorators import api_view
+
+@api_view(['GET'])
+def get_systems_by_asset(request):
+    """
+    Retrieve systems for a specific asset.
+    """
+    asset_id = request.query_params.get('assetId')
+    if asset_id:
+        systems = System.objects.filter(asset_id=asset_id)
+        serializer = SystemSerializer(systems, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    return JsonResponse({'error': 'Missing assetId parameter'}, status=400)
+
 
 
 # ---------------------------- Main views ------------------------------------#

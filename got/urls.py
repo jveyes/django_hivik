@@ -77,5 +77,5 @@ urlpatterns = [
     path("rest/sys/<int:pk>", views.SystemUpdateDelete.as_view()),
     # urls.py
     path("rest/systems/", views.SystemList.as_view(), name='system-list'),
-
+    path('api/systems/', views.get_systems_by_asset, name='systems-by-asset'),
 ]
