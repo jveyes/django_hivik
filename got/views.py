@@ -40,8 +40,18 @@ import itertools
 
 
 class AssetGetCreate(generics.ListCreateAPIView):
-    queryset = Asset.objects.all()
-    serializer_class = AssetSerializer
+    serializer_class = SystemSerializer
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned systems to a given asset,
+        by filtering against a `assetId` query parameter in the URL.
+        """
+        queryset = System.objects.all()
+        asset_id = self.request.query_params.get('assetId', None)
+        if asset_id is not None:
+            queryset = queryset.filter(asset_id=asset_id)
+        return queryset
 
 
 class AssetUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
