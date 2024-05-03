@@ -26,6 +26,8 @@
 		border-radius: 20px;
 		border: solid 3px rgba(54, 162, 235, 1);
 		background: white;
+        overflow-x: auto; /* Permite el desplazamiento horizontal */
+        min-width: 1200px;
 	}
 </style>
 
@@ -148,13 +150,29 @@
                     padding: {top: 20, left: 0, right: 0, bottom: 0}
                 },
                 y: {
-                ticks: {
-                    font: {
-                        size: 16,  
-                        weight: 'bold', 
+                    display: true,
+                    position: 'left',
+                    ticks: {
+                        font: {
+                            size: 16,  
+                            weight: 'bold', 
+                        }
                     }
-                }
-            }
+                },
+            //     yFixed: { // Eje Y secundario fijo solo para las etiquetas
+            //         display: true,
+            //         position: 'left',
+            //         offset: true, // Esto separa el eje secundario del principal
+            //         ticks: {
+            //             font: {
+            //                 size: 16,
+            //                 weight: 'bold',
+            //             }
+            //         },
+            //         grid: {
+            //             drawOnChartArea: false // Esto evitará que se dibujen líneas de cuadrícula para este eje
+            //         }
+            // }
             },
             
             plugins: {
@@ -163,7 +181,7 @@
                     callbacks: {
                         title: function(tooltipItems, data) {
                         // Cambiar el título por la descripción de la actividad
-                        return tooltipItems[0].raw.activityDescription;
+                            return tooltipItems[0].raw.activityDescription;
                         },
                         label: function(context) {
                         var dataPoint = context.raw;
