@@ -102,12 +102,22 @@
         id: 'status',
         afterDatasetsDraw(chart, args, pluginOptions) {
             const {ctx, data, chartArea: {top, bottom, left, right}, scales: {x, y}} = chart;
+
+            const icons = ['\uf00d', '\uf110', '\uf00c'];
+            const colours = ['rgba(255, 26, 104, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'];
+
             ctx.save();
-            ctx.font = 'bolder 12px sans-serif';
-            ctx.fillStyle = 'black';
+            ctx.font = 'bolder 12px FontAwesome';
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';
-            data.datasets[0].data.forEach((datapoint, index) => {ctx.fillText(datapoint.status, right + 50, y .getPixelForValue(index));})
+            data.datasets[0].data.forEach((datapoint, index) => {
+                ctx.beginPath();
+                ctx.fillStyle = colours[datapoint.status];
+                ctx.arc(right + 50, y.getPixelForValue(index), 12, 0, (Math.PI/180)*360, false);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.fillText(icons[datapoint.status], right + 50, y.getPixelForValue(index));})
             ctx.restore();
         }
     }

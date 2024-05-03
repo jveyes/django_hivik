@@ -69,6 +69,21 @@ class EquipoUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SystemSerializer
 
 
+class SystemList(generics.ListAPIView):
+    serializer_class = SystemSerializer
+
+    def get_queryset(self):
+        """
+        Opcionalmente restringe los sistemas a aquellos asociados a un activo específico,
+        al filtrar contra un parámetro de query 'assetId' en la URL.
+        """
+        queryset = System.objects.all()
+        asset_id = self.request.query_params.get('assetId', None)
+        if asset_id is not None:
+            queryset = queryset.filter(asset_id=asset_id)
+        return queryset
+
+
 # ---------------------------- Main views ------------------------------------#
 # ---------------------------- Mis actividades ------------------------------ #
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
@@ -1252,12 +1267,9 @@ def truncate_text(text, length=45):
     return text
 
 
-def calculate_status_code(task):
+def calculate_status_code(t):
     """Calcula el estado numérico para una tarea basada en su OT."""
-    ot_tasks = Task.objects.filter(ot=task.ot)
-
-    if not ot_tasks:
-        return None
+    ot_tasks = Task.objects.filter(ot=t)
 
     # Obtener la fecha de inicio más temprana y la fecha final más tardía
     earliest_start_date = min(t.start_date for t in ot_tasks)
@@ -1279,6 +1291,7 @@ def calculate_status_code(task):
 def schedule(request, pk):
 
     tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, ot__state='x')
+    ots = Ot.objects.filter(system__asset=pk, state='x')
     asset = get_object_or_404(Asset, pk=pk)
     min_date = tasks.aggregate(Min('start_date'))['start_date__min']
 
@@ -1291,11 +1304,18 @@ def schedule(request, pk):
         'rgba(255, 159, 64, 0.2)',   # naranja
     ])
 
+    sta = [0 for i in tasks]
+    n = 0
+    for ot in ots:
+        sta[n] = calculate_status_code(ot)
+        n += 1
+
     # Mapear cada responsable a un color
     responsibles = set(task.responsible.username for task in tasks if task.responsible)
     responsible_colors = {res: next(color_palette) for res in responsibles}
 
     chart_data = []
+    n = 0
     for task in tasks:
         if task.finished:
             color = "rgba(192, 192, 192, 0.5)"
@@ -1314,8 +1334,9 @@ def schedule(request, pk):
             'activity_description': task.description,
             'background_color': color,
             'border_color': border_color,
-            'status_code': calculate_status_code(task),
+            'status_code': sta[n],
         })
+        n += 1
 
     context = {
         'tasks': chart_data,
