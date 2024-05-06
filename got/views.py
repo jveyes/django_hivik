@@ -7,7 +7,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count, Q, Min
+from django.db.models import Count, Q, Min, Max, OuterRef, Subquery, F, ExpressionWrapper, DateField
 from django.template.loader import get_template
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
@@ -36,82 +36,6 @@ from xhtml2pdf import pisa
 from io import BytesIO
 from collections import defaultdict
 import itertools
-
-
-
-class AssetGetCreate(generics.ListCreateAPIView):
-    serializer_class = SystemSerializer
-
-    def get_queryset(self):
-        """
-        Optionally restricts the returned systems to a given asset,
-        by filtering against a `assetId` query parameter in the URL.
-        """
-        queryset = System.objects.all()
-        asset_id = self.request.query_params.get('assetId', None)
-        if asset_id is not None:
-            queryset = queryset.filter(asset_id=asset_id)
-        return queryset
-
-
-class AssetUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Asset.objects.all()
-    serializer_class = AssetSerializer
-
-
-class SystemGetCreate(generics.ListCreateAPIView):
-    queryset = System.objects.all()
-    serializer_class = SystemSerializer
-
-
-class SystemUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
-    queryset = System.objects.all()
-    serializer_class = SystemSerializer
-
-
-class EquipoGetCreate(generics.ListCreateAPIView):
-    queryset = System.objects.all()
-    serializer_class = SystemSerializer
-
-
-class EquipoUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
-    queryset = System.objects.all()
-    serializer_class = SystemSerializer
-
-
-class SystemList(generics.ListAPIView):
-    serializer_class = SystemSerializer
-
-    def get_queryset(self):
-        """
-        Opcionalmente restringe los sistemas a aquellos asociados a un activo específico,
-        al filtrar contra un parámetro de query 'assetId' en la URL.
-        """
-        queryset = System.objects.all()
-        asset_id = self.request.query_params.get('assetId', None)
-        if asset_id is not None:
-            queryset = queryset.filter(asset_id=asset_id)
-        return queryset
-    
-
-from django.http import JsonResponse
-from rest_framework.parsers import JSONParser
-from .models import System
-from .serializers import SystemSerializer
-from rest_framework.decorators import api_view
-
-@api_view(['GET'])
-def get_systems_by_asset(request):
-    """
-    Retrieve systems for a specific asset.
-    """
-    asset_id = request.query_params.get('assetId')
-    if asset_id:
-        systems = System.objects.filter(asset_id=asset_id)
-        serializer = SystemSerializer(systems, many=True)
-        return JsonResponse(serializer.data, safe=False)
-    return JsonResponse({'error': 'Missing assetId parameter'}, status=400)
-
 
 
 # ---------------------------- Main views ------------------------------------#
@@ -984,6 +908,7 @@ class RutaListView(LoginRequiredMixin, generic.ListView):
         context = super(RutaListView, self).get_context_data(**kwargs)
         context['assets'] = Asset.objects.all()
         context['area_filter'] = self.request.GET.get('area_filter')
+        context['dique_rutinas'] = Ruta.objects.filter(name__icontains='DIQUE')
         return context
 
 
@@ -1122,15 +1047,34 @@ def indicadores(request):
 
     area_filter = request.GET.get('area', None)
 
-    # top_assets = Asset.objects.annotate(num_ots=Count('system__ot')).order_by('-num_ots')[:5]
     assets = Asset.objects.annotate(num_ots=Count('system__ot'))
     if area_filter:
         assets = assets.filter(area=area_filter)
     top_assets = assets.order_by('-num_ots')[:5]
-    ots_per_asset = [asset.num_ots for asset in top_assets]
-    asset_labels = [asset.name for asset in top_assets]
+    ots_per_asset = [a.num_ots for a in top_assets]
+    asset_labels = [a.name for a in top_assets]
 
     labels = ['Preventivo', 'Correctivo', 'Modificativo']
+
+    earliest_start_date = Task.objects.filter(ot=OuterRef('pk')).order_by('start_date').values('start_date')[:1]
+    # Subconsulta para calcular la fecha de finalización más tardía
+    latest_final_date = Task.objects.filter(ot=OuterRef('pk')).annotate(
+        final_date=ExpressionWrapper(
+            F('start_date') + F('men_time'),
+            output_field=DateField()
+        )
+    ).order_by('-final_date').values('final_date')[:1]
+
+    # Anotar fechas de inicio y fin en `Ot` a través de subconsultas de `Task`
+    bar = Ot.objects.annotate(
+        start=Subquery(earliest_start_date),
+        end=Subquery(latest_final_date)
+    ).filter(state='x')
+
+    if area_filter:
+        bar = bar.filter(system__asset__area=area_filter)
+
+    barcos = bar.filter(system__asset__area='a')
 
     if area_filter:
         ots = len(Ot.objects.filter(creation_date__month=m, creation_date__year=2024, system__asset__area=area_filter))
@@ -1190,6 +1134,7 @@ def indicadores(request):
         'ots_asset': ots_per_asset,
         'asset_labels': asset_labels,
         'ots_finished': ot_finish,
+        'barcos': barcos
     }
     return render(request, 'got/indicadores.html', context)
 

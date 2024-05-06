@@ -71,11 +71,11 @@ urlpatterns = [
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 
     # ---------------------------- Django rest framework ----------------------- #
-    path("rest/", views.AssetGetCreate.as_view()),
-    path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),
-    path("rest/sys", views.SystemGetCreate.as_view()),
-    path("rest/sys/<int:pk>", views.SystemUpdateDelete.as_view()),
-    # urls.py
-    path("rest/systems/", views.SystemList.as_view(), name='system-list'),
-    path('api/systems/', views.get_systems_by_asset, name='systems-by-asset'),
+    # path("rest/", views.AssetGetCreate.as_view()),
+    # path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),
+    # path("rest/sys", views.SystemGetCreate.as_view()),
+    # path("rest/sys/<int:pk>", views.SystemUpdateDelete.as_view()),
+    # # urls.py
+    # path("rest/systems/", views.SystemList.as_view(), name='system-list'),
+    # path('api/systems/', views.get_systems_by_asset, name='systems-by-asset'),
 ]

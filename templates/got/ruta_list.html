@@ -1,5 +1,72 @@
 {% extends "got/base_generic.html" %}
 
+{% block headtag %}
+<style>
+	body {
+		font-size: 1.125rem;
+		font-family: system-ui;
+		line-height: 1.5;
+	}
+
+	.wrapper {
+		width: min(900px, 100% - 3rem);
+		margin-inline: auto;
+	}
+
+	table {
+		width: 100%;
+		color: white;
+		background: #323232;
+		border-collapse: collapse;
+	}
+
+	th, td {
+		padding: 1rem;
+	}
+
+	caption {
+		color: white;
+		text-align: center;
+		background-color:  hsl(0 0% 0%);
+		text-transform: uppercase;
+		font-weight: 700;
+	}
+
+	th {
+		background-color:  hsl(0 0% 0% / 0.5);
+	}
+
+	tr:nth-of-type(2n) {
+		background-color:  hsl(0 0% 0% / 0.1);
+	}
+
+	@media (max-width: 650px) {
+		th {
+			display: none;
+		}
+		td {
+			display: grid;
+			gap: 0.5rem;
+			grid-template-columns: 15ch auto;
+			padding: 0.5rem 1rem;
+		}
+
+		td:first-child {
+			padding-top: 2rem;
+		}
+
+		td:last-child {
+			padding-bottom: 2rem;	
+		}
+
+		td::before {
+			content: attr(data-cell) ": ";
+			font-weight: 700;
+		}
+	}
+</style>
+{% endblock %}
+
 {% block header %}Rutinas de mantenimiento{% endblock %}
 
 {% block content %}
@@ -18,9 +85,43 @@
     <button type="submit" >Filtrar</button>
 </form>
 
+<div class="wrapper">
+		<table class="mt-5">
+			<caption>
+				Control Dique
+			</caption>
+			<tr>
+				<th rowspan="2">Embarcaciones</th>
+				<th rowspan="2">Último dique</th>
+				<th rowspan="2">Astillero</th>
+				<th colspan="4" style="text-align: center;">Fecha dique 2.5 años</th>
+			</tr>
+			<tr>
+				<th>Dias restantes</th>
+				<th>Mes</th>
+				<th>Año</th>
+				<th>Fecha</th>
+			</tr>
+			{% for ruta in dique_rutinas %}
+				<tr>
+					<td data-cell="Embarcación">{{ruta.system.asset}}</td>
+					<td data-cell="Última intervención">{{ruta.intervention_date|date:"d/m/Y"}}</td>
+					<td data-cell="Astillero">{{ruta.astillero}}</td>
+					<td data-cell="Dias restantes">{{ruta.daysleft}}</td>
+					<td data-cell="Mes">{{ruta.next_date|date:"M"}}</td>
+					<td data-cell="Año">{{ruta.next_date|date:"Y"}}</td>
+					<td data-cell="Fecha">{{ruta.next_date|date:"d/m/Y"}}</td>
+				</tr>
+			{% endfor %}
+		</table>
+</div>
+
+<!-- inspeccion periferica, fugas, tornilleria
+destapar tapa de balancines
+recalibracion  -->
 	
 <!-- Rutinas de mantenimiento -->
-{% if ruta_list %}
+<!-- {% if ruta_list %}
 	<table class="table mi-tabla-borde-externo mt-4">
 		<thead>
 			<tr>
@@ -82,6 +183,6 @@
 	</table>
 	{% else %}
 		<p>No hay rutinas registradas.</p>
-	{% endif %}
+	{% endif %} -->
 
 {% endblock %}

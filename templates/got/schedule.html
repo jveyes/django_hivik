@@ -24,7 +24,7 @@
 		width: 100%;
 		padding: 0px;
 		border-radius: 20px;
-		border: solid 3px rgba(54, 162, 235, 1);
+		/* border: solid 3px rgba(54, 162, 235, 1); */
 		background: white;
         overflow-x: auto; /* Permite el desplazamiento horizontal */
         min-width: 1200px;
@@ -43,7 +43,7 @@
 
 {% block content %}
 
-    <div class="chartBox mt-5">
+    <div class="chartBox mt-5 rounded shadow">
         <canvas id="myChart"></canvas>
     </div>
 
@@ -159,20 +159,6 @@
                         }
                     }
                 },
-            //     yFixed: { // Eje Y secundario fijo solo para las etiquetas
-            //         display: true,
-            //         position: 'left',
-            //         offset: true, // Esto separa el eje secundario del principal
-            //         ticks: {
-            //             font: {
-            //                 size: 16,
-            //                 weight: 'bold',
-            //             }
-            //         },
-            //         grid: {
-            //             drawOnChartArea: false // Esto evitará que se dibujen líneas de cuadrícula para este eje
-            //         }
-            // }
             },
             
             plugins: {

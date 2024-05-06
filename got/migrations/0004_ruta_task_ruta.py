@@ -21,4 +21,24 @@ class Migration(migrations.Migration):
             name='impact',
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('s', 'La seguridad personal'), ('m', 'El medio ambiente'), ('i', 'Integridad del equipo/sistema'), ('o', 'El desarrollo normal de las operaciones')], max_length=1), blank=True, default=list, size=None),
         ),
+        migrations.AddField(
+            model_name='historicalot',
+            name='suministros',
+            field=models.TextField(blank=True, default='', null=True),
+        ),
+        migrations.AddField(
+            model_name='historicalruta',
+            name='suministros',
+            field=models.TextField(blank=True, default='', null=True),
+        ),
+        migrations.AddField(
+            model_name='ot',
+            name='suministros',
+            field=models.TextField(blank=True, default='', null=True),
+        ),
+        migrations.AddField(
+            model_name='ruta',
+            name='suministros',
+            field=models.TextField(blank=True, default='', null=True),
+        ),
     ]

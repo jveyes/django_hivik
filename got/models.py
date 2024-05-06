@@ -11,7 +11,6 @@ from simple_history.models import HistoricalRecords
 
 def get_upload_path(instance, filename):
     ext = filename.split('.')[-1]
-    # Ruta incluyendo la carpeta 'media/'
     filename = f"media/{datetime.now():%Y%m%d%H%M%S}.{ext}"
     return filename
 
@@ -23,10 +22,7 @@ def get_upload_pdfs(instance, filename):
 
 
 class Asset(models.Model):
-    '''
-    Modelo para representar activos.
-    Incluye propiedades especificas para Barcos.
-    '''
+
     AREA = (
         ('a', 'Motonave'),
         ('b', 'Buceo'),
@@ -36,39 +32,22 @@ class Asset(models.Model):
         ('x', 'Apoyo'),
     )
 
+    abbreviation = models.CharField(max_length=3, unique=True, null=True, blank=True)
     name = models.CharField(max_length=50)
     area = models.CharField(max_length=1, choices=AREA, default='a')
     supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
 
     # Propiedades adicionales para barcos
-    bandera = models.CharField(
-        default='Colombia', max_length=50, null=True, blank=True
-        )
-    eslora = models.DecimalField(
-        default=0, max_digits=8, decimal_places=2, null=True, blank=True
-        )
-    manga = models.DecimalField(
-        default=0, max_digits=8, decimal_places=2, null=True, blank=True
-        )
-    puntal = models.DecimalField(
-        default=0, max_digits=8, decimal_places=2, null=True, blank=True
-        )
-    calado_maximo = models.DecimalField(
-        default=0, max_digits=8, decimal_places=2, null=True, blank=True
-        )
-    deadweight = models.IntegerField(
-        default=0, null=True, blank=True
-        )
-    arqueo_bruto = models.IntegerField(
-        default=0, null=True, blank=True
-        )
-    arqueo_neto = models.IntegerField(
-        default=0, null=True, blank=True
-        )
-    espacio_libre_cubierta = models.IntegerField(
-        default=0, null=True, blank=True
-        )
+    bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
+    eslora = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
+    manga = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
+    puntal = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
+    calado_maximo = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
+    deadweight = models.IntegerField(default=0, null=True, blank=True)
+    arqueo_bruto = models.IntegerField(default=0, null=True, blank=True)
+    arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
+    espacio_libre_cubierta = models.IntegerField(default=0, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -91,9 +70,7 @@ class System(models.Model):
 
     name = models.CharField(max_length=50)
     group = models.IntegerField()
-    location = models.CharField(
-        max_length=50, default="Cartagena", null=True, blank=True
-        )
+    location = models.CharField(max_length=50, default="Cartagena", null=True, blank=True)
     state = models.CharField(choices=STATUS, default='m', max_length=1)
 
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
@@ -148,11 +125,7 @@ class Equipo(models.Model):
     fabricante = models.CharField(max_length=50, null=True, blank=True)
     feature = models.TextField()
     imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
-    manual_pdf = models.FileField(
-        upload_to=get_upload_pdfs,
-        null=True,
-        blank=True
-        )
+    manual_pdf = models.FileField(upload_to=get_upload_pdfs, null=True, blank=True)
 
     tipo = models.CharField(choices=TIPO, default='nr', max_length=2)
 
@@ -161,9 +134,7 @@ class Equipo(models.Model):
     horometro = models.IntegerField(default=0, null=True, blank=True)
     prom_hours = models.IntegerField(default=0, null=True, blank=True)
 
-    system = models.ForeignKey(
-        System, on_delete=models.CASCADE, related_name='equipos'
-        )
+    system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='equipos')
 
     def calculate_horometro(self):
         total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
@@ -179,25 +150,33 @@ class Equipo(models.Model):
         return reverse('got:sys-detail', args=[self.system.id])
 
 
+class Component(models.Model):
+    name = models.CharField(max_length=50)
+    serial = models.CharField(max_length=50, null=True, blank=True)
+    marca = models.CharField(max_length=50, null=True, blank=True)
+    presentacion = models.CharField(max_length=50)
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=50)
+    direccion = models.CharField(max_length=100)
+    contact = models.CharField(max_length=50)
+    num_contact = models.CharField(max_length=50)
+
+
 class HistoryHour(models.Model):
 
     report_date = models.DateField()
     hour = models.DecimalField(max_digits=5, decimal_places=2)
-
-    reporter = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True
-    )
-    component = models.ForeignKey(
-        Equipo, on_delete=models.CASCADE, related_name='hours'
-        )
+    reporter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    component = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='hours')
 
     def __str__(self):
-        return '%s: %s - %s (%s)' % (
-            self.report_date, self.component, self.hour, self.reporter
-            )
+        return '%s: %s - %s (%s)' % (self.report_date, self.component, self.hour, self.reporter)
 
     class Meta:
         ordering = ['-report_date']
@@ -229,10 +208,9 @@ class Ot(models.Model):
     suministros = models.TextField(default="", blank=True, null=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE)
-    history = HistoricalRecords()
 
     def all_tasks_finished(self):
-        related_tasks = self.task_set.all()  # Asume que la relación inversa se llama 'task_set'
+        related_tasks = self.task_set.all()
         if related_tasks.exists() and all(task.finished for task in related_tasks):
             return True
         return False
@@ -260,22 +238,13 @@ class Ruta(models.Model):
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
     suministros = models.TextField(default="", blank=True, null=True)
-    history = HistoricalRecords()
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
-    equipo = models.ForeignKey(
-        Equipo, on_delete=models.SET_NULL, null=True, blank=True
-        )
-    ot = models.ForeignKey(
-        Ot, on_delete=models.SET_NULL, null=True, blank=True
-    )
-    dependencia = models.OneToOneField(
-        'self',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='dependiente'
-    )
+    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
+    ot = models.ForeignKey(Ot, on_delete=models.SET_NULL, null=True, blank=True)
+    dependencia = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='dependiente')
+    astillero = models.CharField(max_length=50, default="", null=True, blank=True)
+
 
     @property
     def next_date(self):
@@ -297,6 +266,10 @@ class Ruta(models.Model):
                 ndays = int(self.frecuency/1)
         
         return date.today() + timedelta(days=ndays)
+
+    @property
+    def daysleft(self):
+        return (self.next_date - date.today()).days
 
     @property
     def percentage_remaining(self):
@@ -340,9 +313,7 @@ class Ruta(models.Model):
 
 
 class Task(models.Model):
-    '''
-    Actividades (v1.0)
-    '''
+
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
     ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, null=True, blank=True)
     responsible = models.ForeignKey(
@@ -356,15 +327,10 @@ class Task(models.Model):
     procedimiento = models.TextField(default="", blank=True, null=True)
     hse = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
-    evidence = models.ImageField(
-        upload_to=get_upload_path,
-        null=True,
-        blank=True
-        )
+    evidence = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     men_time = models.IntegerField(default=0)
     finished = models.BooleanField()
-    history = HistoricalRecords()
 
     def __str__(self):
         return self.description
@@ -402,25 +368,10 @@ class FailureReport(models.Model):
     causas = models.TextField()
     suggest_repair = models.TextField(null=True, blank=True)
     critico = models.BooleanField()
-    evidence = models.ImageField(
-        upload_to=get_upload_path,
-        null=True,
-        blank=True
-        )
+    evidence = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
     closed = models.BooleanField(default=False)
-    impact = ArrayField(
-        models.CharField(max_length=1, choices=IMPACT),
-        default=list,
-        blank=True
-    )
-    history = HistoricalRecords()
-    related_ot = models.OneToOneField(
-        'Ot',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='failure_report'
-        )
+    impact = ArrayField(models.CharField(max_length=1, choices=IMPACT), default=list, blank=True)
+    related_ot = models.OneToOneField('Ot', on_delete=models.SET_NULL, null=True, blank=True, related_name='failure_report')
 
     class Meta:
         ordering = ['-moment']
@@ -437,3 +388,5 @@ class FailureReport(models.Model):
     def get_impact_display(self, impact_code):
         """Devuelve la representación en texto de un código de impacto."""
         return dict(self.IMPACT).get(impact_code, "Desconocido")
+
+

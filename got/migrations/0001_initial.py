@@ -97,7 +97,6 @@ class Migration(migrations.Migration):
                 ('description', models.TextField()),
                 ('hse', models.TextField(blank=True, default='', null=True)),
                 ('procedimiento', models.TextField(blank=True, default='', null=True)),
-                ('suministros', models.TextField(blank=True, default='', null=True)),
                 ('news', models.TextField(blank=True, null=True)),
                 ('evidence', models.ImageField(blank=True, null=True, upload_to=got.models.get_upload_path)),
                 ('start_date', models.DateField(blank=True, null=True)),
