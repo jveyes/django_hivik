@@ -1,6 +1,71 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
+{% block headtag %}
+<style>
+
+	.wrapper {
+		width: min(900px, 100% - 3rem);
+		margin-inline: auto;
+	}
+
+	/* table {
+		width: 100%;
+		color: white;
+		background: #323232;
+		border-collapse: collapse;
+	}
+
+	th, td {
+		padding: 1rem;
+	}
+
+	caption {
+		color: white;
+		text-align: center;
+		background-color:  hsl(0 0% 0%);
+		text-transform: uppercase;
+		font-weight: 700;
+	}
+
+	th {
+		background-color:  hsl(0 0% 0% / 0.5);
+	}
+
+	tr:nth-of-type(2n) {
+		background-color:  hsl(0 0% 0% / 0.1);
+	} */
+
+	@media (max-width: 650px) {
+        .tab {
+            display: none;
+        }
+		th {
+			display: none;
+		}
+		td {
+			display: grid;
+			gap: 0.5rem;
+			grid-template-columns: 15ch auto;
+			padding: 0.5rem 1rem;
+		}
+
+		td:first-child {
+			padding-top: 2rem;
+		}
+
+		td:last-child {
+			padding-bottom: 2rem;	
+		}
+
+		td::before {
+			content: attr(data-cell) ": ";
+			font-weight: 700;
+		}
+	}
+</style>
+{% endblock %}
+
 {% block header %}
 
     {% if perms.got.view_asset or request.user|has_group:"buzos_members"  %}
@@ -46,7 +111,7 @@
 
     <!-- Informacion general -->
     <section class="d-flex">
-        <div class="" style="min-width: 350px;">
+        <div class="tab" style="min-width: 350px;">
             <table class="table table-dark mt-0 mb-0 table-striped">
                 <thead>
                     {% if asset.imagen %}
@@ -106,9 +171,9 @@
                         <td>{{asset.espacio_libre_cubierta}} m2</td>
                     </tr>
                 {% endif %}
-            </tbody>
-        </table>
-    </div>
+                </tbody>
+            </table>
+        </div>
 
     <div class="ms-4 flex-grow-1">
         <div class="d-flex">
@@ -134,13 +199,13 @@
                 <tbody>           
                     {% for sys in page_obj %}
                         <tr>
-                            <th scope="row">{{sys.group}}</th>
-                            <td><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
-                            <td>{{ sys.location }}</td>
-                            <td>{{ sys.get_state_display }}</td>
-                            <td>{% if sys.maintenance_percentage %}{{ sys.maintenance_percentage }}%{% endif %}</td>
+                            <th data-cell="Grupo" scope="row">{{sys.group}}</th>
+                            <td data-cell="Sistema"><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
+                            <td data-cell="Ubicación">{{ sys.location }}</td>
+                            <td data-cell="Estado">{{ sys.get_state_display }}</td>
+                            <td data-cell="Mantenimiento">{% if sys.maintenance_percentage %}{{ sys.maintenance_percentage }}%{% endif %}</td>
                             {% if perms.got.change_system %}
-                                <td>
+                                <td data-cell="Acciones">
                                     <a class="" href="{% url 'got:sys-update' sys.id %}"><i class="bi bi-pen"></i></a>
                                     <a class="" href="{% url 'got:sys-delete' sys.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
                                 </td>
