@@ -63,6 +63,7 @@
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
                         y: '{{task.description}}',
                         name: '{{task.name}}',
+                        statuss: {{task.statuss|yesno:"true,false"}},
                         status: '{{task.status_code}}',
                         activityDescription: '{{ task.activity_description }}'
                     },
@@ -175,11 +176,13 @@
                         },
                         label: function(context) {
                         var dataPoint = context.raw;
+                        var statussBoolean = dataPoint.statuss === 'true';
                         return [
                             `Fecha inicio: ${dataPoint.x[0]}`,
                             `Fecha fin: ${dataPoint.x[1]}`,
                             `Responsable: ${dataPoint.name}`,
-                            `Estado: ${dataPoint.status ? 'Finalizado' : 'En proceso'}`,
+                            // `Estado2: ${dataPoint.statuss}`,
+                            // `Estado: ${statussBoolean ? 'Finalizado' : 'En proceso'}`,
                         ];
                         }
                     }
