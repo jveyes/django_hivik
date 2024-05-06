@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Component, Location
     )
 from django.contrib.auth.models import User, Group
 
@@ -481,3 +481,50 @@ class RutaUpdateOTForm(forms.ModelForm):
     class Meta:
         model = Ruta
         fields = ['ot']
+
+
+# got/forms.py
+
+from django import forms
+from .models import Component, Salida, SalidaItem, Location
+
+class ComponentForm(forms.ModelForm):
+    class Meta:
+        model = Component
+        fields = ['name', 'serial', 'marca', 'presentacion', 'equipo']
+        widgets = {
+            'equipo': forms.Select(attrs={'class': 'form-select'})
+        }
+
+class SalidaForm(forms.ModelForm):
+    class Meta:
+        model = Salida
+        fields = ['lugar_destino', 'motivo', 'persona_transporte', 'matricula_vehiculo']
+        widgets = {
+            'lugar_destino': forms.Select(attrs={'class': 'form-select'}),
+            'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+class SalidaItemForm(forms.ModelForm):
+    class Meta:
+        model = SalidaItem
+        fields = ['item', 'cantidad', 'imagen']
+        widgets = {
+            'item': forms.Select(attrs={'class': 'form-select'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+
+        
+
+class LocationForm(forms.ModelForm):
+
+    class Meta:
+        model = Location
+        fields = '__all__'
+        labels = {
+            'name': 'Nombre',
+            'direccion': 'Dirección',
+            'contact': 'Contacto',
+            'num_contact': 'Numero',
+            }

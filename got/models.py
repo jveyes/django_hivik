@@ -155,7 +155,7 @@ class Component(models.Model):
     serial = models.CharField(max_length=50, null=True, blank=True)
     marca = models.CharField(max_length=50, null=True, blank=True)
     presentacion = models.CharField(max_length=50)
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -166,6 +166,33 @@ class Location(models.Model):
     direccion = models.CharField(max_length=100)
     contact = models.CharField(max_length=50)
     num_contact = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+
+class Salida(models.Model):
+
+    lugar_destino = models.ForeignKey(Location, on_delete=models.CASCADE)
+    fecha = models.DateField(auto_now_add=True)
+    motivo = models.TextField()
+    persona_transporte = models.CharField(max_length=100)
+    matricula_vehiculo = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"Salida a {self.lugar_destino} ({self.fecha})"
+
+    def get_absolute_url(self):
+        return reverse('got:salida-detail', args=[str(self.id)])
+
+
+class SalidaItem(models.Model):
+    salida = models.ForeignKey(Salida, on_delete=models.CASCADE, related_name='items')
+    item = models.ForeignKey(Component, on_delete=models.CASCADE)
+    cantidad = models.PositiveIntegerField()
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.cantidad}x {self.item.name} ({self.salida})"
 
 
 class HistoryHour(models.Model):

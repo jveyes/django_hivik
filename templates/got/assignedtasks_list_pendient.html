@@ -1,6 +1,76 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
+
+{% block headtag %}
+<style>
+	/* body {
+		font-size: 1.125rem;
+		font-family: system-ui;
+		line-height: 1.5;
+	} */
+
+	.wrapper {
+		width: min(900px, 100% - 3rem);
+		margin-inline: auto;
+	}
+
+	table {
+		width: 100%;
+		color: white;
+		background: #323232;
+		border-collapse: collapse;
+	}
+
+	th, td {
+		padding: 1rem;
+	}
+
+	caption {
+		color: white;
+		text-align: center;
+		background-color:  hsl(0 0% 0%);
+		text-transform: uppercase;
+		font-weight: 700;
+	}
+
+	th {
+		background-color:  hsl(0 0% 0% / 0.5);
+	}
+
+	tr:nth-of-type(2n) {
+		background-color:  hsl(0 0% 0% / 0.1);
+	}
+
+	@media (max-width: 650px) {
+		th {
+			display: none;
+		}
+		td {
+			display: grid;
+			gap: 0.5rem;
+			grid-template-columns: 15ch auto;
+			padding: 0.5rem 1rem;
+		}
+
+		td:first-child {
+			padding-top: 2rem;
+		}
+
+		
+
+		td::before {
+			content: attr(data-cell) " ";
+			font-weight: 700;
+		}
+
+		td:last-child {
+			padding-bottom: 2rem;	
+		}
+	}
+</style>
+{% endblock %}
+
 {% block header %}
 	Actividades {% if selected_asset_name %}- {{ selected_asset_name }}{% endif %}{% if worker %}/{{ worker }}{% endif %}
 {% endblock %}
@@ -48,7 +118,7 @@
 
 <section class="mt-2">
 	<!-------------------------------------------- Actividades ------------------------------------------------------------>
-	<table class="table mi-tabla-borde-externo mt-0">
+	<table class="table mi-tabla-borde-externo mt-0 table-striped">
 		<thead class="table-secondary">
 			<tr>
 				<th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">#OT</th>
@@ -70,12 +140,12 @@
 			
 				{% for act in task_list %}
 					<tr>
-						<td><strong>{{act.ot.num_ot}}</strong></td>
-						<td class="{% if act.is_overdue %}text-danger{% endif %}"><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
-						<td><a href="{% url 'got:finish-task' act.id %}">{{act.description}}</a></td>
-						<td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-						<td>{{act.start_date|date:"d/m/Y"}}</td>
-						<td class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
+						<td data-cell="Orden de trabajo"><strong>{{act.ot.num_ot}}</strong></td>
+						<td data-cell="Sistema" class="{% if act.is_overdue %}text-danger{% endif %}"><strong>{{act.ot.system.asset}}</strong>/{{act.ot.system.name}}</td>
+						<td data-cell="Descripción"><a href="{% url 'got:finish-task' act.id %}">{{act.description}}</a></td>
+						<td data-cell="Responsable">{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
+						<td data-cell="Fecha de inicio">{{act.start_date|date:"d/m/Y"}}</td>
+						<td data-cell="Fecha vencimiento" class="{% if act.is_overdue %}text-danger{% endif %}">{{act.final_date|date:"d/m/Y"}}</td>
 						
 						{% if perms.got.can_reschedule_task %}
 							<td style="text-align: center;">

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Location, Component, Salida
 )
 
 
@@ -57,4 +57,7 @@ admin.site.register(Ruta)
 admin.site.register(Equipo)
 admin.site.register(System)
 admin.site.register(HistoryHour)
+admin.site.register(Component)
+admin.site.register(Salida)
+admin.site.register(Location)
 admin.site.register(Ot, OtAdmin)

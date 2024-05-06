@@ -70,6 +70,9 @@ urlpatterns = [
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 
+    path('create-salida/', views.create_salida, name='create_salida'),
+    path('create-component/<int:pk>/', views.create_component, name='create_component'),
+
     # ---------------------------- Django rest framework ----------------------- #
     # path("rest/", views.AssetGetCreate.as_view()),
     # path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),

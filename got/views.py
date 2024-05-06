@@ -21,13 +21,13 @@ from .serializers import AssetSerializer, SystemSerializer
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, HistoricalSystem
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Component, Location
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
-    OtFormNoSup, ActFormNoSup
+    OtFormNoSup, ActFormNoSup, Component, Location
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -888,7 +888,7 @@ class TaskDeleterut(DeleteView):
 # --------------------------- Rutinas --------------------------- #
 class RutaListView(LoginRequiredMixin, generic.ListView):
     model = Ruta
-    paginate_by = 15
+    # paginate_by = 15
     template_name = 'got/ruta_list.html'
     context_object_name = 'ruta_list'
 
@@ -1320,3 +1320,73 @@ def schedule(request, pk):
         'responsibles': responsible_colors,
     }
     return render(request, 'got/schedule.html', context)
+
+
+
+# got/views.py
+
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.forms import modelformset_factory
+from django.conf import settings
+from .models import Salida, SalidaItem, Component, Location
+from .forms import SalidaForm, SalidaItemForm, ComponentForm
+
+@login_required
+def create_component(request):
+    if request.method == "POST":
+        form = ComponentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('got:create_component')
+    else:
+        form = ComponentForm()
+
+    return render(request, 'got/create_component.html', {'form': form})
+
+@login_required
+def create_salida(request):
+    SalidaItemFormSet = modelformset_factory(SalidaItem, form=SalidaItemForm, extra=1, can_delete=True)
+    
+    if request.method == "POST":
+        salida_form = SalidaForm(request.POST)
+        item_formset = SalidaItemFormSet(request.POST, request.FILES)
+
+        if salida_form.is_valid() and item_formset.is_valid():
+            salida = salida_form.save()
+
+            for form in item_formset:
+                if form.cleaned_data.get('item') and form.cleaned_data.get('cantidad') > 0:
+                    item_instance = form.save(commit=False)
+                    item_instance.salida = salida
+                    item_instance.save()
+
+            # Enviar correo electrónico
+            send_salida_email(salida)
+
+            return redirect(salida.get_absolute_url())
+
+    else:
+        salida_form = SalidaForm(initial={'fecha': date.today()})
+        item_formset = SalidaItemFormSet(queryset=SalidaItem.objects.none())
+
+    return render(request, 'got/create_salida.html', {
+        'salida_form': salida_form,
+        'item_formset': item_formset
+    })
+
+def send_salida_email(salida):
+    subject = f"Salida de Materiales: {salida.lugar_destino}"
+    items = "\n".join([f"{item.cantidad}x {item.item.name}" for item in salida.items.all()])
+    message = f"""
+    Lugar de Destino: {salida.lugar_destino}
+    Fecha: {salida.fecha}
+    Motivo: {salida.motivo}
+    Persona que Transporta: {salida.persona_transporte}
+    Matrícula del Vehículo: {salida.matricula_vehiculo}
+
+    Ítems:
+    {items}
+    """
+    send_mail(subject, message, settings.EMAIL_HOST_USER, ['medinabaez1120@gmail.com'])

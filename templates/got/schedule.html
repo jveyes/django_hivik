@@ -92,19 +92,23 @@
             ctx.save();
 
             ctx.beginPath();
-            ctx.lineWidth = 0.5;
-            ctx.strokeStyle = 'rgba(255, 26, 104, 1)';
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = 'rgba(102, 102, 10, 1)';
+            ctx.setLineDash([6, 6]);
             ctx.moveTo(x.getPixelForValue(new Date()), top);
             ctx.lineTo(x.getPixelForValue(new Date()), bottom);
             ctx.stroke();
+
+            ctx.setLineDash([]);
         }
     }
 
     const status = {
         id: 'status',
         afterDatasetsDraw(chart, args, pluginOptions) {
-            const {ctx, data, chartArea: {top, bottom, left, right}, scales: {x, y}} = chart;
-
+            const {ctx, data, options, chartArea: {top, bottom, left, right}, scales: {x, y}} = chart;
+            
+            const paddingRight = options.layout.padding.right;
             const icons = ['\uf00d', '\uf110', '\uf00c'];
             const colours = ['rgba(255, 26, 104, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)'];
 
@@ -115,11 +119,11 @@
             data.datasets[0].data.forEach((datapoint, index) => {
                 ctx.beginPath();
                 ctx.fillStyle = colours[datapoint.status];
-                ctx.arc(right + 50, y.getPixelForValue(index), 12, 0, (Math.PI/180)*360, false);
+                ctx.arc(right + (paddingRight / 2), y.getPixelForValue(index), 12, 0, (Math.PI/180)*360, false);
                 ctx.closePath();
                 ctx.fill();
                 ctx.fillStyle = 'white';
-                ctx.fillText(icons[datapoint.status], right + 50, y.getPixelForValue(index));})
+                ctx.fillText(icons[datapoint.status], right + (paddingRight / 2), y.getPixelForValue(index));})
             ctx.restore();
         }
     }
