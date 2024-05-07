@@ -93,7 +93,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         context['asset'] = Asset.objects.all()
         context['serport_members'] = all_users
         if asset_id:  # Nombre assets para filtrar
-            context['selected_asset_name'] = Asset.objects.get(id=asset_id)
+            context['selected_asset_name'] = Asset.objects.get(abbreviation=asset_id)
             context['asset_id'] = asset_id
         if worker_id:  # Nombre usuarios para filtrar
             worker = User.objects.get(id=worker_id)

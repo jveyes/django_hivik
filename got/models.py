@@ -32,7 +32,8 @@ class Asset(models.Model):
         ('x', 'Apoyo'),
     )
 
-    abbreviation = models.CharField(max_length=3, unique=True, null=True, blank=True)
+    id = models.IntegerField(default=0, null=True, blank=True)
+    abbreviation = models.CharField(max_length=3, unique=True, primary_key=True)
     name = models.CharField(max_length=50)
     area = models.CharField(max_length=1, choices=AREA, default='a')
     supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
@@ -53,7 +54,7 @@ class Asset(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('got:asset-detail', args=[str(self.id)])
+        return reverse('got:asset-detail', args=[str(self.abbreviation)])
 
     class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
@@ -73,8 +74,7 @@ class System(models.Model):
     location = models.CharField(max_length=50, default="Cartagena", null=True, blank=True)
     state = models.CharField(choices=STATUS, default='m', max_length=1)
 
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    history = HistoricalRecords()
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, to_field='abbreviation')
 
     def __str__(self):
         return '%s/%s' % (self.asset, self.name)

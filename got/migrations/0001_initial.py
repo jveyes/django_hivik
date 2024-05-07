@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Asset',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('abbreviation', models.CharField(max_length=3, primary_key=True, serialize=False, unique=True)),
                 ('name', models.CharField(max_length=50)),
                 ('area', models.CharField(choices=[('a', 'Motonave'), ('b', 'Buceo'), ('o', 'Oceanografía'), ('l', 'Locativo'), ('v', 'Vehiculos'), ('x', 'Apoyo')], default='a', max_length=1)),
                 ('bandera', models.CharField(blank=True, default='Colombia', max_length=50, null=True)),

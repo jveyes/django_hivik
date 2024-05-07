@@ -9,8 +9,8 @@ urlpatterns = [
 
     # ---------------------------- Assets view ----------------------------- #
     path("assets/", views.AssetsListView.as_view(), name="asset-list"),
-    path("assets/<int:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
-    path("assets/<int:pk>/schedule/", views.schedule, name="schedule"),
+    path("assets/<str:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
+    path("assets/<str:pk>/schedule/", views.schedule, name="schedule"),
 
 
     # ---------------------------- Systems view ----------------------------- #
@@ -55,7 +55,7 @@ urlpatterns = [
 
     # ---------------------------- History hour view ------------------------ #
     path("reportehoras/<str:component>/", views.reporthours, name='horas'),
-    path("reportehorasasset/<int:asset_id>/",views.reportHoursAsset,name='horas-asset'),
+    path("reportehorasasset/<str:asset_id>/",views.reportHoursAsset,name='horas-asset'),
 
     # ---------------------------- Reportes de falla view ------------------- #
     # LISTADO REPORTES DE FALLA
