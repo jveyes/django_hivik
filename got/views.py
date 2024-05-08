@@ -429,7 +429,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         # email.content_subtype = 'html'
         
         if self.object.evidence:
-            email.attach_file(self.object.evidence.path)
+            email.attach_file(self.object.evidence)
         
         email.send()
 
