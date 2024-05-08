@@ -25,4 +25,6 @@ Crítico: Sí
 Crítico: No
 {% endif %}
 
+{{evidence.url}}
+
 Para más detalles {{ report_url }}

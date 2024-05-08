@@ -429,7 +429,12 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         # email.content_subtype = 'html'
         
         if self.object.evidence:
-            email.attach_file(self.object.evidence)
+            mimetype = f'image/{self.object.evidence.name.split(".")[-1]}'
+            email.attach(
+                'Evidencia.' + self.object.evidence.name.split(".")[-1],
+                self.object.evidence.read(),  # Leer el archivo directamente
+                mimetype
+            )
         
         email.send()
 
@@ -676,9 +681,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
                 # Enviar correo electrónico al finalizar la OT
                 subject = f'Orden de Trabajo {ot.num_ot} Finalizada'
-                message = render_to_string(
-                    'got/ot_finished_email.txt', {'ot': ot}
-                    )
+                message = render_to_string('got/ot_finished_email.txt', {'ot': ot})
                 from_email = settings.EMAIL_HOST_USER
                 to_email = supervisor_email
 
