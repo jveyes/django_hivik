@@ -1,7 +1,7 @@
 {% extends "got/base_generic.html" %}
 
 {% block header %}
-	<a href="{% url 'got:asset-detail' system.asset.id %}"><i class="bi bi-arrow-90deg-left"></i></a>
+	<a href="{% url 'got:asset-detail' system.asset.abbreviation %}"><i class="bi bi-arrow-90deg-left"></i></a>
 	{{ system.asset }}/{{ system.name }}
 {% endblock %}
 
