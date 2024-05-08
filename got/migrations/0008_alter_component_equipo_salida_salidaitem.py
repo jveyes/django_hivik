@@ -12,6 +12,11 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='asset',
+            name='id',
+            field=models.IntegerField(default=0),
+        ),
         migrations.AlterField(
             model_name='component',
             name='equipo',

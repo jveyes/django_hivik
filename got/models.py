@@ -32,7 +32,6 @@ class Asset(models.Model):
         ('x', 'Apoyo'),
     )
 
-    id = models.IntegerField(default=0, null=True, blank=True)
     abbreviation = models.CharField(max_length=3, unique=True, primary_key=True)
     name = models.CharField(max_length=50)
     area = models.CharField(max_length=1, choices=AREA, default='a')

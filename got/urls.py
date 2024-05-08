@@ -25,7 +25,7 @@ urlpatterns = [
     # ---------------------------- OTs view --------------------------------- #
     path("ots/", views.OtListView.as_view(), name="ot-list"),
     path("ots/<int:pk>/", views.OtDetailView.as_view(), name="ot-detail"),
-    path("ots/create/<int:pk>/", views.OtCreate.as_view(), name="ot-create"),
+    path("ots/create/<str:pk>/", views.OtCreate.as_view(), name="ot-create"),
     path("ots/<int:pk>/update/", views.OtUpdate.as_view(), name="ot-update"),
     path("ots/<int:pk>/delete/", views.OtDelete.as_view(), name="ot-delete"),
 
@@ -61,9 +61,9 @@ urlpatterns = [
     # LISTADO REPORTES DE FALLA
     path("report-failure/", views.FailureListView.as_view(), name="failure-report-list"),
     # DETALLE REPORTES DE FALLA
-    path("report-failure/<int:pk>/", views.FailureDetailView.as_view(), name="failure-report-detail"),
+    path("report-failure/<str:pk>/", views.FailureDetailView.as_view(), name="failure-report-detail"),
     # FORMULARIO CREACION DE REPORTE DE FALLA
-    path('report-failure/<int:asset_id>/create/', views.FailureReportForm.as_view(), name='failure-report-create'),
+    path('report-failure/<str:asset_id>/create/', views.FailureReportForm.as_view(), name='failure-report-create'),
     # FORMULARIO ACTUALIZACION DE REPORTE DE FALLA
     path('report-failure/<int:pk>/update/', views.FailureReportUpdate.as_view(), name='failure-report-update'),
     path('report-failure/<int:fail_id>/crear_ot/', views.crear_ot_failure_report, name='failure-report-crear-ot'),

@@ -148,10 +148,13 @@
                     position: 'top',
                     type: 'time',
                     time: {
-                        unit: 'day'
+                        // unit: 'day'
+                        displayFormats: {
+                            day: 'd'
+                        }
                     },
                     min: '{{min_date|date:"Y-m-d"}}',
-                    max: '2024-05-30',
+                    max: '2024-06-10s',
                     padding: {top: 20, left: 0, right: 0, bottom: 0}
                 },
                 y: {
@@ -175,15 +178,15 @@
                             return tooltipItems[0].raw.activityDescription;
                         },
                         label: function(context) {
-                        var dataPoint = context.raw;
-                        var statussBoolean = dataPoint.statuss === 'true';
-                        return [
-                            `Fecha inicio: ${dataPoint.x[0]}`,
-                            `Fecha fin: ${dataPoint.x[1]}`,
-                            `Responsable: ${dataPoint.name}`,
-                            // `Estado2: ${dataPoint.statuss}`,
-                            // `Estado: ${statussBoolean ? 'Finalizado' : 'En proceso'}`,
-                        ];
+                            var dataPoint = context.raw;
+                            var statussBoolean = dataPoint.statuss === 'true';
+                            return [
+                                `Fecha inicio: ${dataPoint.x[0]}`,
+                                `Fecha fin: ${dataPoint.x[1]}`,
+                                `Responsable: ${dataPoint.name}`,
+                                // `Estado2: ${dataPoint.statuss}`,
+                                // `Estado: ${statussBoolean ? 'Finalizado' : 'En proceso'}`,
+                            ];
                         }
                     }
                 },

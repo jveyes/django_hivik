@@ -89,15 +89,15 @@
         </button>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'got:ot-create' asset.id %}">Crear OT</a>
+        <a class="nav-link" href="{% url 'got:ot-create' asset.abbreviation %}">Crear OT</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'got:horas-asset' asset.id %}" {% if not rotativos %}aria-disabled="true" disabled{% endif %}>
+        <a class="nav-link" href="{% url 'got:horas-asset' asset.abbreviation %}" {% if not rotativos %}aria-disabled="true" disabled{% endif %}>
             Reporte total de horas
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'got:failure-report-create' asset.id %}">Reportar falla</a>
+        <a class="nav-link" href="{% url 'got:failure-report-create' asset.abbreviation %}">Reportar falla</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="{% url 'got:schedule' asset.abbreviation %}">Cronograma</a>

@@ -1,28 +1,97 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
+{% block headtag %}
+<style>
+	/* body {
+		font-size: 1.125rem;
+		font-family: system-ui;
+		line-height: 1.5;
+	} */
+
+	.wrapper {
+		width: min(900px, 100% - 3rem);
+		margin-inline: auto;
+	}
+
+	table {
+		width: 100%;
+		color: white;
+		background: #323232;
+		border-collapse: collapse;
+	}
+
+	th, td {
+		padding: 1rem;
+	}
+
+	caption {
+		color: white;
+		text-align: center;
+		background-color:  hsl(0 0% 0%);
+		text-transform: uppercase;
+		font-weight: 700;
+	}
+
+	th {
+		background-color:  hsl(0 0% 0% / 0.5);
+	}
+
+	tr:nth-of-type(2n) {
+		background-color:  hsl(0 0% 0% / 0.1);
+	}
+
+	@media (max-width: 650px) {
+		th {
+			display: none;
+		}
+		td {
+			display: grid;
+			gap: 0.5rem;
+			grid-template-columns: 15ch auto;
+			padding: 0.5rem 1rem;
+		}
+
+		td:first-child {
+			padding-top: 2rem;
+		}
+
+		
+
+		td::before {
+			content: attr(data-cell) ": ";
+			font-weight: 700;
+		}
+
+		td:last-child {
+			padding-bottom: 2rem;	
+		}
+	}
+</style>
+{% endblock %}
+
 {% block header %}Listado de Ordenes de trabajo{% endblock %}
 
 {% block content %}
-    <section class="container d-flex justify-content-between flex-wrap align-items-center">
+    <section class="container d-flex justify-content-end flex-wrap align-items-center">
 
-    <!-- Opciones de filtrado -->
+        <!-- Opciones de filtrado -->
 
-    <!-- Enlace sin filtros -->
-        <div class="btn-group" role="group">
+        <!-- Enlace sin filtros -->
+        <div class="btn-group" role="group" style="margin: 5px 0px;">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 Filtrar por equipo
             </button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="{% url 'got:ot-list' %}">Mostrar todas</a></li>
                 {% for a in asset %}
-                    <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?asset_id={{ a.id }}">{{ a.name }}</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?asset_id={{ a.abbreviation }}">{{ a.name }}</a></li>
                 {% endfor %}
             </ul>
         </div>
 
         {% if request.user|has_group:"super_members" %}
-            <div class="btn-group" role="group">
+            <div class="btn-group" role="group" style="margin: 5px 10px;">
                 <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     Filtrar supervisor
                 </button>
@@ -35,22 +104,19 @@
             </div>
         {% endif %}
 
-        <div class="btn-group" role="group" aria-label="Estado de OT">
-            <input type="radio" class="btn-check" name="state" id="Todos" autocomplete="off" checked>
-            <label class="btn btn-outline-primary" for="Todos" onclick="window.location.href='{% url 'got:ot-list' %}'">Todos</label>
-
-            <input type="radio" class="btn-check" name="state" id="abierto" autocomplete="off" {% if request.GET.state == 'a' %}checked{% endif %}>
-            <label class="btn btn-outline-primary" for="abierto" onclick="window.location.href='{% url 'got:ot-list' %}?state=a'">Abierto</label>
-        
-            <input type="radio" class="btn-check" name="state" id="ejecucion" autocomplete="off" {% if request.GET.state == 'x' %}checked{% endif %}>
-            <label class="btn btn-outline-primary" for="ejecucion" onclick="window.location.href='{% url 'got:ot-list' %}?state=x'">En ejecución</label>
-        
-            <input type="radio" class="btn-check" name="state" id="finalizado" autocomplete="off" {% if request.GET.state == 'f' %}checked{% endif %}>
-            <label class="btn btn-outline-primary" for="finalizado" onclick="window.location.href='{% url 'got:ot-list' %}?state=f'">Finalizado</label>
-            
-            <input type="radio" class="btn-check" name="state" id="cancelado" autocomplete="off" {% if request.GET.state == 'c' %}checked{% endif %}>
-            <label class="btn btn-outline-primary" for="cancelado" onclick="window.location.href='{% url 'got:ot-list' %}?state=c'">Cancelado</label>
+        <div class="btn-group" role="group" style="margin: 5px 10px;">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Estado
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}">Todos</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?state=a">Abierto</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?state=x">En ejecucion</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?state=f">Finalizado</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ot-list' %}?state=c">Cancelado</a></li>
+            </ul>
         </div>
+
     
 
         <div style="padding: 10px 0">
@@ -70,7 +136,7 @@
     {% endif %}
     
 
-    <table class="table table-hover mi-tabla-borde-externo">
+    <table class="table table-striped mi-tabla-borde-externo">
         <thead>
             <tr>
                 <th scope="col">OT-#</th>
@@ -84,12 +150,12 @@
         <tbody>
             {% for ot in ot_list %}
                 <tr class="{% if ot.all_tasks_finished and ot.state != 'f' %}table-success{% endif %}">
-                    <th scope="row">OT-{{ ot.num_ot }}</td>
-                    <td>{{ot.creation_date|date:"d/m/Y"}}</td>
-                    <td><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
-                    <td>{{ot.system}}</td>
-                    <td>{{ot.super.first_name}} {{ot.super.last_name}}</td>
-                    <td>{{ot.get_state_display}}</td>
+                    <td data-cell="OT">OT-{{ ot.num_ot }}</td>
+                    <td data-cell="Fecha de creación">{{ot.creation_date|date:"d/m/Y"}}</td>
+                    <td data-cell="Descripción"><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
+                    <td data-cell="Sistema">{{ot.system}}</td>
+                    <td data-cell="Responsable">{{ot.super.first_name}} {{ot.super.last_name}}</td>
+                    <td data-cell="Estado">{{ot.get_state_display}}</td>
                 </tr>
             {% empty %}
                 <tr>
