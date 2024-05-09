@@ -1330,7 +1330,7 @@ def schedule(request, pk):
                     'activity_description': ruta.name,
                     'start_date': ruta.next_date,
                     'final_date': ruta.next_date + timedelta(days=1),
-                    'name': f"{task_ruta.responsible.first_name} {task_ruta.responsible.last_name}",
+                    'name': {task_ruta.responsible},
                     'status': 'preventivo',
                     'background_color': green_soft,
                     'border_color': green_hard
