@@ -81,4 +81,6 @@ urlpatterns = [
     # # urls.py
     # path("rest/systems/", views.SystemList.as_view(), name='system-list'),
     # path('api/systems/', views.get_systems_by_asset, name='systems-by-asset'),
+
+    # path('schedule/add-task/', views.add_task, name='add-task'),
 ]

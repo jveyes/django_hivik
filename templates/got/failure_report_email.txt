@@ -4,7 +4,7 @@ Reporte de Falla Registrado #{{ id }}
 Reportado por: {{ reporter.get_full_name }}
 Fecha y hora del reporte: {{ moment }}
 
-Equipo afectado: {{ equipo.name }}
+Equipo afectado: {{ equipo }}
 Descripción de la falla:
 {{ description }}
 

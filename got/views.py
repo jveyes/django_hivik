@@ -455,7 +455,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         return {
             'reporter': self.object.reporter,
             'moment': self.object.moment.strftime('%Y-%m-%d %H:%M'),
-            'equipo': self.object.equipo.name,
+            'equipo': f'{self.object.equipo.system.asset}-{self.object.equipo.name}',
             'description': self.object.description,
             'causas': self.object.causas,
             'suggest_repair': self.object.suggest_repair,
@@ -1271,6 +1271,7 @@ def schedule(request, pk):
     tasks = Task.objects.filter(ot__system__asset=pk, ot__isnull=False, start_date__isnull=False, ot__state='x')
     ots = Ot.objects.filter(system__asset=pk, state='x')
     asset = get_object_or_404(Asset, pk=pk)
+    systems = System.objects.filter(asset=asset)
     min_date = tasks.aggregate(Min('start_date'))['start_date__min']
 
     color_palette = itertools.cycle([
@@ -1308,13 +1309,32 @@ def schedule(request, pk):
             'final_date': task.final_date,
             'description': truncate_text(task.ot.description),
             'name': f"{task.responsible.first_name} {task.responsible.last_name}",
-            'status': task.finished,
+            # 'status': task.finished,
             'activity_description': task.description,
             'background_color': color,
             'border_color': border_color,
             'status_code': sta[n],
         })
         n += 1
+    
+    # Agregar actividades desde las rutas
+    green_soft = 'rgba(75, 192, 192, 0.2)'    # verde suave
+    green_hard = 'rgba(75, 192, 192, 1)'     # verde fuerte
+    for system in systems:
+        rutas = Ruta.objects.filter(system=system)
+        for ruta in rutas:
+            tasks_ruta = ruta.task_set.all()
+            for task_ruta in tasks_ruta:
+                chart_data.append({
+                    'description': system.name,
+                    'activity_description': ruta.name,
+                    'start_date': ruta.next_date,
+                    'final_date': ruta.next_date + timedelta(days=1),
+                    'name': f"{task_ruta.responsible.first_name} {task_ruta.responsible.last_name}",
+                    'status': 'preventivo',
+                    'background_color': green_soft,
+                    'border_color': green_hard
+                })
 
     context = {
         'tasks': chart_data,
