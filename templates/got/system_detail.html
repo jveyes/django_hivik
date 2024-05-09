@@ -29,7 +29,127 @@
 	<h2 style="margin: 40px">Equipos</h2>
 		<!-- Equipos -->
 		{% if system.equipos.all %}
-			{% for equipo in system.equipos.all %}
+		{% if  not is_structures %}
+				{% for equipo in system.equipos.all %}
+					<section>
+						<table class="table table-bordered shadow mt-0">
+					
+							<tbody>
+								<tr style="height: 20%;">
+									<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
+										<h2>{{equipo.name}}</h2>
+										{% if perms.got.add_equipo %}
+											<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
+											<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
+										{% endif %}
+										{% if equipo.tipo == 'r' %}
+											<a href="{% url 'got:horas' equipo.code %}" class="btn btn-secondary float-end">reporte horas</a>
+										{% endif %}
+									</td>
+									{% if equipo.imagen %}
+										<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" width="600px"></td>
+									{% endif %}
+								</tr>
+								<tr>
+									<td>
+										<table style="margin-top: 0;">
+											<tr>
+												<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información General</strong></h4></td>
+											</tr>
+											<tr>
+												<td><strong>Código interno:</strong></td>  
+												<td>{{equipo.code}}</td>
+											</tr>
+											<tr>
+												<td class="pt-0"><strong>Modelo:</strong></td>  
+												<td class="pt-0">{{equipo.model}}</td>
+											</tr>
+											<tr>
+												<td class="pt-0"><strong>Marca:</strong></td>  
+												<td class="pt-0">{{equipo.marca}}</td>
+											</tr>
+											{% if system.asset.area == 'v' %}
+												<tr>
+													<td class="pt-0"><strong>Placa:</strong></td>  
+													<td class="pt-0">{{equipo.serial}}</td>
+												</tr>
+											{% else %}	
+												<tr>
+													<td class="pt-0"><strong>Serial:</strong></td>  
+													<td class="pt-0">{{equipo.serial}}</td>
+												</tr>
+											{% endif %}
+											<tr>
+												<td class="pt-0"><strong>Fecha ingreso:</strong></td>  
+												<td class="pt-0">{{equipo.date_inv}}</td>
+											</tr>
+											<tr>
+												<td class="pt-0"><strong>Estado:</strong></td>  
+												<td class="pt-0">{{system.get_state_display}}</td>
+											</tr>
+											<tr>	
+												<td class="pt-0"><strong>Ubicación:</strong></td>  
+												<td class="pt-0">{{system.location}}</td>
+											</tr>
+											{% if equipo.tipo == 'r' %}
+												<tr>
+													<td class="pt-0"><strong>Horometro:</strong></td>
+													<td class="pt-0">{{equipo.horometro}}</td>
+												</tr>
+												<tr>
+													<td class="pt-0"><strong>Prom hora/día:</strong></td>
+													<td class="pt-0">{{equipo.prom_hours}}</td>
+												</tr>
+											{% endif %}
+											<tr>
+												<td class="pt-0"><strong>Fabricante:</strong></td>  
+												<td class="pt-0">{{equipo.fabricante}}</td>
+											</tr>
+											<tr>
+												<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información Específica del Equipo</strong></h4></td>
+											</tr>
+											<tr>
+												<td class="pt-0"><strong>Especificaciones:</strong></td>  
+												<td>{{equipo.feature|linebreaksbr }}</td>
+											</tr>
+											{% if equipo.manual_pdf %}
+												<tr>
+													<td class="pt-0"><strong>Manual:</strong></td>  
+													<td class="pt-0"><a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a></td>
+												</tr>
+											{% endif %}
+										</table>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						{% if equipo.component_set.all %}
+						<div class="wrapper">
+							<table class="mt-2">
+								<caption>
+									Componentes
+								</caption>
+								<tr>
+									<th>Nombre</th>
+									<th>Presentación</th>
+									<th>Marca</th>
+									<th>Serial/referencia</th>
+								</tr>
+								{% for com in equipo.component_set.all %}
+									<tr>
+										<td data-cell="Nombre">{{com.name}}</td>
+										<td data-cell="Presentación">{{com.presentacion}}</td>
+										<td data-cell="Marca">{{com.marca}}</td>
+										<td data-cell="Serial/referencia">{{com.serial}}</td>
+									</tr>
+								{% endfor %}
+							</table>
+						</div>
+						{% endif %}
+					</section>
+				{% endfor %}
+				{% else %}
+				{% for equipo in system.equipos.all %}
 				<section>
 					<table class="table table-bordered shadow mt-0">
 				
@@ -41,84 +161,13 @@
 										<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
 										<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
 									{% endif %}
-									{% if equipo.tipo == 'r' %}
-										<a href="{% url 'got:horas' equipo.code %}" class="btn btn-secondary float-end">reporte horas</a>
-									{% endif %}
 								</td>
-								{% if equipo.imagen %}
-									<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" width="600px"></td>
-								{% endif %}
+								
 							</tr>
 							<tr>
-								<td>
-									<table style="margin-top: 0;">
-										<tr>
-											<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información General</strong></h4></td>
-										</tr>
-										<tr>
-											<td><strong>Código interno:</strong></td>  
-											<td>{{equipo.code}}</td>
-										</tr>
-										<tr>
-											<td class="pt-0"><strong>Modelo:</strong></td>  
-											<td class="pt-0">{{equipo.model}}</td>
-										</tr>
-										<tr>
-											<td class="pt-0"><strong>Marca:</strong></td>  
-											<td class="pt-0">{{equipo.marca}}</td>
-										</tr>
-										{% if system.asset.area == 'v' %}
-											<tr>
-												<td class="pt-0"><strong>Placa:</strong></td>  
-												<td class="pt-0">{{equipo.serial}}</td>
-											</tr>
-										{% else %}	
-											<tr>
-												<td class="pt-0"><strong>Serial:</strong></td>  
-												<td class="pt-0">{{equipo.serial}}</td>
-											</tr>
-										{% endif %}
-										<tr>
-											<td class="pt-0"><strong>Fecha ingreso:</strong></td>  
-											<td class="pt-0">{{equipo.date_inv}}</td>
-										</tr>
-										<tr>
-											<td class="pt-0"><strong>Estado:</strong></td>  
-											<td class="pt-0">{{system.get_state_display}}</td>
-										</tr>
-										<tr>	
-											<td class="pt-0"><strong>Ubicación:</strong></td>  
-											<td class="pt-0">{{system.location}}</td>
-										</tr>
-										{% if equipo.tipo == 'r' %}
-											<tr>
-												<td class="pt-0"><strong>Horometro:</strong></td>
-												<td class="pt-0">{{equipo.horometro}}</td>
-											</tr>
-											<tr>
-												<td class="pt-0"><strong>Prom hora/día:</strong></td>
-												<td class="pt-0">{{equipo.prom_hours}}</td>
-											</tr>
-										{% endif %}
-										<tr>
-											<td class="pt-0"><strong>Fabricante:</strong></td>  
-											<td class="pt-0">{{equipo.fabricante}}</td>
-										</tr>
-										<tr>
-											<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información Específica del Equipo</strong></h4></td>
-										</tr>
-										<tr>
-											<td class="pt-0"><strong>Especificaciones:</strong></td>  
-											<td>{{equipo.feature|linebreaksbr }}</td>
-										</tr>
-										{% if equipo.manual_pdf %}
-											<tr>
-												<td class="pt-0"><strong>Manual:</strong></td>  
-												<td class="pt-0"><a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a></td>
-											</tr>
-										{% endif %}
-									</table>
-								</td>
+								{% if equipo.imagen %}
+									<td><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" width="100%"></td>
+								{% endif %}
 							</tr>
 						</tbody>
 					</table>
@@ -147,11 +196,12 @@
 					{% endif %}
 				</section>
 			{% endfor %}
-		{% else %}
-			<section class="container mt-5">
-				<p>No hay equipos registrados.</p>
-			</section>
-		{% endif %}
+				{% endif %}
+			{% else %}
+				<section class="container mt-5">
+					<p>No hay equipos registrados.</p>
+				</section>
+			{% endif %}
 
 
 

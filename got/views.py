@@ -303,7 +303,15 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     '''
 
     model = System
-
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        system = self.get_object()
+        
+        # Verificar si el nombre del sistema es "Estructuras"
+        context['is_structures'] = system.name.lower() == "estructuras"
+        
+        return context
 
 class SysDelete(DeleteView):
     '''
