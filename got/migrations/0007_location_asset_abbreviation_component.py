@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('serial', models.CharField(blank=True, max_length=50, null=True)),
                 ('marca', models.CharField(blank=True, max_length=50, null=True)),
                 ('presentacion', models.CharField(max_length=50)),
-                ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.equipo')),
+                ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo')),
             ],
         ),
     ]

@@ -42,7 +42,7 @@ urlpatterns = [
     path('delete_task/<int:pk>/', views.TaskDeleterut.as_view(), name='delete-task'),
 
     # ---------------------------- Rutinas view ----------------------------- #
-    path('rutas/', views.RutaListView.as_view(), name="ruta-list"),
+    path('rutas/', views.RutaListView, name="ruta-list"),
     path('ruta/<str:pk>/create/', views.RutaCreate.as_view(), name='ruta-create'),
     path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'),
     path('ruta/<str:pk>/update/', views.RutaUpdateOT.as_view(), name='ruta-update-ot'),

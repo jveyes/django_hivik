@@ -287,15 +287,16 @@ class EquipoForm(forms.ModelForm):
             'imagen': 'Imagen',
             'manual_pdf': 'Manual',
             'tipo': 'tipo de equipo:',
-            'initial_hours': 'Horas iniciales (si aplica)'
+            'initial_hours': 'Horas iniciales (Si aplica)',
+            'lubricante': 'Lubricante (Si aplica)',
+            'volumen': 'Capacidad lubricante - Galones (Si aplica)',
             }
         widgets = {
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'feature': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
+            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
             }
 
 
@@ -320,9 +321,7 @@ class EquipoFormUpdate(forms.ModelForm):
             }
         widgets = {
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'feature': forms.Textarea(
-                attrs={'rows': 4, 'class': 'form-control'}
-                ),
+            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
             }
@@ -460,12 +459,9 @@ class failureForm(forms.ModelForm):
             'evidence': 'Evidencia',
             }
         widgets = {
-            'description': forms.Textarea(
-                attrs={'class': 'form-control', 'rows': 3}),
-            'causas': forms.Textarea(
-                attrs={'class': 'form-control', 'rows': 3}),
-            'suggest_repair': forms.Textarea(
-                attrs={'class': 'form-control', 'rows': 3}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'causas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'suggest_repair': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
 

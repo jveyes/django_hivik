@@ -49,6 +49,25 @@ class Asset(models.Model):
     arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
     espacio_libre_cubierta = models.IntegerField(default=0, null=True, blank=True)
 
+    
+    def check_ruta_status(self, frecuency, location=None):
+        if location:
+            rutas = self.system_set.filter(rutas__frecuency=frecuency, rutas__system__location=location)
+        else:
+            rutas = self.system_set.filter(rutas__frecuency=frecuency)
+        
+        if not rutas.exists():
+            return "---"
+        all_on_time = True
+        for system in rutas:
+            for ruta in system.rutas.filter(frecuency=frecuency):
+                if ruta.next_date < date.today():
+                    all_on_time = False
+                    break
+            if not all_on_time:
+                break
+        return "Ok" if all_on_time else "Requiere"  
+
     def __str__(self):
         return self.name
 
@@ -126,12 +145,14 @@ class Equipo(models.Model):
     imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
     manual_pdf = models.FileField(upload_to=get_upload_pdfs, null=True, blank=True)
 
-    tipo = models.CharField(choices=TIPO, default='nr', max_length=2)
-
     # Componentes de tipo rotativo
+    tipo = models.CharField(choices=TIPO, default='nr', max_length=2)
     initial_hours = models.IntegerField(default=0)
     horometro = models.IntegerField(default=0, null=True, blank=True)
     prom_hours = models.IntegerField(default=0, null=True, blank=True)
+    lubricante = models.CharField(max_length=100, null=True, blank=True)
+    volumen = models.IntegerField(default=0, null=True, blank=True)
+
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='equipos')
 
@@ -140,7 +161,7 @@ class Equipo(models.Model):
         return total_hours + self.initial_hours
 
     def __str__(self):
-        return self.name
+        return f"{self.system.asset} ({self.name})"
 
     class Meta:
         ordering = ['name', 'code']

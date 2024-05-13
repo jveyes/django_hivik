@@ -21,8 +21,9 @@
 	}
 
 	th, td {
-		padding: 1rem;
+		padding: 0.4rem;
 	}
+	
 
 	caption {
 		color: white;
@@ -71,20 +72,6 @@
 
 {% block content %}
 
-<!-- Opciones de filtrado -->
-<!-- <form method="get" action="{% url 'got:ruta-list' %}">
-    <label for="area_filter">Filtrar por área:</label>
-    <select name="area_filter" id="area_filter">
-        <option value="">Todos</option>
-        <option value="a" {% if area_filter == 'a' %}selected{% endif %}>Barcos</option>
-        <option value="b" {% if area_filter == 'b' %}selected{% endif %}>Buceo</option>
-        <option value="o" {% if area_filter == 'o' %}selected{% endif %}>Oceanografía</option>
-        <option value="l" {% if area_filter == 'l' %}selected{% endif %}>Locativo</option>
-        <option value="v" {% if area_filter == 'v' %}selected{% endif %}>Vehículos</option>
-    </select>
-    <button type="submit" >Filtrar</button>
-</form> -->
-
 <div class="wrapper">
 		<table class="mt-5">
 			<caption>
@@ -116,73 +103,107 @@
 		</table>
 </div>
 
+<section class="mt-5">
+    <!-- Boton de filtrar activos por area -->
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                Filtrar por area
+            </button>
+            <!-- Opciones -->
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'got:ruta-list' %}">Mostrar todos</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ruta-list' %}?location=Cartagena">Cartagena</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ruta-list' %}?location=Santa Marta">Santa Marta</a></li>
+                <li><a class="dropdown-item" href="{% url 'got:ruta-list' %}?location=Guyana">Guyana</a></li>
+            </ul>
+        </div>
+</section>
+
+
+<div>
+	<table class="mt-5" style="width: 80%; margin: auto;">
+		<caption>
+			Control mantenimiento equipos de buceo
+		</caption>
+		<tr>
+			<th>Equipos</th>
+			<th>Mensual</th>
+			<th>Trimestral</th>
+			<th>Semestral</th>
+			<th>Anual</th>
+			<th>Bianual</th>
+			<th rowspan="{{ buceo_rowspan }}" style="vertical-align: middle; text-align: center; font-size: 1.25em;">
+				{{ ind_mtto }} %
+			</th>
+		</tr>
+		{% for asset in buceo %}
+			<tr>
+				<td data-cell="Equipo">{{asset.asset}}</td>
+				<td>
+					<span {% if asset.mensual == "Requiere" %} class="badge text-bg-danger" {% elif asset.mensual == "Ok" %} class="badge text-bg-success" {% endif %}>
+						{{ asset.mensual }}
+					</span>
+				</td>
+				<td>
+					<span {% if asset.trimestral == "Requiere" %} class="badge text-bg-danger" {% elif asset.trimestral == "Ok" %} class="badge text-bg-success" {% endif %}>
+						{{ asset.trimestral }}
+					</span>
+				</td>
+				<td>
+					<span {% if asset.semestral == "Requiere" %} class="badge text-bg-danger" {% elif asset.semestral == "Ok" %} class="badge text-bg-success" {% endif %}>
+						{{ asset.semestral }}
+					</span>
+				</td>
+				<td>
+					<span {% if asset.anual == "Requiere" %} class="badge text-bg-danger" {% elif asset.anual == "Ok" %} class="badge text-bg-success" {% endif %}>
+						{{ asset.anual }}
+					</span>
+				</td>
+				<td>
+					<span {% if asset.bianual == "Requiere" %} class="badge text-bg-danger" {% elif asset.bianual == "Ok" %} class="badge text-bg-success" {% endif %}>
+						{{ asset.bianual }}
+					</span>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+
+<div>
+	<table class="mt-5" style="width: 100%; margin: auto;">
+		<caption>
+			Motores aceites y filtros
+		</caption>
+		<tr>
+			<th>Equipo</th>
+			<th colspan="3">Motor propulsor estribor</th>
+			<th colspan="3">Motor propulsor babor</th>
+		</tr>
+		<tr>
+			<th></th>
+			<th>Componente</th>
+			<th>Lub. Utilizado</th>
+			<th>Capacidad (Gls)</th>
+			<th>Componente</th>
+			<th>Lub. Utilizado</th>
+			<th>Capacidad (Gls)</th>
+		</tr>
+		{% for motor in motores_data %}
+			<tr>
+				<td>{{ motor.name }}</td>
+				<td>{{ motor.estribor.marca }} / {{ motor.estribor.modelo }}</td>
+				<td>{{ motor.estribor.lubricante }}</td>
+				<td style="text-align: center;">{{ motor.estribor.capacidad }}</td>
+				<td>{{ motor.babor.marca }} / {{ motor.babor.modelo }}</td>
+				<td>{{ motor.babor.lubricante }}</td>
+				<td style="text-align: center;">{{ motor.estribor.capacidad }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+
 <!-- inspeccion periferica, fugas, tornilleria
 destapar tapa de balancines
 recalibracion  -->
-	
-<!-- Rutinas de mantenimiento -->
-<!-- {% if ruta_list %}
-	<table class="table mi-tabla-borde-externo mt-4">
-		<thead>
-			<tr>
-				<th scope="col">Equipo</th>
-				<th scope="col">Codigo</th>
-				<th scope="col">Frecuencia</th>
-				<th scope="col">Control</th>
-				<th scope="col">Fecha de ultima intervención</th>
-				<th scope="col">Fecha proxima intervención</th>
-				<th scope="col">OT</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for ruta in ruta_list %}
-				<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'n' %}table-secondary{% else %}table-danger{% endif %}">
-					<th scope="row">{{ ruta.system.asset }}/{{ ruta.system.name }}</th>
-					<td>{{ ruta.name }}</td>
-					<td>{{ ruta.frecuency }}</td>
-					<td>{{ ruta.get_control_display }}</td>
-					<td>{% if ruta.ot %}{{ ruta.intervention_date }}{% else %}---{% endif %}</td>
-					<td>{% if ruta.ot %}{{ ruta.next_date }}{% else %}---{% endif %}</td>
-					<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
-				</tr>
-				<tr>
-					<td colspan="7">
-						<div id="collapse{{ ruta.code }}" class="collapse">
-							<p>
-                                <a href="{{ ruta.get_absolute_url }}"><i class="bi bi-arrow-right-square-fill"></i></a>
-								<strong>Actividades:</strong>
-							</p>
-
-							{% if ruta.task_set.all %}
-								<ol>
-									{% for task in ruta.task_set.all %}
-									<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
-									<ul style="list-style-type: none;">
-										{% if task.procedimiento %}
-										<li><strong>Procedimiento:<br></strong>{{ task.procedimiento|linebreaksbr }}</li>
-										{% endif %}
-										{% if task.suministros %}
-										<li><strong>Equipos, herramientas y consumibles:<br></strong>{{ task.suministros|linebreaksbr }}</li>
-										{% endif %}
-										{% if task.hse %}
-										<li><strong>Precauciones de seguridad:<br></strong>{{ task.hse|linebreaksbr }}</li>
-										{% endif %}
-									</ul>
-									{% endfor %}
-								</ol>
-
-							{% else %}
-								<p>No hay actividades registradas.</p>
-							{% endif %}
-
-						</div>
-					</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% else %}
-		<p>No hay rutinas registradas.</p>
-	{% endif %} -->
 
 {% endblock %}

@@ -16,9 +16,6 @@ from django.core.paginator import Paginator
 from django.utils import timezone
 # from django.contrib import messages
 
-from rest_framework import generics
-from .serializers import AssetSerializer, SystemSerializer
-
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Component, Location
@@ -41,27 +38,6 @@ import itertools
 # ---------------------------- Main views ------------------------------------#
 # ---------------------------- Mis actividades ------------------------------ #
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
-
-    '''
-    Vista 1: consulta para listado de actividades pendientes y enlace directo a
-    cada actividad.
-
-    - Supervisores --> listado de actividades pendientes de todos los activos.
-                        Boton filtrado por activo.
-                        Boton filtrado por responsables
-                        Boton para reprogramar.
-
-    - Talleres --> listado de actividades pendientes propias.
-                    Boton filtrar por activo.
-    
-    - Buzos --> Listado de actividades pendientes de sus activos.
-                Boton para filtrar por activo.
-                Boton para reprogramar.
-
-    - Maquinistas --> Listado de actividades pendientes de su embarcación.
-                      Boton para filtrar por responsable. 
-                    
-    '''
 
     model = Task
     template_name = 'got/assignedtasks_list_pendient.html'
@@ -897,30 +873,89 @@ class TaskDeleterut(DeleteView):
 
 
 # --------------------------- Rutinas --------------------------- #
-class RutaListView(LoginRequiredMixin, generic.ListView):
-    model = Ruta
-    # paginate_by = 15
-    template_name = 'got/ruta_list.html'
-    context_object_name = 'ruta_list'
+@login_required
+def RutaListView(request):
 
-    def get_queryset(self):
+    location_filter = request.GET.get('location', None)
 
-        area_filter = self.request.GET.get('area_filter')
-        if area_filter:
-            queryset = sorted(Ruta.objects.filter(system__asset__area=area_filter).exclude(system__state='x'), key=lambda t: t.next_date)
-        else:
-            queryset = sorted(Ruta.objects.exclude(system__state='x'), key=lambda t: t.next_date)
-        return queryset
+    buceo = Asset.objects.filter(area='b')
+    diques = Ruta.objects.filter(name__icontains='DIQUE')
+    barcos = Asset.objects.filter(area='a')
 
-    def get_context_data(self, **kwargs):
-        """
-        Agrega assets y area_filter al contexto.
-        """
-        context = super(RutaListView, self).get_context_data(**kwargs)
-        context['assets'] = Asset.objects.all()
-        context['area_filter'] = self.request.GET.get('area_filter')
-        context['dique_rutinas'] = Ruta.objects.filter(name__icontains='DIQUE')
-        return context
+    buceo_rowspan = len(buceo) + 1
+    total_oks = 0
+    total_non_dashes = 0
+
+    buceo_data = []
+    for asset in buceo:
+        mensual = asset.check_ruta_status(30, location_filter)
+        trimestral = asset.check_ruta_status(90, location_filter)
+        semestral = asset.check_ruta_status(180, location_filter)
+        anual = asset.check_ruta_status(365, location_filter)
+        bianual = asset.check_ruta_status(730, location_filter)
+
+        for status in [mensual, trimestral, semestral, anual, bianual]:
+            if status == "Ok":
+                total_oks += 1
+            if status != "---":
+                total_non_dashes += 1
+
+        buceo_data.append({
+            'asset': asset,
+            'mensual': mensual,
+            'trimestral': trimestral,
+            'semestral': semestral,
+            'anual': anual,
+            'bianual': bianual,
+        })
+
+    ind_mtto = round((total_oks*100)/total_non_dashes, 2)
+
+
+    motores_data = []
+    for barco in barcos:
+        sistema = barco.system_set.filter(group=200).first()
+        sistema2 = barco.system_set.filter(group=300).first()
+        motores_info = {
+            'name': barco.name,
+            'estribor': {'marca': '---', 'modelo': '---', 'lubricante': '---', 'capacidad': 0},
+            'babor': {'marca': '---', 'modelo': '---'},
+            'generador': {'marca': '---', 'modelo': '---'}
+        }
+
+        if sistema:
+            motor_estribor = sistema.equipos.filter(name__icontains='Motor propulsor estribor').first()
+            motor_babor = sistema.equipos.filter(name__icontains='Motor propulsor babor').first()
+            motor_generador = sistema2.equipos.filter(name__icontains='Motor generador #1').first()
+            
+            if motor_estribor:
+                motores_info['estribor'] = {
+                    'marca': motor_estribor.marca,
+                    'modelo': motor_estribor.model,
+                    'lubricante': motor_estribor.lubricante,
+                    'capacidad': motor_estribor.volumen,
+                    }
+            if motor_babor:
+                motores_info['babor'] = {
+                    'marca': motor_babor.marca,
+                    'modelo': motor_babor.model,
+                    'lubricante': motor_babor.lubricante,
+                    'capacidad': motor_babor.volumen,
+                    }
+            if motor_generador:
+                motores_info['generador'] = {'marca': motor_generador.marca, 'modelo': motor_generador.model}
+
+        motores_data.append(motores_info)
+
+    context = {
+        'dique_rutinas': diques,
+        'buceo': buceo_data,
+        'barcos': barcos,
+        'motores_data': motores_data,
+        'ind_mtto': ind_mtto,
+        'buceo_rowspan': buceo_rowspan,
+    }
+    return render(request, 'got/ruta_list.html', context)
 
 
 class RutaCreate(CreateView):
@@ -1054,7 +1089,7 @@ def report_pdf(request, num_ot):
 @login_required
 def indicadores(request):
 
-    m = 4
+    m = 5
 
     area_filter = request.GET.get('area', None)
 
