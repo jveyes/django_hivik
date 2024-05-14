@@ -324,6 +324,7 @@ class EquipoFormUpdate(forms.ModelForm):
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
             }
 
 
@@ -403,7 +404,10 @@ class ReportHoursAsset(forms.ModelForm):
             'report_date': 'Fecha',
             'component': 'Componente',
         }
-        widgets = {'report_date': XYZ_DateInput(format=['%Y-%m-%d'],), }
+        widgets = {
+            'report_date': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'component': forms.Select(attrs={'class': 'form-control'}),
+            }
 
 
     def __init__(self, *args, **kwargs):
