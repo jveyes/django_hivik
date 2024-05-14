@@ -3,7 +3,7 @@
 {% block headtag %}
 <style>
 	body {
-		font-size: 1.125rem;
+		font-size: 0.8rem;
 		font-family: system-ui;
 		line-height: 1.5;
 	}
@@ -175,28 +175,46 @@
 			Motores aceites y filtros
 		</caption>
 		<tr>
-			<th>Equipo</th>
-			<th colspan="3">Motor propulsor estribor</th>
-			<th colspan="3">Motor propulsor babor</th>
+			<th rowspan="2" style="text-align: center;">Equipo</th>
+			<th colspan="5" style="text-align: center;">Motor propulsor estribor</th>
+			<th colspan="5" style="text-align: center;">Motor propulsor babor</th>
+			<!-- <th colspan="3" style="text-align: center;">Motor generador #1</th> -->
 		</tr>
 		<tr>
-			<th></th>
 			<th>Componente</th>
 			<th>Lub. Utilizado</th>
 			<th>Capacidad (Gls)</th>
+			<th>Horometro</th>
+			<th>Fecha ultimo reporte</th>
+
 			<th>Componente</th>
 			<th>Lub. Utilizado</th>
 			<th>Capacidad (Gls)</th>
+			<th>Horometro</th>
+			<th>Fecha ultimo reporte</th>
+
+			<!-- <th>Componente</th>
+			<th>Lub. Utilizado</th>
+			<th>Capacidad (Gls)</th> -->
 		</tr>
 		{% for motor in motores_data %}
 			<tr>
-				<td>{{ motor.name }}</td>
+				<td style="white-space: nowrap;">{{ motor.name }}</td>
 				<td>{{ motor.estribor.marca }} / {{ motor.estribor.modelo }}</td>
 				<td>{{ motor.estribor.lubricante }}</td>
 				<td style="text-align: center;">{{ motor.estribor.capacidad }}</td>
+				<td style="text-align: center;">{{ motor.estribor.horometro }}</td>
+				<td>{{ motor.estribor.fecha|date:"d/m/Y" }}</td>
+
 				<td>{{ motor.babor.marca }} / {{ motor.babor.modelo }}</td>
 				<td>{{ motor.babor.lubricante }}</td>
-				<td style="text-align: center;">{{ motor.estribor.capacidad }}</td>
+				<td style="text-align: center;">{{ motor.babor.capacidad }}</td>
+				<td style="text-align: center;">{{ motor.babor.horometro }}</td>
+				<td>{{ motor.babor.fecha|date:"d/m/Y" }}</td>
+
+				<!-- <td>{{ motor.generador.marca }} / {{ motor.generador.modelo }}</td>
+				<td>{{ motor.generador.lubricante }}</td>
+				<td style="text-align: center;">{{ motor.generador.capacidad }}</td> -->
 			</tr>
 		{% endfor %}
 	</table>

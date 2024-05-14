@@ -159,9 +159,13 @@ class Equipo(models.Model):
     def calculate_horometro(self):
         total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
         return total_hours + self.initial_hours
+    
+    def last_hour_report_date(self):
+        last_report = self.hours.order_by('-report_date').first()
+        return last_report.report_date if last_report else None
 
     def __str__(self):
-        return f"{self.system.asset} ({self.name})"
+        return f"{self.name}"
 
     class Meta:
         ordering = ['name', 'code']
@@ -227,6 +231,7 @@ class HistoryHour(models.Model):
 
     class Meta:
         ordering = ['-report_date']
+        unique_together = ('component', 'report_date')
 
 
 class Ot(models.Model):

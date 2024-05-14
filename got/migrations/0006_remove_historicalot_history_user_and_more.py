@@ -42,22 +42,6 @@ class Migration(migrations.Migration):
             model_name='historicalruta',
             name='system',
         ),
-        migrations.RemoveField(
-            model_name='historicaltask',
-            name='history_user',
-        ),
-        migrations.RemoveField(
-            model_name='historicaltask',
-            name='ot',
-        ),
-        migrations.RemoveField(
-            model_name='historicaltask',
-            name='responsible',
-        ),
-        migrations.RemoveField(
-            model_name='historicaltask',
-            name='ruta',
-        ),
         migrations.AddField(
             model_name='ruta',
             name='astillero',
@@ -71,8 +55,5 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='HistoricalRuta',
-        ),
-        migrations.DeleteModel(
-            name='HistoricalTask',
         ),
     ]

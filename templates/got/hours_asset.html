@@ -1,8 +1,44 @@
 {% extends "got/base_generic.html" %}
 
+{% block headtag %}
+<style>
+    .scrollable {
+        overflow-x: auto;
+        width: 100%; /* Ajusta según necesidad */
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 8px; /* Ajusta según necesidad */
+        text-align: left;
+    }
+    thead th {
+        position: sticky;
+        top: 0;
+        background-color: #fff; /* Asegura que el fondo no sea transparente */
+    }
+    th:first-child, td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #fff;
+        z-index: 2; /* Asegura que la columna se mantenga sobre el contenido desplazable */
+    }
+    th:nth-child(2), td:nth-child(2) {
+        position: sticky;
+        left: 150px; /* Ajusta según el ancho de la primera columna. Asegúrate de que este ancho sea correcto. */
+        background-color: #fff;
+        z-index: 1; /* Asegura que la segunda columna también se mantenga fija, pero debajo de la primera en términos de stacking si se solapan */
+    }
+
+</style>
+{% endblock %}
+
+
 {% block header %}
-<a href="{% url 'got:asset-detail' asset.abbreviation %}"><i class="bi bi-arrow-90deg-left"></i></a>
-reporte de horas {{ asset.name }}
+	<a href="{% url 'got:asset-detail' asset.abbreviation %}"><i class="bi bi-arrow-90deg-left"></i></a>
+  	reporte de horas {{ asset.name }}
 {% endblock %}
 
 {% block content %}
@@ -13,29 +49,35 @@ reporte de horas {{ asset.name }}
     <button class="btn btn-primary" type="submit">Guardar</button>
 </form>
 
-<h3 class="mt-4">Horometro actual {{ component.horometro }}</h3>
+<h3 class="mt-4">Horometro actual</h3>
 
-<!-- Mostrar el listado de registros en una tabla -->
-<div class="center">
-<table>
-  <thead>
-    <tr>
-      <th>Fecha</th>
-      <th>Horas</th>
-      <th>Componente</th>
-      <th>Reportado por</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for hour in horas %}
-    <tr>
-      <td>{{ hour.report_date }}</td>
-      <td>{{ hour.hour }}</td>
-      <td>{{ hour.component }}</td>
-      <td>{{ hour.reporter }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="scrollable">
+	<table>
+		<thead>
+			<tr>
+				<th>Componente</th>
+				<th>Total</th>
+				{% for date in dates %}
+					<th>{{ date|date:"d/m/Y" }}</th>
+				{% endfor %}
+			</tr>
+		</thead>
+		<tbody>
+			{% for data in equipos_data %}
+				<tr>
+					<td style="white-space: nowrap;">{{ data.equipo.name }}</td>
+					<td>{{ data.equipo.horometro }}</td>
+					{% for hour in data.horas %}
+						<td>{{ hour }}</td>
+					{% endfor %}
+				</tr>
+			{% empty %}
+			<tr>
+				<td colspan="5">No hay equipos rotativos.</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
+
 {% endblock %}

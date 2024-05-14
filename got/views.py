@@ -464,17 +464,11 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
 
 
 class FailureDetailView(LoginRequiredMixin, generic.DetailView):
-    '''
-    Detalle de reportes de falla (v1.0)
-    '''
+
     model = FailureReport
 
 
 class FailureReportUpdate(LoginRequiredMixin, UpdateView):
-
-    '''
-    Formulario para reportar fallas en los equipos de activo.
-    '''
 
     model = FailureReport
     form_class = failureForm
@@ -519,9 +513,7 @@ def crear_ot_failure_report(request, fail_id):
 
 # --------------------------- Ordenes de trabajo --------------------------- #
 class OtListView(LoginRequiredMixin, generic.ListView):
-    '''
-    Vista generica para listado de ordenes de trabajo (v1.0)
-    '''
+
     model = Ot
     paginate_by = 15
 
@@ -802,7 +794,6 @@ class TaskUpdate(UpdateView):
             return ActFormNoSup
 
 
-# Para rutinas
 class TaskCreate(CreateView):
     '''
     Vista formulario para actualizar una actividad
@@ -918,15 +909,23 @@ def RutaListView(request):
         sistema2 = barco.system_set.filter(group=300).first()
         motores_info = {
             'name': barco.name,
-            'estribor': {'marca': '---', 'modelo': '---', 'lubricante': '---', 'capacidad': 0},
-            'babor': {'marca': '---', 'modelo': '---'},
-            'generador': {'marca': '---', 'modelo': '---'}
+            'estribor': {
+                'marca': '---',
+                'modelo': '---',
+                'lubricante': '---',
+                'capacidad': 0,
+                'fecha': '---',
+                },
+            'babor': {
+                'marca': '---',
+                'modelo': '---'},
+            'generador': {'marca': '---', 'modelo': '---', 'lubricante': '---', 'capacidad': 0}
         }
 
         if sistema:
             motor_estribor = sistema.equipos.filter(name__icontains='Motor propulsor estribor').first()
             motor_babor = sistema.equipos.filter(name__icontains='Motor propulsor babor').first()
-            motor_generador = sistema2.equipos.filter(name__icontains='Motor generador #1').first()
+            motor_generador1 = sistema2.equipos.filter(name__icontains='Motor generador 1').first()
             
             if motor_estribor:
                 motores_info['estribor'] = {
@@ -934,6 +933,8 @@ def RutaListView(request):
                     'modelo': motor_estribor.model,
                     'lubricante': motor_estribor.lubricante,
                     'capacidad': motor_estribor.volumen,
+                    'horometro': motor_estribor.horometro,
+                    'fecha': motor_estribor.last_hour_report_date(),
                     }
             if motor_babor:
                 motores_info['babor'] = {
@@ -941,9 +942,16 @@ def RutaListView(request):
                     'modelo': motor_babor.model,
                     'lubricante': motor_babor.lubricante,
                     'capacidad': motor_babor.volumen,
+                    'horometro': motor_babor.horometro,
+                    'fecha': motor_babor.last_hour_report_date()
                     }
-            if motor_generador:
-                motores_info['generador'] = {'marca': motor_generador.marca, 'modelo': motor_generador.model}
+            if motor_generador1:
+                motores_info['generador'] = {
+                    'marca': motor_generador1.marca,
+                    'modelo': motor_generador1.model,
+                    'lubricante': motor_generador1.lubricante,
+                    'capacidad': motor_generador1.volumen,
+                    }
 
         motores_data.append(motores_info)
 
@@ -1219,6 +1227,9 @@ def reporthours(request, component):
 def reportHoursAsset(request, asset_id):
 
     asset = get_object_or_404(Asset, pk=asset_id)
+    today = date.today()
+    dates = [today - timedelta(days=x) for x in range(30)]
+    equipos_rotativos = Equipo.objects.filter(system__asset=asset, tipo='r')
 
     if request.method == 'POST':
         # Si se envió el formulario, procesarlo
@@ -1234,10 +1245,25 @@ def reportHoursAsset(request, asset_id):
 
     hours = HistoryHour.objects.filter(component__system__asset=asset)[:30]
 
-    context = {
+    equipos_data = []
+    for equipo in equipos_rotativos:
+        horas_reportadas = {date: 0 for date in dates}  # Prepara un diccionario con las fechas y horas iniciales a 0
+        for hour in equipo.hours.filter(report_date__range=(dates[-1], today)):
+            if hour.report_date in horas_reportadas:
+                horas_reportadas[hour.report_date] += hour.hour
+
+        equipos_data.append({
+            'equipo': equipo,
+            'horas': [horas_reportadas[date] for date in dates]  # Listar horas por cada fecha para el equipo
+        })
+
+    context = { 
         'form': form,
         'horas': hours,
         'asset': asset,
+        'equipos_data': equipos_data,
+        'equipos_rotativos': equipos_rotativos,
+        'dates': dates
     }
 
     return render(request, 'got/hours_asset.html', context)

@@ -84,6 +84,8 @@ class Migration(migrations.Migration):
                 ('prom_hours', models.IntegerField(blank=True, default=0, null=True)),
                 ('imagen', models.ImageField(blank=True, null=True, upload_to=got.models.get_upload_path)),
                 ('manual_pdf', models.FileField(blank=True, null=True, upload_to=got.models.get_upload_pdfs)),
+                ('lubricante', models.CharField(blank=True, max_length=100, null=True)),
+                ('volumen', models.IntegerField(blank=True, default=0, null=True)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='equipos', to='got.system')),
             ],
             options={

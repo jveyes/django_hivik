@@ -394,13 +394,6 @@ class ReportHours(forms.ModelForm):
 
 
 class ReportHoursAsset(forms.ModelForm):
-    def clean_hour(self):
-        hour = self.cleaned_data['hour']
-        if hour < 0 or hour > 24:
-            raise forms.ValidationError(
-                'El valor de horas debe estar entre 0 y 24.'
-                )
-        return hour
 
     class Meta:
         model = HistoryHour
@@ -412,13 +405,34 @@ class ReportHoursAsset(forms.ModelForm):
         }
         widgets = {'report_date': XYZ_DateInput(format=['%Y-%m-%d'],), }
 
+
     def __init__(self, *args, **kwargs):
-        asset = kwargs.pop('asset')
-        super().__init__(*args, **kwargs)
-        self.fields['component'].queryset = Equipo.objects.filter(
-            system__asset=asset,
-            tipo='r'
-            )
+        asset = kwargs.pop('asset', None)
+        super(ReportHoursAsset, self).__init__(*args, **kwargs)
+        if asset:
+            self.fields['component'].queryset = Equipo.objects.filter(system__asset=asset, tipo='r')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        component = cleaned_data.get('component')
+        report_date = cleaned_data.get('report_date')
+        hour = cleaned_data.get('hour')
+        
+        if hour < 0 or hour > 24:
+            raise ValidationError('El valor de horas debe estar entre 0 y 24.')
+
+        # Verificar si ya existe una entrada con la misma fecha y componente
+        existing = HistoryHour.objects.filter(component=component, report_date=report_date).first()
+        if existing:
+            # Si existe, ajustar instancia para actualizar en lugar de crear una nueva
+            self.instance = existing
+            self.cleaned_data['hour'] = hour  # Asegurarse de que la hora nueva se guarda
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        # Guardar el registro existente o uno nuevo
+        return super(ReportHoursAsset, self).save(commit=commit)
 
 
 # Form : Crear nuevo reporte de falla
