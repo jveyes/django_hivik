@@ -1,91 +1,18 @@
-{% load my_tags %}
-{% obtener_asset_del_supervisor as asset_del_supervisor %}
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-	{% include 'got/links.html' %}
+	{% include 'got/base/links.html' %}
 	{% block headtag %}{% endblock %}
 </head>
 <body>
 
-	<!-- Barra de navegacion -->
-	<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #cad3db; border: 1px solid #444">
-		<div class="container-fluid">
-        	<!-- Logo de serport -->
-		  	<a class="nav-link" href="{% url 'got:my-tasks' %}">
-        		<img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
-			</a>
-			<!-- Boton para barra de navegación responsive -->
-        	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          		<span class="navbar-toggler-icon"></span>
-        	</button>
-			<!-- Enlaces de navegación -->
-        	<div class="collapse navbar-collapse" id="navbarSupportedContent">
-        		<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-					<!-- Muestra el enlace directo al equipo del supervisor -->
-					{% if request.user|has_group:"maq_members" %}
-						<li class="nav-item {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}">
-							<a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
-						</li>
-					{% else %}
-						<li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-							<a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
-						</li>
-					{% endif %}
-
-					<!-- Vistas publicas -->
-					{% if not request.user|has_group:"gerencia" %}
-            		<li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
-						<a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
-            		</li>
-					<li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
-						<a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
-				  	</li>
-					{% endif %}
-
-					{% if not request.user|has_group:"serport_members" %}
-					  	<li class="nav-item">
-						  	<!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
-							<a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
-						</li>
-				  	{% endif %}
-
-            		<!-- Opciones limitadas para supervisores de serport -->
-            		{% if request.user|has_group:"super_members" %}
-						<li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
-							<a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
-					  	</li>
-            		{% endif %}
-					{% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
-					<li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-						<a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
-					</li>
-				{% endif %}
-
-          		</ul>
-
-          		<!-- Boton de logout -->
-				<form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
-					<div style="color: #000; padding-right: 15px;">
-						{{ user.get_username }}
-					</div>
-					<button class="btn btn-outline-danger" type="submit">
-						<i class="bi bi-box-arrow-right"></i>
-					</button>
-				</form>
-        	</div>
-      	</div>
-	</nav>
+	{% include 'got/base/navegacion.html' %}
 
 	<!-- Bloque main -->
 	<main class="container mt-4">
 
 		<!-- Titulo de la pagina -->
-		<h1>
-			{% block header %}{% endblock %}
-		</h1>
+		<h1>{% block header %}{% endblock %}</h1>
 
 		<!-- Contenido -->
 		{% block content %}{% endblock %}

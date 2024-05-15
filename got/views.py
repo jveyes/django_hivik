@@ -14,7 +14,6 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.utils import timezone
-# from django.contrib import messages
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
@@ -157,17 +156,6 @@ class Finish_task(UpdateView):
 # ---------------------------- Activos (Assets) ---------------------------- #
 class AssetsListView(LoginRequiredMixin, generic.ListView):
 
-    '''
-    Vista 2: consulta del listado de activos(Assets) de cada area (barcos,
-    buceo, oceanografía, vehiculos, locativo y apoyo).
-
-    - Supervisores tendran acceso al listado completo de cada area.
-
-    - Grupo de buzos tendra acceso solo a los equipo de buceo.
-
-    - Maquinistas/talleres no tendran acceso a esta vista.
-    '''
-
     model = Asset
     paginate_by = 15
 
@@ -188,30 +176,13 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
 # Detalle assets y listado de sistemas
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
-    '''
-    Información de activo y relaciones con sus sistemas y sus rutinas.
-
-    - template name: asset_detail.html
-
-    - Supervisores:
-        Crear nueva OT.
-        Crear/editar/eliminar sistema.
-        Reporte total de horas.
-        Reportar fallas.
-
-    - Maquinistas y buzos:
-        Reporte total de horas.
-        Reportar fallas.
-    '''
-
     model = Asset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         asset = self.get_object()
 
-        rotativos = Equipo.objects.filter(
-            system__asset=asset, tipo='r').exists()
+        rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
 
         # Filtrar sistemas basado en el grupo de usuario
         if self.request.user.groups.filter(name='santamarta_station').exists():
@@ -225,7 +196,7 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             sys = asset.system_set.filter(location='Guyana').exclude(state='x')
         else:
             systems = asset.system_set.all()
-            sys = asset.system_set.exclude(state='x')
+            sys = asset.system_set.all()
 
         other_asset_systems = System.objects.filter(location=asset.name).exclude(asset=asset)
         combined_systems = (sys.union(other_asset_systems)).order_by('group')

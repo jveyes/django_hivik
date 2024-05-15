@@ -497,8 +497,6 @@ class RutaUpdateOTForm(forms.ModelForm):
         fields = ['ot']
 
 
-# got/forms.py
-
 from django import forms
 from .models import Component, Salida, SalidaItem, Location
 
