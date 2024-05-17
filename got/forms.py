@@ -1,18 +1,46 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Component, Location
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Component, Location, Image
     )
 from django.contrib.auth.models import User, Group
 
 
-# Form 1: Crear/editar sistema
-class SysForm(forms.ModelForm):
+class UserChoiceField(forms.ModelChoiceField):
 
-    '''
-    - asset_detail.html (modal para crear).
-    - system_form.html
-    '''
+    def label_from_instance(self, obj):
+        return f'{obj.first_name} {obj.last_name}'
+
+
+class XYZ_DateInput(forms.DateInput):
+
+    input_type = 'date'
+
+    def __init__(self, **kwargs):
+        kwargs['format'] = '%Y-%m-%d'
+        super().__init__(**kwargs)
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = [single_file_clean(data, initial)]
+        return result
+
+
+# Form 1: Crear/editar sistemas
+class SysForm(forms.ModelForm):
 
     class Meta:
         model = System
@@ -24,82 +52,45 @@ class SysForm(forms.ModelForm):
             'state': 'Estado'
         }
 
-# Wid 1
-class UserChoiceField(forms.ModelChoiceField):
-    '''
-    Objeto widget para desplegar nombre y apellido de los usuarios
-    '''
-    def label_from_instance(self, obj):
-        return f'{obj.first_name} {obj.last_name}'
 
-# Wid 2
-class XYZ_DateInput(forms.DateInput):
-    '''
-    Objeto para desplegar calendario en fechas de formularios
-    '''
-    input_type = 'date'
+# Form 8: Crear/editar nuevo equipo
+class EquipoForm(forms.ModelForm):
 
-    def __init__(self, **kwargs):
-        kwargs['format'] = '%Y-%m-%d'
-        super().__init__(**kwargs)
-
-
-# Form 2: reprogramación de actividades
-class RescheduleTaskForm(forms.ModelForm):
-
-    '''
-    - "assignedtasks_list_pendient_user.html"
-    '''
-
-    news = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 4}),
-        required=False,
-        label='Novedades'
-        )
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        if Equipo.objects.filter(code=code).exists():
+            raise ValidationError(
+                '''Este código ya está en uso. Por favor,
+                ingresa un código diferente.'''
+                )
+        return code
 
     class Meta:
-        model = Task
-        fields = ['start_date', 'news', 'men_time']
+        model = Equipo
+        exclude = ['system', 'horometro', 'prom_hours']
         labels = {
-            'start_date': 'Fecha de reprogramacion',
-            'men_time': 'Tiempo de ejecución (Dias)'
+            'name': 'Nombre',
+            'date_inv': 'Fecha de ingreso al inventario',
+            'code': 'Codigo interno',
+            'model': 'Modelo',
+            'serial': '# Serial',
+            'marca': 'Marca',
+            'fabricante': 'Fabricante',
+            'feature': 'Caracteristicas',
+            'imagen': 'Imagen',
+            'manual_pdf': 'Manual',
+            'tipo': 'tipo de equipo:',
+            'initial_hours': 'Horas iniciales (Si aplica)',
+            'lubricante': 'Lubricante (Si aplica)',
+            'volumen': 'Capacidad lubricante - Galones (Si aplica)',
             }
         widgets = {
-            'start_date': XYZ_DateInput(format=['%Y-%m-%d']),
+            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
             }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        men_time = cleaned_data.get('men_time')
-
-        if not start_date and not men_time:
-            raise forms.ValidationError('Debe proporcionar una nueva fecha de inicio y/o tiempo de ejecución.')
-        
-        return cleaned_data
-
-
-# Form 3: Finalizar actividad
-class FinishTask(forms.ModelForm):
-
-    '''
-    - task_detail.html
-    '''
-
-    news = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, label='Novedades',)
-
-    class Meta:
-        model = Task
-        fields = ['news', 'evidence', 'finished']
-        labels = {
-                'news': 'Novedades',
-                'evidence': 'Evidencia',
-                'finished': 'Finalizar'
-                }
-        widgets = {
-            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
-            'finished': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
 
 
 # Form 4: Crear nueva orden de trabajo
@@ -176,6 +167,63 @@ class FinishOtForm(forms.Form):
     )
 
 
+# Form 2: reprogramación de actividades
+class RescheduleTaskForm(forms.ModelForm):
+
+    news = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4}),
+        required=False,
+        label='Novedades'
+        )
+
+    class Meta:
+        model = Task
+        fields = ['start_date', 'news', 'men_time']
+        labels = {
+            'start_date': 'Fecha de reprogramacion',
+            'men_time': 'Tiempo de ejecución (Dias)'
+            }
+        widgets = {
+            'start_date': XYZ_DateInput(format=['%Y-%m-%d']),
+            }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        men_time = cleaned_data.get('men_time')
+
+        if not start_date and not men_time:
+            raise forms.ValidationError('Debe proporcionar una nueva fecha de inicio y/o tiempo de ejecución.')
+        
+        return cleaned_data
+
+
+# Form 3: Finalizar actividad
+class FinishTask(forms.ModelForm):
+
+    finished = forms.ChoiceField(
+        choices=[(True, 'Sí'), (False, 'No')],
+        widget=forms.RadioSelect,
+        label='Finalizado',
+        initial=False,  # Asegúrate de establecer un valor inicial adecuado si es necesario
+        required=False
+    )
+
+    class Meta:
+        model = Task
+        fields = ['news', 'finished']
+        labels = {
+                'news': 'Novedades',
+                }
+        widgets = {
+            'news': forms.Textarea,
+        }
+
+    def __init__(self, *args, **kwargs):
+        super(FinishTask, self).__init__(*args, **kwargs)
+        self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
+
+
 # Form 7: Crear nueva actividad
 class ActForm(forms.ModelForm):
     responsible = UserChoiceField(
@@ -183,27 +231,33 @@ class ActForm(forms.ModelForm):
         label='Responsable',
     )
 
+    finished = forms.ChoiceField(
+        choices=[(True, 'Sí'), (False, 'No')],
+        widget=forms.RadioSelect,
+        label='Finalizado',
+        initial=False,  # Asegúrate de establecer un valor inicial adecuado si es necesario
+        required=False
+    )
+
     class Meta:
         model = Task
-        exclude = ['ot', 'ruta', 'hse']
+        fields = ['responsible', 'description', 'news', 'start_date', 'men_time', 'finished']
         labels = {
             'description': 'Descripción',
             'news': 'Novedades',
-            'evidence': 'Evidencia',
             'start_date': 'Fecha de inicio',
             'men_time': 'Tiempo de ejecución (Dias)',
-            'finished': 'Finalizado',
             }
         widgets = {
-            'responsible': forms.Select(attrs={'class': 'form-control'}),
+            'responsible': forms.Select,
             'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea,
             }
 
     def __init__(self, *args, **kwargs):
         super(ActForm, self).__init__(*args, **kwargs)
         self.fields['start_date'].required = True
+        self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
 
 
 # Form 7: Crear nueva actividad
@@ -211,24 +265,31 @@ class ActFormNoSup(forms.ModelForm):
 
     class Meta:
         model = Task
-        exclude = ['ot', 'ruta', 'hse', 'responsible']
+        fields = ['description', 'news', 'start_date', 'men_time', 'finished']
         labels = {
             'description': 'Descripción',
             'news': 'Novedades',
-            'evidence': 'Evidencia',
             'start_date': 'Fecha de inicio',
             'men_time': 'Tiempo de ejecución (Dias)',
-            'finished': 'Finalizado',
         }
         widgets = {
             'start_date': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea,
         }
 
     def __init__(self, *args, **kwargs):
         super(ActFormNoSup, self).__init__(*args, **kwargs)
         self.fields['start_date'].required = True
+        self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
+
+
+
+class UploadImages(forms.Form):
+    file_field = MultipleFileField(label='Evidencias', required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file_field'].widget.attrs.update({'multiple': True})
 
 
 class RutActForm(forms.ModelForm):
@@ -257,46 +318,6 @@ class RutActForm(forms.ModelForm):
             'procedimiento': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'hse': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'responsible': forms.Select(attrs={'class': 'form-control'}),
-            }
-
-
-# Form 8: Crear/editar nuevo equipo
-class EquipoForm(forms.ModelForm):
-
-    def clean_code(self):
-        code = self.cleaned_data.get('code')
-        if Equipo.objects.filter(code=code).exists():
-            raise ValidationError(
-                '''Este código ya está en uso. Por favor,
-                ingresa un código diferente.'''
-                )
-        return code
-
-    class Meta:
-        model = Equipo
-        exclude = ['system', 'horometro', 'prom_hours']
-        labels = {
-            'name': 'Nombre',
-            'date_inv': 'Fecha de ingreso al inventario',
-            'code': 'Codigo interno',
-            'model': 'Modelo',
-            'serial': '# Serial',
-            'marca': 'Marca',
-            'fabricante': 'Fabricante',
-            'feature': 'Caracteristicas',
-            'imagen': 'Imagen',
-            'manual_pdf': 'Manual',
-            'tipo': 'tipo de equipo:',
-            'initial_hours': 'Horas iniciales (Si aplica)',
-            'lubricante': 'Lubricante (Si aplica)',
-            'volumen': 'Capacidad lubricante - Galones (Si aplica)',
-            }
-        widgets = {
-            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
-            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
-            'tipo': forms.Select(attrs={'class': 'form-control'}),
             }
 
 
@@ -495,48 +516,3 @@ class RutaUpdateOTForm(forms.ModelForm):
     class Meta:
         model = Ruta
         fields = ['ot']
-
-
-from django import forms
-from .models import Component, Salida, SalidaItem, Location
-
-class ComponentForm(forms.ModelForm):
-    class Meta:
-        model = Component
-        fields = ['name', 'serial', 'marca', 'presentacion', 'equipo']
-        widgets = {
-            'equipo': forms.Select(attrs={'class': 'form-select'})
-        }
-
-class SalidaForm(forms.ModelForm):
-    class Meta:
-        model = Salida
-        fields = ['lugar_destino', 'motivo', 'persona_transporte', 'matricula_vehiculo']
-        widgets = {
-            'lugar_destino': forms.Select(attrs={'class': 'form-select'}),
-            'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        }
-
-class SalidaItemForm(forms.ModelForm):
-    class Meta:
-        model = SalidaItem
-        fields = ['item', 'cantidad', 'imagen']
-        widgets = {
-            'item': forms.Select(attrs={'class': 'form-select'}),
-            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
-            'imagen': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-        }
-
-        
-
-class LocationForm(forms.ModelForm):
-
-    class Meta:
-        model = Location
-        fields = '__all__'
-        labels = {
-            'name': 'Nombre',
-            'direccion': 'Dirección',
-            'contact': 'Contacto',
-            'num_contact': 'Numero',
-            }

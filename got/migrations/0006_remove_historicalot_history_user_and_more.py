@@ -10,38 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='historicalot',
-            name='history_user',
-        ),
-        migrations.RemoveField(
-            model_name='historicalot',
-            name='super',
-        ),
-        migrations.RemoveField(
-            model_name='historicalot',
-            name='system',
-        ),
-        migrations.RemoveField(
-            model_name='historicalruta',
-            name='dependencia',
-        ),
-        migrations.RemoveField(
-            model_name='historicalruta',
-            name='equipo',
-        ),
-        migrations.RemoveField(
-            model_name='historicalruta',
-            name='history_user',
-        ),
-        migrations.RemoveField(
-            model_name='historicalruta',
-            name='ot',
-        ),
-        migrations.RemoveField(
-            model_name='historicalruta',
-            name='system',
-        ),
         migrations.AddField(
             model_name='ruta',
             name='astillero',
@@ -49,11 +17,5 @@ class Migration(migrations.Migration):
         ),
         migrations.DeleteModel(
             name='HistoricalFailureReport',
-        ),
-        migrations.DeleteModel(
-            name='HistoricalOt',
-        ),
-        migrations.DeleteModel(
-            name='HistoricalRuta',
         ),
     ]

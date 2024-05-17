@@ -48,4 +48,8 @@ class Migration(migrations.Migration):
                 ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo')),
             ],
         ),
+        migrations.AlterUniqueTogether(
+            name='historyhour',
+            unique_together={('component', 'report_date')},
+        ),
     ]

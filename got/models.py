@@ -368,18 +368,14 @@ class Task(models.Model):
 
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
     ruta = models.ForeignKey(Ruta, on_delete=models.CASCADE, null=True, blank=True)
-    responsible = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,  
-        null=True,
-        blank=True
-    )
+    responsible = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
 
     description = models.TextField()
     procedimiento = models.TextField(default="", blank=True, null=True)
     hse = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+
     start_date = models.DateField(null=True, blank=True)
     men_time = models.IntegerField(default=0)
     finished = models.BooleanField()
@@ -442,3 +438,9 @@ class FailureReport(models.Model):
         return dict(self.IMPACT).get(impact_code, "Desconocido")
 
 
+
+class Image(models.Model):
+
+    failure = models.ForeignKey(FailureReport, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    task = models.ForeignKey(Task, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to=get_upload_path)

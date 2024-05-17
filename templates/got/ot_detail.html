@@ -1,6 +1,51 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
+
+{% block headtag %}
+
+<style>
+    .btn-group-toggle {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-group-toggle label {
+        background-color: #f8f9fa;
+        color: #495057;
+        border: 1px solid #ced4da;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+    }
+
+    .btn-group-toggle label:hover {
+        background-color: #e9ecef;
+    }
+
+    .btn-group-toggle input[type="radio"]:checked + label {
+        background-color: #007bff;
+        color: white;
+    }
+
+    legend {
+        font-size: 16px;
+    }
+
+    
+    @media (width> 650px) {
+	
+        .adap {
+            width: 50%;
+            border: 0.4px #666 solid;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: auto;
+        }
+	}
+</style>
+{% endblock %}
+
 {% block header %}
     <a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
     Detalle de OT-{{ot.num_ot}}
@@ -184,10 +229,13 @@
             </div>
             <div class="modal-body">
                 <form method="post" action="{{ ot.get_absolute_url }}" enctype="multipart/form-data">{% csrf_token %}
-                    <table>
-                        {{ task_form.as_table }}
-                    </table>
-                    <button type="submit" class="btn btn-primary" name="submit_task">Agregar Actividad</button>
+                    <div class="form-group">
+                        {{ task_form }}
+                        {{ image_form }}
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" name="submit_task">Agregar Actividad</button>
+                    </div>
                 </form>
             </div>
         </div>

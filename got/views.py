@@ -17,13 +17,13 @@ from django.utils import timezone
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Component, Location
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
-    OtFormNoSup, ActFormNoSup, Component, Location
+    OtFormNoSup, ActFormNoSup, UploadImages
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -135,22 +135,6 @@ class Reschedule_task(UpdateView):
 
     def form_valid(self, form):
         return super().form_valid(form)
-    
-
-class Finish_task(UpdateView):
-
-    '''
-    Funcionalidad para reprogramar actividades
-    '''
-
-    model = Task
-    form_class = FinishTask
-    template_name = 'got/task_finish_form.html'
-    http_method_names = ['get', 'post']
-    success_url = reverse_lazy('got:my-tasks')
-
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 
 # ---------------------------- Activos (Assets) ---------------------------- #
@@ -237,18 +221,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 # ---------------------------- Systems -------------------------------------- #
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
 
-    '''
-    Información de consulta para listado de equipos detallado de cada sistema
-    creado.
-
-    - Supervisores:
-        Crear/editar/eliminar componente.
-        Reporte de horas de equipos rotativos.
-
-    - Maquinistas y buzos:
-        Reporte de horas de equipos rotativos.
-    '''
-
     model = System
     
     def get_context_data(self, **kwargs):
@@ -261,9 +233,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 class SysDelete(DeleteView):
-    '''
-    Vista formulario para eliminar sistemas
-    '''
+
     model = System
 
     def get_success_url(self):
@@ -274,15 +244,13 @@ class SysDelete(DeleteView):
 
 
 class SysUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = System
     form_class = SysForm
 
 # ---------------------------- Equipos ---------------------------- #
-
 class EquipoCreateView(CreateView):
+
     model = Equipo
     form_class = EquipoForm
     template_name = 'got/equipo_form.html'
@@ -295,9 +263,7 @@ class EquipoCreateView(CreateView):
         return reverse('got:sys-detail', kwargs={'pk': self.object.system.pk})
 
 class EquipoUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = Equipo
     form_class = EquipoFormUpdate
     template_name = 'got/equipo_form.html'
@@ -305,9 +271,7 @@ class EquipoUpdate(UpdateView):
 
 
 class EquipoDelete(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
+
     model = Equipo
 
     def get_success_url(self):
@@ -318,22 +282,6 @@ class EquipoDelete(DeleteView):
 # ---------------------------- Failure Report ---------------------------- #
 
 class FailureListView(LoginRequiredMixin, generic.ListView):
-
-    '''
-    Información de activo y relaciones con sus sistemas y sus rutinas.
-
-    - template name: asset_detail.html
-
-    - Supervisores:
-        Crear nueva OT.
-        Crear/editar/eliminar sistema.
-        Reporte total de horas.
-        Reportar fallas.
-
-    - Maquinistas y buzos:
-        Reporte total de horas.
-        Reportar fallas.
-    '''
 
     model = FailureReport
     paginate_by = 15
@@ -558,6 +506,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         else:
             context['task_form'] = ActFormNoSup()
         context['state_form'] = FinishOtForm()
+        context['image_form'] = UploadImages()
 
         # Agregar lógica para determinar el estado global de las tareas
         ot = self.get_object()
@@ -594,6 +543,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             self.actualizar_rutas_dependientes(ruta.dependencia)
 
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
         ot = self.get_object()
 
         if 'delete_task' in request.POST:
@@ -602,10 +552,20 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
             task.delete()
             return redirect(ot.get_absolute_url()) 
     
-        if request.user.groups.filter(name='super_members').exists():
-            task_form = ActForm(request.POST, request.FILES)
-        else:
-            task_form = ActFormNoSup(request.POST, request.FILES)
+        task_form_class = ActForm if request.user.groups.filter(name='super_members').exists() else ActFormNoSup
+        task_form = task_form_class(request.POST, request.FILES)
+        image_form = UploadImages(request.POST, request.FILES)
+
+        if task_form.is_valid() and image_form.is_valid():
+            # Guardar la tarea
+            task = task_form.save(commit=False)
+            task.ot = ot
+            task.save()
+
+            # Guardar cada imagen asociada a la tarea
+            for file in request.FILES.getlist('file_field'):
+                Image.objects.create(task=task, image=file)
+
 
         state_form = FinishOtForm(request.POST)
 
@@ -714,9 +674,7 @@ class OtCreate(CreateView):
 
 
 class OtUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar ordenes de trabajo (v1.0)
-    '''
+
     model = Ot
     http_method_names = ['get', 'post']
 
@@ -743,26 +701,75 @@ class OtDelete(DeleteView):
 
 
 # --------------------------- Actividades --------------------------- #
+class Finish_task(UpdateView):
+
+    model = Task
+    form_class = FinishTask
+    template_name = 'got/task_finish_form.html'
+    second_form_class = UploadImages
+    success_url = reverse_lazy('got:my-tasks')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'image_form' not in context:
+            context['image_form'] = self.second_form_class()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        image_form = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and image_form.is_valid():
+            response = super().form_valid(form)
+            for img in request.FILES.getlist('file_field'):
+                Image.objects.create(task=self.object, image=img)
+            return response
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def form_invalid(self, form, **kwargs):
+        return self.render_to_response(self.get_context_data(form=form, **kwargs))
+
+
 class TaskDetailView(LoginRequiredMixin, generic.DetailView):
-    '''
-    Detalle de actividades (v1.0)
-    '''
+
     model = Task
 
 
 class TaskUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = Task
     template_name = 'got/task_form.html'
-    http_method_names = ['get', 'post']
+    form_class = ActForm
+    second_form_class = UploadImages
+    # http_method_names = ['get', 'post']
 
-    def get_form_class(self):
-        if self.request.user.groups.filter(name='super_members').exists():
-            return ActForm
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'image_form' not in context:
+            context['image_form'] = self.second_form_class()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        image_form = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and image_form.is_valid():
+            response = super().form_valid(form)
+            for img in request.FILES.getlist('file_field'):
+                Image.objects.create(task=self.object, image=img)
+            return response
         else:
-            return ActFormNoSup
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+    def form_invalid(self, form, **kwargs):
+        return self.render_to_response(self.get_context_data(form=form, **kwargs))
 
 
 class TaskCreate(CreateView):
@@ -1384,72 +1391,3 @@ def schedule(request, pk):
     }
     return render(request, 'got/schedule.html', context)
 
-
-
-# got/views.py
-
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.forms import modelformset_factory
-from django.conf import settings
-from .models import Salida, SalidaItem, Component, Location
-from .forms import SalidaForm, SalidaItemForm, ComponentForm
-
-@login_required
-def create_component(request):
-    if request.method == "POST":
-        form = ComponentForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('got:create_component')
-    else:
-        form = ComponentForm()
-
-    return render(request, 'got/create_component.html', {'form': form})
-
-@login_required
-def create_salida(request):
-    SalidaItemFormSet = modelformset_factory(SalidaItem, form=SalidaItemForm, extra=1, can_delete=True)
-    
-    if request.method == "POST":
-        salida_form = SalidaForm(request.POST)
-        item_formset = SalidaItemFormSet(request.POST, request.FILES)
-
-        if salida_form.is_valid() and item_formset.is_valid():
-            salida = salida_form.save()
-
-            for form in item_formset:
-                if form.cleaned_data.get('item') and form.cleaned_data.get('cantidad') > 0:
-                    item_instance = form.save(commit=False)
-                    item_instance.salida = salida
-                    item_instance.save()
-
-            # Enviar correo electrónico
-            send_salida_email(salida)
-
-            return redirect(salida.get_absolute_url())
-
-    else:
-        salida_form = SalidaForm(initial={'fecha': date.today()})
-        item_formset = SalidaItemFormSet(queryset=SalidaItem.objects.none())
-
-    return render(request, 'got/create_salida.html', {
-        'salida_form': salida_form,
-        'item_formset': item_formset
-    })
-
-def send_salida_email(salida):
-    subject = f"Salida de Materiales: {salida.lugar_destino}"
-    items = "\n".join([f"{item.cantidad}x {item.item.name}" for item in salida.items.all()])
-    message = f"""
-    Lugar de Destino: {salida.lugar_destino}
-    Fecha: {salida.fecha}
-    Motivo: {salida.motivo}
-    Persona que Transporta: {salida.persona_transporte}
-    Matrícula del Vehículo: {salida.matricula_vehiculo}
-
-    Ítems:
-    {items}
-    """
-    send_mail(subject, message, settings.EMAIL_HOST_USER, ['medinabaez1120@gmail.com'])
