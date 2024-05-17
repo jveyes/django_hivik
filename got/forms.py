@@ -487,7 +487,7 @@ class failureForm(forms.ModelForm):
 
     class Meta:
         model = FailureReport
-        exclude = ['reporter', 'related_ot', 'closed']
+        exclude = ['reporter', 'related_ot', 'closed', 'evidence']
         labels = {
             'equipo': 'Equipo que presenta la falla',
             'critico': '¿Equipo/sistema que presenta la falla es critico?',
@@ -495,13 +495,13 @@ class failureForm(forms.ModelForm):
             'impact': 'Seleccione las areas afectadas por la falla',
             'causas': 'Describa las causas probable de la falla',
             'suggest_repair': 'Reparación sugerida',
-            'evidence': 'Evidencia',
+            # 'evidence': 'Evidencia',
             }
         widgets = {
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'causas': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'suggest_repair': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'evidence': forms.FileInput(attrs={'class': 'form-control'}),
+            # 'evidence': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 

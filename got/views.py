@@ -372,6 +372,8 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         asset_id = self.kwargs.get('asset_id')
         asset = get_object_or_404(Asset, pk=asset_id)
         context['asset_main'] = asset
+        if 'image_form' not in context:
+            context['image_form'] = UploadImages()  # Añadir el formulario de imágenes
         return context
 
     def get_form(self, form_class=None):
@@ -380,6 +382,22 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         asset = get_object_or_404(Asset, pk=asset_id)
         form.fields['equipo'].queryset = Equipo.objects.filter(system__asset=asset)
         return form
+    
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        image_form = UploadImages(request.POST, request.FILES)
+        
+        if form.is_valid() and image_form.is_valid():
+            response = super().form_valid(form)
+            for file in request.FILES.getlist('file_field'):
+                Image.objects.create(failure=self.object, image=file)  # Asociar las imágenes al reporte de falla
+            return response
+        else:
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form, **kwargs):
+        context = self.get_context_data(form=form, **kwargs)
+        return self.render_to_response(context)
 
 
 class FailureDetailView(LoginRequiredMixin, generic.DetailView):
