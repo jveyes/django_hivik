@@ -70,5 +70,8 @@
 {% endif %}
 </div>
 
+{% for i in task.images.all %}
+    <img src="{{ i.image.url }}" width=200>
+{% endfor %}
 
 {% endblock %}

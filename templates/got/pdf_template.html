@@ -176,6 +176,20 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if act.images.all %}
+                {% for i in act.images.all %}
+                <tr>
+                    <!-- <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td> -->
+                    <td colspan="6" style="padding: 5px; text-align: center; border-left: 0.5px solid black; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
+                        
+                            <img src="{{ i.image.url }}" style="width: 500px; ">
+                        
+                    </td>
+                </tr>
+                {% endfor %}
+                
+                    
+                {% endif %}
                 {% if act.suministros %}
                     <tr>
                         <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>

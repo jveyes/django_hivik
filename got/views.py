@@ -341,17 +341,6 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         
         email.send()
 
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.reporter = self.request.user
-        self.object.save()
-        
-        # Sending the email after the form is saved
-        context = self.get_email_context()  # Collect information to be sent in the email
-        self.send_email(context)  # Send the email
-
-        return HttpResponseRedirect(self.get_success_url())  # Redirect after POST
-
     def get_email_context(self):
         """Builds the context dictionary for the email."""
         impacts_display = [self.object.get_impact_display(code) for code in self.object.impact]
@@ -388,12 +377,28 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         image_form = UploadImages(request.POST, request.FILES)
         
         if form.is_valid() and image_form.is_valid():
+            form.instance.reporter = request.user
             response = super().form_valid(form)
+            context = self.get_email_context()  
+            self.send_email(context)
             for file in request.FILES.getlist('file_field'):
                 Image.objects.create(failure=self.object, image=file)  # Asociar las imágenes al reporte de falla
             return response
         else:
             return self.form_invalid(form)
+        
+    # def form_valid(self, form):
+    #     # self.object = form.save(commit=False)
+    #     # self.object.reporter = self.request.user
+    #     # self.object.save()
+
+    #     form.instance.reporter = self.request.user
+    #     self.object = form.save()
+        
+    #     # Sending the email after the form is saved
+        
+
+        return HttpResponseRedirect(self.get_success_url())  # Redirect after POST
     
     def form_invalid(self, form, **kwargs):
         context = self.get_context_data(form=form, **kwargs)
