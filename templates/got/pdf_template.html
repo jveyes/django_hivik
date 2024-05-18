@@ -145,7 +145,7 @@
                         {{ forloop.counter }}
                     </td>
                     <td style="text-align: justify; border-bottom: 0.5px solid black;">
-                        {{ act.description }}
+                        {{ act.description|linebreaksbr }}
                     </td>
                     <td style="text-align: center; border-bottom: 0.5px solid black;">
                         {{ act.responsible.first_name }} {{ act.responsible.last_name }}
@@ -224,7 +224,7 @@
         {% for act in ot.task_set.all %}
             {% if act.evidence %}
                 <div>
-                    <img src="{{ act.evidence.url }}" style="width: 200px; height: auto;">
+                    <img src="{{ act.evidence.url }}" style="width: 500px; height: auto;">
                 </div>
             {% endif %}
         {% endfor %}

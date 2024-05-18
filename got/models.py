@@ -11,7 +11,7 @@ from simple_history.models import HistoricalRecords
 
 def get_upload_path(instance, filename):
     ext = filename.split('.')[-1]
-    filename = f"media/{datetime.now():%Y%m%d%H%M%S}.{ext}"
+    filename = f"media/{datetime.now():%Y%m%d%H%M%S}-{uuid.uuid4()}.{ext}"
     return filename
 
 
