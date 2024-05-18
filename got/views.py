@@ -123,11 +123,6 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
 class Reschedule_task(UpdateView):
 
-    '''
-    Funcionalidad para reprogramar actividades.
-    Supervisores, buzos y maquinistas.
-    '''
-
     model = Task
     form_class = RescheduleTaskForm
     template_name = 'got/task_reschedule.html'
@@ -437,7 +432,7 @@ class FailureReportUpdate(LoginRequiredMixin, UpdateView):
 def crear_ot_failure_report(request, fail_id):
     fail = get_object_or_404(FailureReport, pk=fail_id)
     nueva_ot = Ot(
-        description=f"Mantenimiento por reporte de falla #{fail.id}",
+        description=f"Reporte de falla -{fail.equipo}",
         state='x',  # Ejecución
         super=request.user,
         tipo_mtto='c',

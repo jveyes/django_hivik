@@ -77,6 +77,10 @@
                 <td><img src="{{ failurereport.evidence.url }}"></td>
             </tr>
         {% endif %}
+
+        {% for i in failurereport.images.all %}
+            <img src="{{ i.image.url }}" width=200>
+        {% endfor %}
     </tbody>
 </table>
 {% endblock %}
