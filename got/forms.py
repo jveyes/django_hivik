@@ -226,6 +226,9 @@ class FinishTask(forms.ModelForm):
 
 # Form 7: Crear nueva actividad
 class ActForm(forms.ModelForm):
+
+    delete_images = forms.BooleanField(required=False, label='Eliminar imágenes')
+
     responsible = UserChoiceField(
         queryset=User.objects.all(),
         label='Responsable',

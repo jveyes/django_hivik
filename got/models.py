@@ -232,7 +232,7 @@ class HistoryHour(models.Model):
     component = models.ForeignKey(Equipo, on_delete=models.CASCADE, related_name='hours')
 
     def __str__(self):
-        return '%s: %s - %s (%s)' % (self.report_date, self.component, self.hour, self.reporter)
+        return '%s: %s - %s (%s) /%s' % (self.report_date, self.component, self.hour, self.reporter, self.component.system.asset)
 
     class Meta:
         ordering = ['-report_date']

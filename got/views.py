@@ -744,20 +744,25 @@ class TaskUpdate(UpdateView):
     template_name = 'got/task_form.html'
     form_class = ActForm
     second_form_class = UploadImages
-    # http_method_names = ['get', 'post']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if 'image_form' not in context:
             context['image_form'] = self.second_form_class()
+        context['images'] = Image.objects.filter(task=self.get_object())
         return context
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         form = self.get_form()
         image_form = self.second_form_class(request.POST, request.FILES)
+        # if 'delete_images' in request.POST:
+        #     self.object.images.all().delete()
+        #     return redirect(self.get_success_url())
         if form.is_valid() and image_form.is_valid():
             response = super().form_valid(form)
+            if form.cleaned_data.get('delete_images'):
+                self.object.images.all().delete()
             for img in request.FILES.getlist('file_field'):
                 Image.objects.create(task=self.object, image=img)
             return response
@@ -1394,7 +1399,7 @@ def schedule(request, pk):
 def OperationListView(request):
 
     assets = Asset.objects.filter(area='a')
-    operations = Operation.objects.all()
+    operations = Operation.objects.order_by('start')
 
     operations_data = []
     for asset in assets:
