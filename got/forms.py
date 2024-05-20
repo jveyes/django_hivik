@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Component, Location, Image
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset
     )
 from django.contrib.auth.models import User, Group
 
@@ -516,3 +516,50 @@ class RutaUpdateOTForm(forms.ModelForm):
     class Meta:
         model = Ruta
         fields = ['ot']
+
+
+class OperationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(OperationForm, self).__init__(*args, **kwargs)
+        self.fields['asset'].queryset = Asset.objects.filter(area='a')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get('start')
+        end = cleaned_data.get('end')
+        asset = cleaned_data.get('asset')
+
+        if start and end and start > end:
+            raise ValidationError({
+                'start': 'La fecha de inicio no puede ser posterior a la fecha de fin.',
+                'end': 'La fecha de fin no puede ser anterior a la fecha de inicio.'
+            })
+
+        if start and end and asset:
+            # Comprobar si hay solapamientos con otras operaciones
+            overlapping_operations = Operation.objects.filter(
+                asset=asset,
+                end__gte=start,
+                start__lte=end
+            )
+            if overlapping_operations.exists():
+                raise ValidationError('Existe un conflicto entre las fechas seleccionadas.')
+
+        return cleaned_data
+
+    class Meta:
+        model = Operation
+        fields = ['proyecto', 'asset', 'start', 'end', 'requirements']
+        widgets = {
+            'start': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'end': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'requirements': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+        labels = {
+            'asset': 'Equipo',
+            'proyecto': 'Nombre del Proyecto',
+            'start': 'Fecha de Inicio',
+            'end': 'Fecha de Fin',
+            'requirements': 'Requerimientos',
+        }

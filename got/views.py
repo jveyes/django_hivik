@@ -14,23 +14,23 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.contrib import messages
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
-    OtFormNoSup, ActFormNoSup, UploadImages
+    OtFormNoSup, ActFormNoSup, UploadImages, OperationForm
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
 from datetime import timedelta, date
 from xhtml2pdf import pisa
 from io import BytesIO
-from collections import defaultdict
 import itertools
 
 
@@ -45,7 +45,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     def dispatch(self, request, *args, **kwargs):
         current_user = request.user
         if current_user.groups.filter(name='gerencia').exists():
-            return redirect('got:asset-list')
+            return redirect('got:operation-list')
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -297,8 +297,7 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
             supervised_assets = Asset.objects.filter(
                 area='b')
 
-            queryset = queryset.filter(
-                equipo__system__asset__in=supervised_assets)
+            queryset = queryset.filter(equipo__system__asset__in=supervised_assets)
 
         return queryset
 
@@ -381,19 +380,6 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
             return response
         else:
             return self.form_invalid(form)
-        
-    # def form_valid(self, form):
-    #     # self.object = form.save(commit=False)
-    #     # self.object.reporter = self.request.user
-    #     # self.object.save()
-
-    #     form.instance.reporter = self.request.user
-    #     self.object = form.save()
-        
-    #     # Sending the email after the form is saved
-        
-
-        return HttpResponseRedirect(self.get_success_url())  # Redirect after POST
     
     def form_invalid(self, form, **kwargs):
         context = self.get_context_data(form=form, **kwargs)
@@ -489,9 +475,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
             supervised_assets = Asset.objects.filter(
                 area='b')
 
-            # Filtra los reportes de falla cuyos equipos pertenecen a un
-            # sistema que a su vez pertenece a un asset supervisado por
-            # el usuario
             queryset = queryset.filter(system__asset__in=supervised_assets)
 
         if state:
@@ -511,9 +494,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
 
 # Detalle de orden de trabajo - generalidades, listado de actividades y reporte
 class OtDetailView(LoginRequiredMixin, generic.DetailView):
-    '''
-    Detalle de ordenes de trabajo (v1.0)
-    '''
+
     model = Ot
 
     # Formulario para crear, modificar o eliminar actividades
@@ -1348,11 +1329,11 @@ def schedule(request, pk):
         'rgba(255, 159, 64, 0.2)',   # naranja
     ])
 
-    sta = [0 for i in tasks]
+    # sta = [0 for i in tasks]
     n = 0
-    for ot in ots:
-        sta[n] = calculate_status_code(ot)
-        n += 1
+    # for ot in ots:
+    #     sta[n] = calculate_status_code(ot)
+    #     n += 1
 
     # Mapear cada responsable a un color
     responsibles = set(task.responsible.username for task in tasks if task.responsible)
@@ -1378,28 +1359,28 @@ def schedule(request, pk):
             'activity_description': task.description,
             'background_color': color,
             'border_color': border_color,
-            'status_code': sta[n],
+            # 'status_code': sta[n],
         })
         n += 1
     
     # Agregar actividades desde las rutas
-    green_soft = 'rgba(75, 192, 192, 0.2)'    # verde suave
-    green_hard = 'rgba(75, 192, 192, 1)'     # verde fuerte
-    for system in systems:
-        rutas = Ruta.objects.filter(system=system)
-        for ruta in rutas:
-            tasks_ruta = ruta.task_set.all()
-            for task_ruta in tasks_ruta:
-                chart_data.append({
-                    'description': system.name,
-                    'activity_description': ruta.name,
-                    'start_date': ruta.next_date,
-                    'final_date': ruta.next_date + timedelta(days=1),
-                    'name': {task_ruta.responsible},
-                    'status': 'preventivo',
-                    'background_color': green_soft,
-                    'border_color': green_hard
-                })
+    # green_soft = 'rgba(75, 192, 192, 0.2)'    # verde suave
+    # green_hard = 'rgba(75, 192, 192, 1)'     # verde fuerte
+    # for system in systems:
+    #     rutas = Ruta.objects.filter(system=system)
+    #     for ruta in rutas:
+    #         tasks_ruta = ruta.task_set.all()
+    #         for task_ruta in tasks_ruta:
+    #             chart_data.append({
+    #                 'description': system.name,
+    #                 'activity_description': ruta.name,
+    #                 'start_date': ruta.next_date,
+    #                 'final_date': ruta.next_date + timedelta(days=1),
+    #                 'name': {task_ruta.responsible},
+    #                 'status': 'preventivo',
+    #                 'background_color': green_soft,
+    #                 'border_color': green_hard
+    #             })
 
     context = {
         'tasks': chart_data,
@@ -1408,4 +1389,58 @@ def schedule(request, pk):
         'responsibles': responsible_colors,
     }
     return render(request, 'got/schedule.html', context)
+
+
+def OperationListView(request):
+
+    assets = Asset.objects.filter(area='a')
+    operations = Operation.objects.all()
+
+    operations_data = []
+    for asset in assets:
+        asset_operations = asset.operation_set.all().values(
+            'start', 'end', 'proyecto', 'requirements'
+        )
+        operations_data.append({
+            'asset': asset,
+            'operations': list(asset_operations)
+        })
+
+    form = OperationForm(request.POST or None)
+    modal_open = False 
+
+    if request.method == 'POST':
+        form = OperationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect(request.path)
+        else:
+            modal_open = True 
+    else:
+        form = OperationForm()
+
+    context= {
+        'operations_data': operations_data,
+        'operation_form': form,
+        'modal_open': modal_open,
+        'operaciones': operations,
+        }
+
+    return render(request, 'got/operation_list.html', context)
+
+
+class OperationDelete(DeleteView):
+
+    model = Operation
+    success_url = reverse_lazy('got:operation-list')
+
+
+class OperationUpdate(UpdateView):
+
+    model = Operation
+    form_class = OperationForm
+
+    def get_success_url(self):
+
+        return reverse('operation-list')
 

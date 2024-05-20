@@ -70,6 +70,12 @@ urlpatterns = [
     path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
     path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 
+    # ---------------------------- Operaciones ----------------------- #
+    path("operations/", views.OperationListView, name="operation-list"),
+    path('operation/<int:pk>/update/', views.OperationUpdate.as_view(), name='operation-update'),
+    path("operation/<int:pk>/delete/", views.OperationDelete.as_view(), name="operation-delete"),
+
+
     # ---------------------------- Django rest framework ----------------------- #
     # path("rest/", views.AssetGetCreate.as_view()),
     # path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),

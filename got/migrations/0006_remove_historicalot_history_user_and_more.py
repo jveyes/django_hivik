@@ -15,7 +15,4 @@ class Migration(migrations.Migration):
             name='astillero',
             field=models.CharField(blank=True, default='', max_length=50, null=True),
         ),
-        migrations.DeleteModel(
-            name='HistoricalFailureReport',
-        ),
     ]

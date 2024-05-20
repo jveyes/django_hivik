@@ -120,11 +120,11 @@
                 {% for task in tasks %}
                     {
                         x: ['{{task.start_date|date:"Y-m-d"}}', '{{task.final_date|date:"Y-m-d"}}'],
-                        y: '{{task.description}}',
-                        name: '{{task.name}}',
+                        y: '{{task.description|escapejs}}',
+                        name: '{{task.name|escapejs}}',
                         // statuss: {{task.statuss|yesno:"true,false"}},
                         // status: '{{task.status_code}}',
-                        activityDescription: '{{ task.activity_description }}'
+                        activityDescription: '{{ task.activity_description|escapejs }}'
                     },
                 {% endfor %}         
             ],

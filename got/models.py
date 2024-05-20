@@ -2,11 +2,11 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import User
 from datetime import date, timedelta
-from django.db.models import Sum, Count, Case, When, IntegerField, Value
+from django.db.models import Sum
 from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
-from simple_history.models import HistoricalRecords
+from django.core.exceptions import ValidationError
 
 
 def get_upload_path(instance, filename):
@@ -49,7 +49,6 @@ class Asset(models.Model):
     arqueo_neto = models.IntegerField(default=0, null=True, blank=True)
     espacio_libre_cubierta = models.IntegerField(default=0, null=True, blank=True)
 
-    
     def check_ruta_status(self, frecuency, location=None):
         if location:
             rutas = self.system_set.filter(rutas__frecuency=frecuency, rutas__system__location=location)
@@ -174,6 +173,7 @@ class Equipo(models.Model):
         return reverse('got:sys-detail', args=[self.system.id])
 
 
+# EXPERIMENTAL
 class Component(models.Model):
     name = models.CharField(max_length=50)
     serial = models.CharField(max_length=50, null=True, blank=True)
@@ -185,7 +185,9 @@ class Component(models.Model):
         return self.name
 
 
+# EXPERIMENTAL
 class Location(models.Model):
+
     name = models.CharField(max_length=50)
     direccion = models.CharField(max_length=100)
     contact = models.CharField(max_length=50)
@@ -194,6 +196,8 @@ class Location(models.Model):
     def __str__(self):
         return self.name
 
+
+# EXPERIMENTAL
 class Salida(models.Model):
 
     lugar_destino = models.ForeignKey(Location, on_delete=models.CASCADE)
@@ -209,6 +213,7 @@ class Salida(models.Model):
         return reverse('got:salida-detail', args=[str(self.id)])
 
 
+# EXPERIMENTAL
 class SalidaItem(models.Model):
     salida = models.ForeignKey(Salida, on_delete=models.CASCADE, related_name='items')
     item = models.ForeignKey(Component, on_delete=models.CASCADE)
@@ -438,9 +443,35 @@ class FailureReport(models.Model):
         return dict(self.IMPACT).get(impact_code, "Desconocido")
 
 
-
 class Image(models.Model):
 
     failure = models.ForeignKey(FailureReport, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey(Task, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to=get_upload_path)
+
+
+class Operation(models.Model):
+
+    start = models.DateField()
+    end = models.DateField()
+    proyecto = models.CharField(max_length=100)
+    requirements = models.TextField()
+
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, to_field='abbreviation')
+
+    def __str__(self):
+        return f"{self.proyecto}/{self.asset} ({self.start} - {self.start})"
+    
+    # def clean(self):
+    #     # Comprobar si hay solapamientos con otras operaciones
+    #     overlapping_operations = Operation.objects.filter(
+    #         asset=self.asset,
+    #         end__gte=self.start,
+    #         start__lte=self.end
+    #     ).exclude(pk=self.pk)
+    #     if overlapping_operations.exists():
+    #         raise ValidationError('Conflicto de fechas seleccionadas.')
+
+    # def save(self, *args, **kwargs):
+    #     self.clean()
+    #     super(Operation, self).save(*args, **kwargs)

@@ -3,6 +3,8 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
+import got.models
+
 
 class Migration(migrations.Migration):
 
@@ -30,5 +32,14 @@ class Migration(migrations.Migration):
             model_name='ruta',
             name='suministros',
             field=models.TextField(blank=True, default='', null=True),
+        ),
+        migrations.CreateModel(
+            name='Image',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('image', models.ImageField(upload_to=got.models.get_upload_path)),
+                ('failure', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.failurereport')),
+                ('task', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.task')),
+            ],
         ),
     ]

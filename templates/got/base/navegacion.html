@@ -51,10 +51,15 @@
                       </li>
                 {% endif %}
                 {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
-                <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
-                </li>
-            {% endif %}
+                    <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
+                    </li>
+                {% endif %}
+                {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
+                    <li class="nav-item {% if request.resolver_match.url_name == 'operation-list' %}active{% endif %}">
+                        <a class="nav-link" href="{% url 'got:operation-list' %}">Operaciones</a>
+                    </li>
+                {% endif %}
 
               </ul>
 

@@ -1,0 +1,14 @@
+{% extends "got/base_generic.html" %}
+
+{% block header %}Eliminar proyecto{% endblock %}
+
+{% block content %}
+	<div class="container">
+		<p>¿Estas seguro que deseas eliminar el proyecto: <strong>{{ operation }}?</strong></p>
+
+		<form action="" method="POST">{% csrf_token %}
+  			<input class="btn btn-danger" type="submit" action="" value="Si, Eliminar." />
+		</form>
+	</div>
+
+{% endblock %}
