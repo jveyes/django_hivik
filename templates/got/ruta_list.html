@@ -212,4 +212,48 @@
 	</table>
 </div>
 
+
+<div>
+	<table class="mt-5" style="width: 100%; margin: auto;">
+		<caption>
+			Generadores
+		</caption>
+		<tr>
+			<th rowspan="2" style="text-align: center;">Equipo</th>
+			<th colspan="5" style="text-align: center;">Motor generador estribor/#1</th>
+			<th colspan="5" style="text-align: center;">Motor generador babor/#2</th>
+		</tr>
+		<tr>
+			<th>Componente</th>
+			<th>Lub. Utilizado</th>
+			<th>Capacidad (Gls)</th>
+			<th>Horometro</th>
+			<th>Fecha ultimo reporte</th>
+
+			<th>Componente</th>
+			<th>Lub. Utilizado</th>
+			<th>Capacidad (Gls)</th>
+			<th>Horometro</th>
+			<th>Fecha ultimo reporte</th>
+		</tr>
+		{% for motor in motores_data %}
+			<tr>
+				<td style="white-space: nowrap;">{{ motor.name }}</td>
+				<td>{{ motor.generador1.marca }} / {{ motor.generador1.modelo }}</td>
+				<td>{{ motor.generador1.lubricante }}</td>
+				<td style="text-align: center;">{{ motor.generador1.capacidad }}</td>
+				<td style="text-align: center;">{{ motor.generador1.horometro }}</td>
+				<td>{{ motor.generador1.fecha|date:"d/m/Y" }}</td>
+
+				<td>{{ motor.generador2.marca }} / {{ motor.generador2.modelo }}</td>
+				<td>{{ motor.generador2.lubricante }}</td>
+				<td style="text-align: center;">{{ motor.generador2.capacidad }}</td>
+				<td style="text-align: center;">{{ motor.generador2.horometro }}</td>
+				<td>{{ motor.generador2.fecha|date:"d/m/Y" }}</td>
+
+			</tr>
+		{% endfor %}
+	</table>
+</div>
+
 {% endblock %}

@@ -1,11 +1,12 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User, Group
 from .models import (
     Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset
     )
-from django.contrib.auth.models import User, Group
 
 
+# ---------------- Widgets ------------------- #
 class UserChoiceField(forms.ModelChoiceField):
 
     def label_from_instance(self, obj):
@@ -37,9 +38,17 @@ class MultipleFileField(forms.FileField):
         else:
             result = [single_file_clean(data, initial)]
         return result
+    
+
+class UploadImages(forms.Form):
+    file_field = MultipleFileField(label='Evidencias', required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['file_field'].widget.attrs.update({'multiple': True})
 
 
-# Form 1: Crear/editar sistemas
+# ---------------- Systems ------------------- #
 class SysForm(forms.ModelForm):
 
     class Meta:
@@ -53,7 +62,7 @@ class SysForm(forms.ModelForm):
         }
 
 
-# Form 8: Crear/editar nuevo equipo
+# ---------------- Equipos ------------------- #
 class EquipoForm(forms.ModelForm):
 
     def clean_code(self):
@@ -93,7 +102,34 @@ class EquipoForm(forms.ModelForm):
             }
 
 
-# Form 4: Crear nueva orden de trabajo
+class EquipoFormUpdate(forms.ModelForm):
+
+    class Meta:
+        model = Equipo
+        exclude = ['system', 'horometro', 'prom_hours', 'code']
+        labels = {
+            'name': 'Nombre',
+            'date_inv': 'Fecha de ingreso al inventario',
+            'model': 'Modelo',
+            'serial': '# Serial',
+            'marca': 'Marca',
+            'fabricante': 'Fabricante',
+            'feature': 'Caracteristicas',
+            'imagen': 'Imagen',
+            'manual_pdf': 'Manual',
+            'tipo': 'tipo de equipo:',
+            'initial_hours': 'Horas iniciales (si aplica)'
+            }
+        widgets = {
+            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
+            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
+            }
+
+
+# ----------------- OTs -------------------- #
 class OtForm(forms.ModelForm):
 
     super = UserChoiceField(
@@ -130,7 +166,6 @@ class OtForm(forms.ModelForm):
         self.fields['super'].queryset = super_members_group.user_set.all()
 
 
-# Form 5: Crear nueva orden de trabajo
 class OtFormNoSup(forms.ModelForm):
 
     class Meta:
@@ -158,7 +193,6 @@ class OtFormNoSup(forms.ModelForm):
         self.fields['system'].queryset = System.objects.filter(asset=asset)
 
 
-# Form 6: Finalizar actividad
 class FinishOtForm(forms.Form):
     finish = forms.BooleanField(
         widget=forms.HiddenInput(),
@@ -167,7 +201,7 @@ class FinishOtForm(forms.Form):
     )
 
 
-# Form 2: reprogramación de actividades
+# ---------------- Actividades ------------------- #
 class RescheduleTaskForm(forms.ModelForm):
 
     news = forms.CharField(
@@ -198,14 +232,13 @@ class RescheduleTaskForm(forms.ModelForm):
         return cleaned_data
 
 
-# Form 3: Finalizar actividad
 class FinishTask(forms.ModelForm):
 
     finished = forms.ChoiceField(
         choices=[(True, 'Sí'), (False, 'No')],
         widget=forms.RadioSelect,
         label='Finalizado',
-        initial=False,  # Asegúrate de establecer un valor inicial adecuado si es necesario
+        initial=False,
         required=False
     )
 
@@ -224,21 +257,16 @@ class FinishTask(forms.ModelForm):
         self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
 
 
-# Form 7: Crear nueva actividad
 class ActForm(forms.ModelForm):
 
     delete_images = forms.BooleanField(required=False, label='Eliminar imágenes')
-
-    responsible = UserChoiceField(
-        queryset=User.objects.all(),
-        label='Responsable',
-    )
+    responsible = UserChoiceField(queryset=User.objects.all(), label='Responsable')
 
     finished = forms.ChoiceField(
         choices=[(True, 'Sí'), (False, 'No')],
         widget=forms.RadioSelect,
         label='Finalizado',
-        initial=False,  # Asegúrate de establecer un valor inicial adecuado si es necesario
+        initial=False,
         required=False
     )
 
@@ -263,7 +291,6 @@ class ActForm(forms.ModelForm):
         self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
 
 
-# Form 7: Crear nueva actividad
 class ActFormNoSup(forms.ModelForm):
 
     class Meta:
@@ -286,30 +313,12 @@ class ActFormNoSup(forms.ModelForm):
         self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
 
 
-
-class UploadImages(forms.Form):
-    file_field = MultipleFileField(label='Evidencias', required=False, widget=forms.FileInput(attrs={'class': 'form-control'}))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['file_field'].widget.attrs.update({'multiple': True})
-
-
 class RutActForm(forms.ModelForm):
-    responsible = UserChoiceField(
-        queryset=User.objects.all(),
-        label='Responsable',
-        required=False,
-    )
+    responsible = UserChoiceField(queryset=User.objects.all(), label='Responsable', required=False,)
 
     class Meta:
         model = Task
-        fields = [
-            'responsible',
-            'description',
-            'procedimiento',
-            'hse'
-            ]
+        fields = ['responsible', 'description', 'procedimiento', 'hse', 'priority']
         labels = {
             'responsible': 'Responsable(Opcional)',
             'description': 'Descripción',
@@ -324,35 +333,7 @@ class RutActForm(forms.ModelForm):
             }
 
 
-# Form 8: Crear/editar nuevo equipo
-class EquipoFormUpdate(forms.ModelForm):
-
-    class Meta:
-        model = Equipo
-        exclude = ['system', 'horometro', 'prom_hours', 'code']
-        labels = {
-            'name': 'Nombre',
-            'date_inv': 'Fecha de ingreso al inventario',
-            'model': 'Modelo',
-            'serial': '# Serial',
-            'marca': 'Marca',
-            'fabricante': 'Fabricante',
-            'feature': 'Caracteristicas',
-            'imagen': 'Imagen',
-            'manual_pdf': 'Manual',
-            'tipo': 'tipo de equipo:',
-            'initial_hours': 'Horas iniciales (si aplica)'
-            }
-        widgets = {
-            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
-            'imagen': forms.FileInput(attrs={'class': 'form-control'}),
-            'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
-            'tipo': forms.Select(attrs={'class': 'form-control'}),
-            }
-
-
-#  Form 9: Crear/editar nueva ruta
+# ---------------- Rutinas ------------------- #
 class RutaForm(forms.ModelForm):
 
     def clean(self):
@@ -399,6 +380,7 @@ class RutaForm(forms.ModelForm):
         self.fields['dependencia'].queryset = Ruta.objects.filter(system=system).exclude(code=self.instance.code if self.instance else None)
 
 
+# ---------------- Hours ------------------- #
 class ReportHours(forms.ModelForm):
     def clean_hour(self):
         hour = self.cleaned_data['hour']
@@ -449,21 +431,18 @@ class ReportHoursAsset(forms.ModelForm):
         if hour < 0 or hour > 24:
             raise ValidationError('El valor de horas debe estar entre 0 y 24.')
 
-        # Verificar si ya existe una entrada con la misma fecha y componente
         existing = HistoryHour.objects.filter(component=component, report_date=report_date).first()
         if existing:
-            # Si existe, ajustar instancia para actualizar en lugar de crear una nueva
             self.instance = existing
-            self.cleaned_data['hour'] = hour  # Asegurarse de que la hora nueva se guarda
+            self.cleaned_data['hour'] = hour
 
         return cleaned_data
 
     def save(self, commit=True):
-        # Guardar el registro existente o uno nuevo
         return super(ReportHoursAsset, self).save(commit=commit)
 
 
-# Form : Crear nuevo reporte de falla
+# ---------------- Failure report ------------------- #
 class failureForm(forms.ModelForm):
 
     critico_choices = [
@@ -508,19 +487,7 @@ class failureForm(forms.ModelForm):
         }
 
 
-class RutaUpdateOTForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        asset_id = kwargs.pop('asset_id')
-        super().__init__(*args, **kwargs)
-        self.fields['ot'].queryset = Ot.objects.filter(
-            system__asset_id=asset_id)
-
-    class Meta:
-        model = Ruta
-        fields = ['ot']
-
-
+# ---------------- Operaciones ------------------- #
 class OperationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):

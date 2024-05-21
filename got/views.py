@@ -23,7 +23,7 @@ from .models import (
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
     EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm, RutaUpdateOTForm, EquipoFormUpdate,
+    ReportHoursAsset, failureForm,EquipoFormUpdate,
     OtFormNoSup, ActFormNoSup, UploadImages, OperationForm
 )
 
@@ -492,7 +492,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
-# Detalle de orden de trabajo - generalidades, listado de actividades y reporte
 class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Ot
@@ -907,7 +906,8 @@ def RutaListView(request):
         if sistema:
             motor_estribor = sistema.equipos.filter(name__icontains='Motor propulsor estribor').first()
             motor_babor = sistema.equipos.filter(name__icontains='Motor propulsor babor').first()
-            motor_generador1 = sistema2.equipos.filter(name__icontains='Motor generador 1').first()
+            motor_generador1 = sistema2.equipos.filter(Q(name__icontains='Motor generador estribor') | Q(name__icontains='Motor generador 1')).first()
+            motor_generador2 = sistema2.equipos.filter(Q(name__icontains='Motor generador babor') | Q(name__icontains='Motor generador 2')).first()
             
             if motor_estribor:
                 motores_info['estribor'] = {
@@ -928,11 +928,22 @@ def RutaListView(request):
                     'fecha': motor_babor.last_hour_report_date()
                     }
             if motor_generador1:
-                motores_info['generador'] = {
+                motores_info['generador1'] = {
                     'marca': motor_generador1.marca,
                     'modelo': motor_generador1.model,
                     'lubricante': motor_generador1.lubricante,
                     'capacidad': motor_generador1.volumen,
+                    'horometro': motor_generador1.horometro,
+                    'fecha': motor_generador1.last_hour_report_date()
+                    }
+            if motor_generador2:
+                motores_info['generador2'] = {
+                    'marca': motor_generador2.marca,
+                    'modelo': motor_generador2.model,
+                    'lubricante': motor_generador2.lubricante,
+                    'capacidad': motor_generador2.volumen,
+                    'horometro': motor_generador2.horometro,
+                    'fecha': motor_generador2.last_hour_report_date()
                     }
 
         motores_data.append(motores_info)
@@ -989,21 +1000,6 @@ class RutaUpdate(UpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs['system'] = self.object.system
-        return kwargs
-
-
-class RutaUpdateOT(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
-    model = Ruta
-    form_class = RutaUpdateOTForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        # Obtener la instancia actual de la orden de trabajo
-        instance = self.get_object()
-        kwargs['asset'] = instance.system.asset
         return kwargs
 
 

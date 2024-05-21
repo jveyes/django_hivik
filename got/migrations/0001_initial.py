@@ -63,6 +63,7 @@ class Migration(migrations.Migration):
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
                 ('info_contratista_pdf', models.FileField(upload_to=got.models.get_upload_path, null=True, blank=True)),
                 ('ot_aprobada', models.FileField(blank=True, null=True, upload_to=got.models.get_upload_path)),
+                ('suministros', models.TextField(blank=True, default='', null=True)),
             ],
             options={
                 'ordering': ['-num_ot'],
@@ -106,6 +107,7 @@ class Migration(migrations.Migration):
                 ('finished', models.BooleanField()),
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ot')),
                 ('responsible', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ('priority', models.IntegerField(blank=True, default=0, null=True)),
             ],
             options={
                 'permissions': (('can_reschedule_task', 'Reprogramar actividades'),),

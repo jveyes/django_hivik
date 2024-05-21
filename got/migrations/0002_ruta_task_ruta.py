@@ -22,11 +22,13 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('frecuency', models.IntegerField()),
                 ('intervention_date', models.DateField()),
-                ('system', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.system')),
+                ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='rutas', to='got.system')),
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.ot')),
                 ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='got.equipo')),
                 ('control', models.CharField(choices=[('d', 'Días'), ('h', 'Horas')], max_length=1)),
-                ('dependencia', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='dependiente', to='got.ruta'))
+                ('dependencia', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='dependiente', to='got.ruta')),
+                ('astillero', models.CharField(blank=True, default='', max_length=50, null=True)),
+                ('suministros', models.TextField(blank=True, default='', null=True)),
             ],
             options={'ordering': ['frecuency']},
         ),
@@ -78,6 +80,17 @@ class Migration(migrations.Migration):
                 ('direccion', models.CharField(max_length=100)),
                 ('contact', models.CharField(max_length=50)),
                 ('num_contact', models.CharField(max_length=50)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Operation',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('start', models.DateField()),
+                ('end', models.DateField()),
+                ('proyecto', models.CharField(max_length=100)),
+                ('requirements', models.TextField()),
+                ('asset', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.asset')),
             ],
         ),
     ]

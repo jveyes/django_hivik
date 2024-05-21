@@ -6,7 +6,7 @@ from django.db.models import Sum
 from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
-from django.core.exceptions import ValidationError
+# from django.core.exceptions import ValidationError
 
 
 def get_upload_path(instance, filename):
@@ -380,6 +380,7 @@ class Task(models.Model):
     hse = models.TextField(default="", blank=True, null=True)
     news = models.TextField(blank=True, null=True)
     evidence = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    priority = models.IntegerField(default=0, null=True, blank=True)
 
     start_date = models.DateField(null=True, blank=True)
     men_time = models.IntegerField(default=0)
@@ -402,6 +403,7 @@ class Task(models.Model):
  
     class Meta:
         permissions = (('can_reschedule_task', 'Reprogramar actividades'),)
+        ordering = ['-priority', '-start_date'] 
 
 
 class FailureReport(models.Model):

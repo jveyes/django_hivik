@@ -45,7 +45,7 @@ urlpatterns = [
     path('rutas/', views.RutaListView, name="ruta-list"),
     path('ruta/<str:pk>/create/', views.RutaCreate.as_view(), name='ruta-create'),
     path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'),
-    path('ruta/<str:pk>/update/', views.RutaUpdateOT.as_view(), name='ruta-update-ot'),
+    # path('ruta/<str:pk>/update/', views.RutaUpdateOT.as_view(), name='ruta-update-ot'),
     path('ruta/<str:pk>/delete/',views.RutaDelete.as_view(), name='ruta-delete'),
     path('ruta/<int:ruta_id>/crear_ot/',views.crear_ot_desde_ruta,name='crear_ot_desde_ruta'),
 
