@@ -463,17 +463,3 @@ class Operation(models.Model):
 
     def __str__(self):
         return f"{self.proyecto}/{self.asset} ({self.start} - {self.start})"
-    
-    # def clean(self):
-    #     # Comprobar si hay solapamientos con otras operaciones
-    #     overlapping_operations = Operation.objects.filter(
-    #         asset=self.asset,
-    #         end__gte=self.start,
-    #         start__lte=self.end
-    #     ).exclude(pk=self.pk)
-    #     if overlapping_operations.exists():
-    #         raise ValidationError('Conflicto de fechas seleccionadas.')
-
-    # def save(self, *args, **kwargs):
-    #     self.clean()
-    #     super(Operation, self).save(*args, **kwargs)

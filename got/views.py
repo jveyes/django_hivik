@@ -89,21 +89,17 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         users_maq = maq_group.user_set.all()
         users_buzos = buzos_group.user_set.all()
         
-        # Filtrar actividades por activo y/o usuario.
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
         if responsable_id:
             queryset = queryset.filter(responsible=responsable_id)
 
-        # Para filtrar actividades para usuarios supervisores.
         if current_user.has_perm("got.can_see_completely"):
             queryset = queryset.filter(finished=False).order_by('start_date')
 
-        # Para filtrar actividades usuarios maquinistas.
         elif current_user in users_maq:
             queryset = queryset.filter(finished=False, ot__system__asset__supervisor=current_user)
 
-        # Para filtrar actividades usuarios buzos.
         elif current_user in users_buzos:
             if current_user.groups.filter(name='santamarta_station').exists():
                 queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Santa Marta')
@@ -114,7 +110,6 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
             else:
                 queryset = queryset.filter(finished=False, ot__system__asset__area='b')
 
-        # talleres.
         else:
             queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
 
@@ -152,7 +147,6 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
-# Detalle assets y listado de sistemas
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Asset
@@ -163,7 +157,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
         rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
 
-        # Filtrar sistemas basado en el grupo de usuario
         if self.request.user.groups.filter(name='santamarta_station').exists():
             systems = asset.system_set.filter(location='Santa Marta')
             sys = asset.system_set.filter(location='Santa Marta').exclude(state='x')
@@ -1445,3 +1438,38 @@ class OperationUpdate(UpdateView):
 
         return reverse('operation-list')
 
+
+def generate_asset_pdf(request, asset_id):
+    asset = get_object_or_404(Asset, pk=asset_id)
+    systems = asset.system_set.all()
+
+    systems_with_rutas = []
+    for system in systems:
+        rutas_data = []
+        rutas = Ruta.objects.filter(system=system).prefetch_related('task_set')
+        for ruta in rutas:
+            # Recoger las tareas para cada ruta
+            tasks = ruta.task_set.all()
+            rutas_data.append({
+                'ruta': ruta,
+                'tasks': tasks,
+                'ot_num': ruta.ot.num_ot if ruta.ot else 'N/A'  # Asegúrate que ruta.ot es accesible y no nulo
+            })
+        systems_with_rutas.append({
+            'system': system,
+            'rutas_data': rutas_data
+        })
+
+    context = {
+        'asset': asset,
+        'systems_with_rutas': systems_with_rutas
+    }
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Asset_{}.pdf"'.format(asset.pk)
+    template = get_template('got/asset_pdf_template.html')
+    html = template.render(context)
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+    return response

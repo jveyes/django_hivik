@@ -9,33 +9,6 @@
 		margin-inline: auto;
 	}
 
-	/* table {
-		width: 100%;
-		color: white;
-		background: #323232;
-		border-collapse: collapse;
-	}
-
-	th, td {
-		padding: 1rem;
-	}
-
-	caption {
-		color: white;
-		text-align: center;
-		background-color:  hsl(0 0% 0%);
-		text-transform: uppercase;
-		font-weight: 700;
-	}
-
-	th {
-		background-color:  hsl(0 0% 0% / 0.5);
-	}
-
-	tr:nth-of-type(2n) {
-		background-color:  hsl(0 0% 0% / 0.1);
-	} */
-
 	@media (max-width: 650px) {
         .tab {
             display: none;
@@ -72,6 +45,12 @@
         <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
     {% endif %}
     {{ asset.name }}
+
+    <!-- En tu plantilla asset_detail.html -->
+    <form action="{% url 'got:generate_asset_pdf' asset.abbreviation %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Generar PDF</button>
+    </form>
 
 {% endblock %}
 
@@ -355,6 +334,9 @@
 </section>
 
 </div>
+
+
+
 
 <div class="modal fade" id="sysModal" tabindex="-1" aria-labelledby="sysModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

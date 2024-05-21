@@ -75,6 +75,7 @@ urlpatterns = [
     path('operation/<int:pk>/update/', views.OperationUpdate.as_view(), name='operation-update'),
     path("operation/<int:pk>/delete/", views.OperationDelete.as_view(), name="operation-delete"),
 
+    path('assets/<str:asset_id>/generate-pdf/', views.generate_asset_pdf, name='generate_asset_pdf'),
 
     # ---------------------------- Django rest framework ----------------------- #
     # path("rest/", views.AssetGetCreate.as_view()),
