@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="https://hivik.s3.us-east-2.amazonaws.com/static/anchor-solid.svg">
 
 <!-- Bootstrap -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+<!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous"> -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <!-- Google Fonts Poppins -->
@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
         
 <!-- CSS -->
-<!-- <link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/style.css"> -->
+<link rel="stylesheet" href="https://hivik.s3.us-east-2.amazonaws.com/static/boostrap/css/bootstrap.min.css">
 <link href="https://fonts.googleapis.com/css?family=Anton%7CBaskervville%7CRaleway&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"/>
 
@@ -30,15 +30,81 @@
         font-family: "Poppins", sans-serif;
     }
 
-    .navbar-custom .navbar-nav .nav-link {
-        color: #000;
-    }
-    .active {
-        color: #007bff !important; /* Azul */
+    .navbar {
+        background-color: #191645;
     }
 
     .nav-link {
-        color: #000 !important; /* Negro */
+        color: #fff;
+    }
+
+    .nav-link:hover, .nav-link:focus {
+        color: #43C6AC;
+        background-color: transparent;
+    }
+
+    h1 {
+        color: #191645;
+    }
+
+    table {
+		width: 100%;
+		color: white;
+		background: #323232;
+		border-collapse: collapse;
+	}
+
+	th, td {
+		padding: 1rem;
+	}
+
+	caption {
+		color: white;
+		text-align: center;
+		background-color:  hsl(0 0% 0%);
+		text-transform: uppercase;
+		font-weight: 700;
+	}
+
+	th {
+		background-color:  hsl(0 0% 0% / 0.5);
+	}
+
+	tr:nth-of-type(2n) {
+		background-color:  hsl(0 0% 0% / 0.1);
+	}
+
+	@media (max-width: 650px) {
+		th {
+			display: none;
+		}
+		td {
+			display: grid;
+			gap: 0.5rem;
+			grid-template-columns: 15ch auto;
+			padding: 0.5rem 1rem;
+		}
+
+		td:first-child {
+			padding-top: 2rem;
+		}
+
+		
+
+		td::before {
+			content: attr(data-cell) ": ";
+			font-weight: 700;
+		}
+
+		td:last-child {
+			padding-bottom: 2rem;	
+		}
+	}
+
+    /* No probado  */
+
+    .active {
+        color: #007bff !important; /* Azul */
     }
 
     .bottom-line {
@@ -51,16 +117,12 @@
     }
     
     a:hover {
-        background-color: yellowgreen; /* Cambia el color del texto en hover */
+        background-color: yellowgreen;
         color: #fff;
     }
 
     .space {
         margin: 30px 20px;
-    }
-
-    td, th {
-        padding: 10px;
     }
 
     .mi-tabla-borde-externo {

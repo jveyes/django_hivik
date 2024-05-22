@@ -172,7 +172,7 @@
                     <tr>
                         <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
                         <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
-                            Procedimiento: <br> {{act.procedimiento|linebreaksbr}}
+                            <strong>Procedimiento:</strong> <br> {{act.procedimiento|linebreaksbr}}
                         </td>
                     </tr>
                 {% endif %}
@@ -190,19 +190,11 @@
                 
                     
                 {% endif %}
-                {% if act.suministros %}
-                    <tr>
-                        <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
-                        <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
-                            Suministros: <br> {{act.suministros|linebreaksbr}}
-                        </td>
-                    </tr>
-                {% endif %}
                 {% if act.hse %}
                     <tr>
                         <td style="border-left: 0.5px solid black; border-bottom: 0.5px solid black;"></td>
                         <td colspan="5" style="padding: 2px; border-bottom: 0.5px solid black; border-right: 0.5px solid black;">
-                            Precauciones de seguridad: {{act.hse}}
+                            <strong>Precauciones de seguridad:</strong> {{act.hse|linebreaksbr}}
                         </td>
                     </tr>
                 {% endif %}

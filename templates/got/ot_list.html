@@ -1,78 +1,12 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
-{% block headtag %}
-<style>
-
-	.wrapper {
-		width: min(900px, 100% - 3rem);
-		margin-inline: auto;
-	}
-
-	table {
-		width: 100%;
-		color: white;
-		background: #323232;
-		border-collapse: collapse;
-	}
-
-	th, td {
-		padding: 1rem;
-	}
-
-	caption {
-		color: white;
-		text-align: center;
-		background-color:  hsl(0 0% 0%);
-		text-transform: uppercase;
-		font-weight: 700;
-	}
-
-	th {
-		background-color:  hsl(0 0% 0% / 0.5);
-	}
-
-	tr:nth-of-type(2n) {
-		background-color:  hsl(0 0% 0% / 0.1);
-	}
-
-	@media (max-width: 650px) {
-		th {
-			display: none;
-		}
-		td {
-			display: grid;
-			gap: 0.5rem;
-			grid-template-columns: 15ch auto;
-			padding: 0.5rem 1rem;
-		}
-
-		td:first-child {
-			padding-top: 2rem;
-		}
-
-		
-
-		td::before {
-			content: attr(data-cell) ": ";
-			font-weight: 700;
-		}
-
-		td:last-child {
-			padding-bottom: 2rem;	
-		}
-	}
-</style>
-{% endblock %}
-
-{% block header %}Listado de Ordenes de trabajo{% endblock %}
+{% block header %}Ordenes de trabajo{% endblock %}
 
 {% block content %}
-    <section class="container d-flex justify-content-end flex-wrap align-items-center">
 
-        <!-- Opciones de filtrado -->
+    <aside>
 
-        <!-- Enlace sin filtros -->
         <div class="btn-group" role="group" style="margin: 5px 0px;">
             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 Filtrar por equipo
@@ -112,8 +46,6 @@
             </ul>
         </div>
 
-    
-
         <div style="padding: 10px 0">
             <form method="GET" action="{% url 'got:ot-list' %}" class="form" autocomplete="off">
                 <div class="input-group flex-nowrap" style="width: 500px;">
@@ -123,8 +55,7 @@
                 </div>  
             </form>
         </div>
-
-    </section>
+    </aside>
       
     {% if request.GET.keyword %}
         <h5>Resultados de búsqueda para: "{{ request.GET.keyword }}"</h5>
@@ -145,7 +76,7 @@
         <tbody>
             {% for ot in ot_list %}
                 <tr class="{% if ot.all_tasks_finished and ot.state != 'f' %}table-success{% endif %}">
-                    <td data-cell="OT">OT-{{ ot.num_ot }}</td>
+                    <td data-cell="OT" style="white-space: nowrap;">OT-{{ ot.num_ot }}</td>
                     <td data-cell="Fecha de creación">{{ot.creation_date|date:"d/m/Y"}}</td>
                     <td data-cell="Descripción"><a href="{{ ot.get_absolute_url }}">{{ot.description}}</a></td>
                     <td data-cell="Sistema">{{ot.system}}</td>

@@ -1,13 +1,10 @@
 {% load my_tags %}
 {% obtener_asset_del_supervisor as asset_del_supervisor %}
 
-<!-- Barra de navegacion -->
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #cad3db; border: 1px solid #444">
+<nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <!-- Logo de serport -->
-          <a class="nav-link" href="{% url 'got:my-tasks' %}">
-            <img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
-        </a>
+        <img src="https://hivik.s3.us-east-2.amazonaws.com/static/Logo.png" width="150px">
         <!-- Boton para barra de navegación responsive -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
@@ -65,10 +62,10 @@
 
               <!-- Boton de logout -->
             <form class="d-flex" action="{% url 'logout' %}" method="post">{% csrf_token %}
-                <div style="color: #000; padding-right: 15px;">
-                    {{ user.get_username }}
-                </div>
-                <button class="btn btn-outline-danger" type="submit">
+                
+                <span class="nav-link">{{ user.get_username }}</span>
+               
+                <button class="btn btn-outline-danger btn-sm" type="submit">
                     <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>

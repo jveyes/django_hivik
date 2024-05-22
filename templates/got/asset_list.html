@@ -1,8 +1,15 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
-{% block header %}
+{% block headtag %}
+<style>
+    tr[data-href] {
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
 
+{% block header %}
     Listado de equipos
     {% if request.GET.area %}
         {% if request.GET.area == 'a' %}
@@ -19,7 +26,6 @@
             - Apoyo
         {% endif %}
     {% endif %}
-
 {% endblock %}
 
 {% block content %}
@@ -56,8 +62,8 @@
     <tbody>
         {% if asset_list %}
             {% for asset in asset_list %}
-				<tr>
-					<td><a href="{{ asset.get_absolute_url }}">{{asset.name}}</a></td>
+				<tr data-href="{{ asset.get_absolute_url }}">
+					<td>{{asset.abbreviation}} - {{asset.name}}</td>
 					<td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
 					<td>{{asset.get_area_display}}</td>
 				</tr>
@@ -67,5 +73,17 @@
         {% endif %}
     </tbody>
 </table>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tr[data-href]");
+
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                window.location.href = row.dataset.href;
+            })
+        })
+    })
+</script>
 
 {% endblock %}
