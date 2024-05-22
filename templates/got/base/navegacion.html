@@ -15,46 +15,61 @@
 
                 <!-- Muestra el enlace directo al equipo del supervisor -->
                 {% if request.user|has_group:"maq_members" %}
-                    <li class="nav-item {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}">
-                        <a class="nav-link" href="{{ asset_del_supervisor.get_absolute_url }}">{{ asset_del_supervisor.name }}</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}" href="{{ asset_del_supervisor.get_absolute_url }}">
+                            {{ asset_del_supervisor.name }}
+                        </a>
                     </li>
                 {% else %}
-                    <li class="nav-item {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'got:asset-list' %}">Equipos</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'asset-list' %}active{% endif %}" href="{% url 'got:asset-list' %}">
+                            Equipos
+                        </a>
                     </li>
                 {% endif %}
 
                 <!-- Vistas publicas -->
                 {% if not request.user|has_group:"gerencia" %}
-                <li class="nav-item {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'got:my-tasks' %}">Actividades</a>
+                <li class="nav-item">
+                    <a class="nav-link  {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}" href="{% url 'got:my-tasks' %}">
+                        Actividades
+                    </a>
                 </li>
-                <li class="nav-item {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}">
-                    <a class="nav-link" href="{% url 'got:ot-list' %}">Ordenes de trabajo</a>
-                  </li>
+                <li class="nav-item">
+                    <a class="nav-link  {% if request.resolver_match.url_name == 'ot-list' %}active{% endif %}" href="{% url 'got:ot-list' %}">
+                        Ordenes de trabajo
+                    </a>
+                </li>
                 {% endif %}
 
                 {% if not request.user|has_group:"serport_members" %}
-                      <li class="nav-item">
-                          <!-- <a class="nav-link disabled" aria-disabled="true">Reportes de fallas</a> -->
-                        <a class="nav-link" href="{% url 'got:failure-report-list' %}">Reportes de fallas</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'failure-report-list' %}active{% endif %}" href="{% url 'got:failure-report-list' %}">
+                            Reportes de fallas
+                        </a>
                     </li>
-                  {% endif %}
+                {% endif %}
 
                 <!-- Opciones limitadas para supervisores de serport -->
                 {% if request.user|has_group:"super_members" %}
-                    <li class="nav-item {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'got:ruta-list' %}">Rutinas</a>
-                      </li>
-                {% endif %}
-                {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
-                    <li class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'got:dashboard' %}">Indicadores</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}" href="{% url 'got:ruta-list' %}">
+                            Rutinas
+                        </a>
                     </li>
                 {% endif %}
                 {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
-                    <li class="nav-item {% if request.resolver_match.url_name == 'operation-list' %}active{% endif %}">
-                        <a class="nav-link" href="{% url 'got:operation-list' %}">Operaciones</a>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'got:dashboard' %}">
+                            Indicadores
+                        </a>
+                    </li>
+                {% endif %}
+                {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'operation-list' %}active{% endif %}" href="{% url 'got:operation-list' %}">
+                            Operaciones
+                        </a>
                     </li>
                 {% endif %}
 
