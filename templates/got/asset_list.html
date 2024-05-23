@@ -23,60 +23,60 @@
 
 {% block content %}
 
-    <section class="mt-5">
-    <!-- Boton de filtrar activos por area -->
-    {% if not request.user|has_group:"buzos_members" %}
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Filtrar por area
-            </button>
-            <!-- Opciones -->
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}">Mostrar todos</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
-                <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
-            </ul>
-        </div>
-    {% endif %}
-    </section>
+    <aside>
+        {% if not request.user|has_group:"buzos_members" %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filtrar por area
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}">Mostrar todos</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
+                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
+                </ul>
+            </div>
+        {% endif %}
+    </aside>
 
-<table class="table mi-tabla-borde-externo mt-2">
-    <thead class="table-info">
-    	<tr>
-        	<th scope="col" style="border-bottom: 1px solid #333;">Nombre</th>
-        	<th scope="col" style="border-bottom: 1px solid #333;">Supervisor</th>
-        	<th scope="col" style="border-bottom: 1px solid #333;">Área</th>
-      	</tr>
-    </thead>
-    <tbody>
-        {% if asset_list %}
+    <table class="table-content">
+        <thead>
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Supervisor</th>
+                <th scope="col">Área</th>
+                <th scope="col">%</th>
+            </tr>
+        </thead>
+        <tbody>
             {% for asset in asset_list %}
 				<tr data-href="{{ asset.get_absolute_url }}">
-					<td>{{asset.abbreviation}} - {{asset.name}}</td>
-					<td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
-					<td>{{asset.get_area_display}}</td>
+					<td data-cell="Nombre">{{asset.abbreviation}} - {{asset.name}}</td>
+					<td data-cell="Supervisor">{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
+					<td data-cell="Área">{{asset.get_area_display}}</td>
+					<td data-cell="Porcentaje de mantenimiento">{{asset.ind_mtto}}</td>
 				</tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay ordenes de activos registrados.</td>
+                </tr>
             {% endfor %}
-        {% else %}
-        	<p>No hay equipos registrados.</p>
-        {% endif %}
-    </tbody>
-</table>
+        </tbody>
+    </table>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const rows = document.querySelectorAll("tr[data-href]");
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const rows = document.querySelectorAll("tr[data-href]");
 
-        rows.forEach(row => {
-            row.addEventListener("click", () => {
-                window.location.href = row.dataset.href;
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                })
             })
         })
-    })
-</script>
+    </script>
 
 {% endblock %}

@@ -134,10 +134,8 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
 
     def get_queryset(self):
         queryset = Asset.objects.all()
-
         area = self.request.GET.get('area')
         user_groups = self.request.user.groups.values_list('name', flat=True)
-
         if 'buzos_members' in user_groups:
             queryset = queryset.filter(area='b')
         if area:
@@ -213,8 +211,6 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         system = self.get_object()
-        
-        # Verificar si el nombre del sistema es "Estructuras"
         context['is_structures'] = system.name.lower() == "estructuras"
         
         return context

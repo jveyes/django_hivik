@@ -6,6 +6,7 @@ from django.db.models import Sum
 from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
+from django.db.models import Count
 # from django.core.exceptions import ValidationError
 
 
@@ -65,7 +66,30 @@ class Asset(models.Model):
                     break
             if not all_on_time:
                 break
-        return "Ok" if all_on_time else "Requiere"  
+        return "Ok" if all_on_time else "Requiere" 
+
+
+    def ind_mtto(self):
+        rutas = self.system_set.all().annotate(total_rutas=Count('rutas')).exclude(total_rutas=0)
+        if not rutas:
+            return "---"  # Si no hay rutas, retorna un indicador de no disponible.
+
+        total_rutas = 0
+        total_on_time = 0
+
+        for system in rutas:
+            for ruta in system.rutas.all():
+                total_rutas += 1
+                if ruta.next_date >= date.today():
+                    total_on_time += 1
+
+        if total_rutas == 0:
+            return "---"  # Evita división por cero si no hay rutas en los sistemas.
+
+        # Calcula el porcentaje de rutas que están al día.
+        maintenance_percentage = (total_on_time / total_rutas) * 100
+        return round(maintenance_percentage, 2)
+    
 
     def __str__(self):
         return self.name
