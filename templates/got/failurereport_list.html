@@ -1,118 +1,76 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
-
-{% block headtag %}
-<style>
-	.wrapper {
-		width: min(900px, 100% - 3rem);
-		margin-inline: auto;
-	}
-
-	table {
-		width: 100%;
-		color: white;
-		background: #323232;
-		border-collapse: collapse;
-	}
-
-	th, td {
-		padding: 1rem;
-	}
-
-	caption {
-		color: white;
-		text-align: center;
-		background-color:  hsl(0 0% 0%);
-		text-transform: uppercase;
-		font-weight: 700;
-	}
-
-	th {
-		background-color:  hsl(0 0% 0% / 0.5);
-	}
-
-	tr:nth-of-type(2n) {
-		background-color:  hsl(0 0% 0% / 0.1);
-	}
-
-	@media (max-width: 650px) {
-		th {
-			display: none;
-		}
-		td {
-			display: grid;
-			gap: 0.5rem;
-			grid-template-columns: 15ch auto;
-			padding: 0.5rem 1rem;
-		}
-
-		td:first-child {
-			padding-top: 2rem;
-		}
-
-		
-
-		td::before {
-			content: attr(data-cell) ": ";
-			font-weight: 700;
-		}
-
-		td:last-child {
-			padding-bottom: 2rem;	
-		}
-	}
-</style>
-{% endblock %}
-
 {% block header %}
-Reportes de falla
+	Reportes de falla
 {% endblock %}
 
 {% block content %}
 
+	{% if request.user|has_group:"super_members" %}
+		<aside>
+			<div class="btn-group" role="group">
+				<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+					Filtrar por equipo
+				</button>
+				<ul class="dropdown-menu">
+					<li><a class="dropdown-item" href="{% url 'got:failure-report-list' %}">Mostrar todas</a></li>
+					<li><a class="dropdown-item" href="{% url 'got:failure-report-list' %}?area=b">Buceo</a></li>
+					{% for asset in assets %}
+						<li><a class="dropdown-item" href="{% url 'got:failure-report-list' %}?asset_id={{ asset.abbreviation }}">{{ asset.name }}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		</aside>
+	{% endif %}
 
-<table class="table mi-tabla-borde-externo mt-2">
-    <thead class="table-info">
-        <tr>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                #
-            </th>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                Fecha
-            </th>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                Equipo
-            </th>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                Descripción
-            </th>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                Responsable
-            </th>
-            <th scope="col" style="vertical-align: middle; border-bottom: 1px solid #333;">
-                Estado
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        {% if failurereport_list %}
+	<table class="table-content">
+    	<thead>
+        	<tr>
+            	<th scope="col">#</th>
+            	<th scope="col">Fecha</th>
+            	<th scope="col">Equipo</th>
+            	<th scope="col">Descripción</th>
+            	<th scope="col">Responsable</th>
+            	<th scope="col">Estado</th>
+        	</tr>
+    	</thead>
+    	<tbody>
             {% for fail in failurereport_list %}
-				<tr>
-					<td data-cell="#">{{ fail.id }}</td>
+				<tr data-href="{{ fail.get_absolute_url }}">
+					<td data-cell="# Reporte de falla">{{ fail.id }}</td>
 					<td data-cell="Fecha">{{ fail.moment|date:"d/m/Y" }}</td>
 					<td data-cell="Equipo">{{ fail.equipo.system.asset }}/ {{ fail.equipo }}</td>
-					<td data-cell="Descripción">
-                        <a href="{{ fail.get_absolute_url }}">{{ fail.description }}</a>
-                    </td>
+					<td data-cell="Descripción">{{ fail.description }}</td>
 					<td data-cell="Responsable">{{fail.reporter.first_name}} {{fail.reporter.last_name}}</td>
-					<td data-cell="Estado">{% if fail.closed %}Cerrado{% else %}Abierto{% endif %}</td>
+					<td class="nowrap" data-cell="Estado">
+						{% if fail.closed %}
+							Cerrado
+						{% elif fail.related_ot %}
+							En proceso
+						{% else %}
+							Abierto
+						{% endif %}
+					</td>
 				</tr>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay ordenes de reportes de falla registrados.</td>
+                </tr>
             {% endfor %}
-        {% else %}
-        	<p>No hay reportes de falla registrados.</p>
-        {% endif %}
     </tbody>
 </table>
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const rows = document.querySelectorAll("tr[data-href]");
+
+		rows.forEach(row => {
+			row.addEventListener("click", () => {
+				window.location.href = row.dataset.href;
+			})
+		})
+	})
+</script>
 
 {% endblock %}

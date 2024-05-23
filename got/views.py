@@ -5,16 +5,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count, Q, Min, Max, OuterRef, Subquery, F, ExpressionWrapper, DateField
+from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
 from django.template.loader import get_template
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.utils import timezone
-from django.contrib import messages
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
@@ -274,21 +273,22 @@ class FailureListView(LoginRequiredMixin, generic.ListView):
     model = FailureReport
     paginate_by = 15
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['assets'] = Asset.objects.filter(area='a')
+        return context
+
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        # Comprueba si el usuario es parte del grupo 'maq_members'
         if self.request.user.groups.filter(name='maq_members').exists():
-            # Obtén el/los asset(s) supervisado(s) por el usuario
             supervised_assets = Asset.objects.filter(
                 supervisor=self.request.user)
 
             queryset = queryset.filter(
                 equipo__system__asset__in=supervised_assets)
         elif self.request.user.groups.filter(name='buzos_members').exists():
-            # Obtén el/los asset(s) supervisado(s) por el usuario
-            supervised_assets = Asset.objects.filter(
-                area='b')
+            supervised_assets = Asset.objects.filter(area='b')
 
             queryset = queryset.filter(equipo__system__asset__in=supervised_assets)
 
@@ -438,7 +438,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.groups.filter(name='buzos_members').exists():
-            # Limitar a los asset que tienen en área el valor de 'b'
             info_filter = Asset.objects.filter(area='b')
         else:
             # Todos los asset para usuarios que no son parte de buzos_members
@@ -1268,8 +1267,6 @@ class BitacoraView(generic.TemplateView):
         # history_items = HistoricalSystem.objects.filter(asset_id=asset_id, history_change_reason__contains="location change")
         history_items = System.history.filter(asset_id=asset_id, history_change_reason__contains="location change")
 
-
-        # Combining and sorting all items for display
         combined_items = list(ots) + list(history_items)
         combined_items.sort(key=lambda x: x.history_date if hasattr(x, 'history_date') else x.creation_date, reverse=True)
 
@@ -1286,10 +1283,8 @@ def truncate_text(text, length=45):
 
 
 def calculate_status_code(t):
-    """Calcula el estado numérico para una tarea basada en su OT."""
     ot_tasks = Task.objects.filter(ot=t)
 
-    # Obtener la fecha de inicio más temprana y la fecha final más tardía
     earliest_start_date = min(t.start_date for t in ot_tasks)
     latest_final_date = max(t.final_date for t in ot_tasks)
 
@@ -1340,7 +1335,6 @@ def schedule(request, pk):
             color = "rgba(192, 192, 192, 0.5)"
             border_color = "rgba(192, 192, 192, 1)"
         else:
-            # Obtener el color asignado al responsable de esta tarea
             color = responsible_colors.get(task.responsible.username, "rgba(54, 162, 235, 0.2)")
             border_color = color.replace('0.2', '1') 
         
