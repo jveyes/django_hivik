@@ -4,12 +4,6 @@
 
 {% block headtag %}
 <style>
-	/* body {
-		font-size: 1.125rem;
-		font-family: system-ui;
-		line-height: 1.5;
-	} */
-
 	.wrapper {
 		width: min(900px, 100% - 3rem);
 		margin-inline: auto;
@@ -107,7 +101,7 @@ Reportes de falla
 				<tr>
 					<td data-cell="#">{{ fail.id }}</td>
 					<td data-cell="Fecha">{{ fail.moment|date:"d/m/Y" }}</td>
-					<td data-cell="Equipo">{{ fail.equipo.system.asset }}/{{ fail.equipo }}</td>
+					<td data-cell="Equipo">{{ fail.equipo.system.asset }}/ {{ fail.equipo }}</td>
 					<td data-cell="Descripción">
                         <a href="{{ fail.get_absolute_url }}">{{ fail.description }}</a>
                     </td>

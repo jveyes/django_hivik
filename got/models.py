@@ -94,7 +94,7 @@ class System(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, to_field='abbreviation')
 
     def __str__(self):
-        return '%s/%s' % (self.asset, self.name)
+        return '%s/ %s' % (self.asset, self.name)
 
     def get_absolute_url(self):
         return reverse('got:sys-detail', args=[self.id])
@@ -243,7 +243,7 @@ class Ot(models.Model):
 
     STATUS = (
         ('a', 'Abierto'),
-        ('x', 'En ejecucion'),
+        ('x', 'En ejecución'),
         ('f', 'Finalizado'),
         ('c', 'Cancelado'),
     )

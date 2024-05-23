@@ -12,12 +12,12 @@
 
 {% block content %}
 
-    {% if perms.got.add_system %}
+    
         <a href="{% url 'got:failure-report-update' failurereport.id %}" class="btn btn-danger"><i class="bi bi-pen"></i></a>
         {% if not failurereport.related_ot %}
             <a href="{% url 'got:failure-report-crear-ot' failurereport.id %}" class="btn btn-success"><i class="bi bi-clipboard-plus"></i></a>
         {% endif %}
-    {% endif %}
+
 
     Orden de trabajo: OT-
     {% if failurereport.related_ot %}

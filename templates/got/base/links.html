@@ -26,8 +26,9 @@
 
 <style>
 
-    *, ::before, ::after {
+    body {
         font-family: "Poppins", sans-serif;
+        color: #191645;
     }
 
     /* Barra de navegacion */
@@ -48,14 +49,25 @@
         background-color: transparent;
     }
 
+    .navbar-toggler-icon {
+        background-image: url('data:image/svg+xml;charset=UTF8,%3Csvg viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath stroke="rgba(255, 255, 255, 0.5)" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"/%3E%3C/svg%3E');
+    }
+
+    .page-link {
+        color: #191645;
+    }
+
+    .pagination {
+        --bs-pagination-active-bg: #191645;
+    }
+
+
     h1 {
         color: #191645;
     }
 
     /* Tablas */
     .table-content {
-		width: 100%;
-        
 		border-collapse: collapse;
         border-radius: 5px 5px 0 0;
         margin: 25px 0;
@@ -71,21 +83,28 @@
         font-weight: bold;
     }
 
-	.table-content th, 
-    .table-content td {
-		padding: 12px 15px;
-	}
-
     .table-content tbody tr {
         border-bottom: 1px solid #ddd;
+    }
+
+    .table-content tbody tr:hover {
+        color: #43C6AC;
     }
 
     .table-content tbody tr:nth-of-type(even) {
         background-color: #f3f3f3;
     }
 
+	.table-content th, .table-content td {
+		padding: 8px;
+	}
+
     .table-content tbody tr:last-of-type {
         border-bottom: 2px solid #43C6AC;
+    }
+
+    .nowrap {
+        white-space: nowrap;
     }
 
 	caption {
@@ -96,12 +115,32 @@
 		font-weight: 700;
 	}
 
+    tr[data-href] {
+        cursor: pointer;
+    }
 
-	/* tr:nth-of-type(2n) {
-		background-color:  hsl(0 0% 0% / 0.1);
-	} */
+	.btn-primary {
+		background-color: #43C6AC;
+        border-color: #43C6AC;
+        color: #191645;
+	}
+
+    .btn-group {
+        margin-top: 5px;
+    }
+
+    aside {
+        margin-right: 10px;
+    }
+
 
 	@media (max-width: 650px) {
+
+        .btn-group {
+            width: 100%;
+            height: 80%;
+        }
+
 		th {
 			display: none;
 		}
@@ -115,8 +154,6 @@
 		td:first-child {
 			padding-top: 2rem;
 		}
-
-		
 
 		td::before {
 			content: attr(data-cell) ": ";
