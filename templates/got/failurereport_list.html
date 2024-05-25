@@ -27,7 +27,7 @@
 	<table class="table-content">
     	<thead>
         	<tr>
-            	<th scope="col">#</th>
+            	<th scope="col">RF-#</th>
             	<th scope="col">Fecha</th>
             	<th scope="col">Equipo</th>
             	<th scope="col">Descripción</th>
@@ -38,19 +38,21 @@
     	<tbody>
             {% for fail in failurereport_list %}
 				<tr data-href="{{ fail.get_absolute_url }}">
-					<td data-cell="# Reporte de falla">{{ fail.id }}</td>
+					<td class="nowrap" data-cell="# Reporte de falla">RF-{{ fail.id }}</td>
 					<td data-cell="Fecha">{{ fail.moment|date:"d/m/Y" }}</td>
 					<td data-cell="Equipo">{{ fail.equipo.system.asset }}/ {{ fail.equipo }}</td>
 					<td data-cell="Descripción">{{ fail.description }}</td>
 					<td data-cell="Responsable">{{fail.reporter.first_name}} {{fail.reporter.last_name}}</td>
 					<td class="nowrap" data-cell="Estado">
-						{% if fail.closed %}
-							Cerrado
-						{% elif fail.related_ot %}
-							En proceso
-						{% else %}
-							Abierto
-						{% endif %}
+						<p class="status {% if fail.closed %}finished{% elif fail.related_ot %}shipped{% else %}pending{% endif %}">
+							{% if fail.closed %}
+								Cerrado
+							{% elif fail.related_ot %}
+								En proceso
+							{% else %}
+								Abierto
+							{% endif %}
+						</p>
 					</td>
 				</tr>
             {% empty %}

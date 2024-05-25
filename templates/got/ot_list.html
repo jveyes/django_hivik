@@ -58,6 +58,7 @@
     {% if request.GET.keyword %}
         <h5>Resultados de búsqueda para: "{{ request.GET.keyword }}"</h5>
     {% endif %}
+
     
     <div class="table-responsive">
     <table class="table-content">
@@ -72,14 +73,19 @@
             </tr>
         </thead>
         <tbody>
+            <!-- class=" -->
             {% for ot in ot_list %}
-                <tr  data-href="{{ ot.get_absolute_url }}" class="{% if ot.all_tasks_finished and ot.state != 'f' %}table-success{% endif %}">
+                <tr  data-href="{{ ot.get_absolute_url }}">
                     <td class="nowrap" data-cell="OT">OT-{{ ot.num_ot }}</td>
                     <td data-cell="Fecha de creación">{{ot.creation_date|date:"d/m/Y"}}</td>
                     <td data-cell="Descripción">{{ot.description}}</td>
                     <td data-cell="Sistema">{{ot.system}}</td>
                     <td data-cell="Supervisor">{{ot.super.first_name}} {{ot.super.last_name}}</td>
-                    <td class="nowrap" data-cell="Estado" >{{ot.get_state_display}}</td>
+                    <td class="nowrap" data-cell="Estado">
+                        <p class="status {% if ot.state == 'f' %}finished{% elif ot.state == 'c' %}close{% elif not ot.all_tasks_finished %}pending{% else %}shipped{% endif %}">
+                            {% if ot.all_tasks_finished and ot.state != 'f' %}Pausado{% else %}{{ot.get_state_display}}{% endif %}
+                        </p>
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
