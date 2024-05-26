@@ -80,16 +80,18 @@ class Asset(models.Model):
         for system in rutas:
             for ruta in system.rutas.all():
                 total_rutas += 1
-                if ruta.next_date >= date.today():
-                    total_on_time += 1
+                if ruta.next_date > date.today():
+                    if not ruta.ot:
+                        total_on_time += 0.1
+                    elif ruta.ot.state=='x':
+                        total_on_time += 0.5
+                    elif ruta.ot.state=='f':
+                        total_on_time += 1
 
         if total_rutas == 0:
-            return "---"  # Evita división por cero si no hay rutas en los sistemas.
-
-        # Calcula el porcentaje de rutas que están al día.
+            return "---"  
         maintenance_percentage = (total_on_time / total_rutas) * 100
-        return round(maintenance_percentage, 2)
-    
+        return f'{round(maintenance_percentage, 2)}%'
 
     def __str__(self):
         return self.name
@@ -282,7 +284,7 @@ class Ot(models.Model):
     num_ot = models.AutoField(primary_key=True)
     description = models.TextField()
     super = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    state = models.CharField(choices=STATUS, default='x', max_length=50)
+    state = models.CharField(choices=STATUS, default='x', max_length=1)
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)
     ot_aprobada = models.FileField(upload_to=get_upload_path,null=True, blank=True)

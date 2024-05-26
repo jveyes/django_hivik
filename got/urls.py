@@ -8,9 +8,9 @@ urlpatterns = [
     path("", views.AssignedTaskByUserListView.as_view(), name="my-tasks"),
 
     # ---------------------------- Assets view ----------------------------- #
-    path("assets/", views.AssetsListView.as_view(), name="asset-list"),
-    path("assets/<str:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
-    path("assets/<str:pk>/schedule/", views.schedule, name="schedule"),
+    path("asset/", views.AssetsListView.as_view(), name="asset-list"),
+    path("asset/<str:pk>/", views.AssetDetailView.as_view(), name="asset-detail"),
+    path("asset/<str:pk>/schedule/", views.schedule, name="schedule"),
 
 
     # ---------------------------- Systems view ----------------------------- #
@@ -45,13 +45,12 @@ urlpatterns = [
     path('rutas/', views.RutaListView, name="ruta-list"),
     path('ruta/<str:pk>/create/', views.RutaCreate.as_view(), name='ruta-create'),
     path('ruta/<str:pk>/update/', views.RutaUpdate.as_view(), name='ruta-update'),
-    # path('ruta/<str:pk>/update/', views.RutaUpdateOT.as_view(), name='ruta-update-ot'),
     path('ruta/<str:pk>/delete/',views.RutaDelete.as_view(), name='ruta-delete'),
     path('ruta/<int:ruta_id>/crear_ot/',views.crear_ot_desde_ruta,name='crear_ot_desde_ruta'),
 
     # ---------------------------- Reportes --------------------------------- #
     path("report_pdf/<int:num_ot>/", views.report_pdf, name='report'),
-    path("dashboard/", views.indicadores, name='dashboard'),
+    path("dash/", views.indicadores, name='dashboard'),
 
     # ---------------------------- History hour view ------------------------ #
     path("reportehoras/<str:component>/", views.reporthours, name='horas'),
@@ -76,15 +75,4 @@ urlpatterns = [
     path("operation/<int:pk>/delete/", views.OperationDelete.as_view(), name="operation-delete"),
 
     path('assets/<str:asset_id>/generate-pdf/', views.generate_asset_pdf, name='generate_asset_pdf'),
-
-    # ---------------------------- Django rest framework ----------------------- #
-    # path("rest/", views.AssetGetCreate.as_view()),
-    # path("rest/<int:pk>", views.AssetUpdateDelete.as_view()),
-    # path("rest/sys", views.SystemGetCreate.as_view()),
-    # path("rest/sys/<int:pk>", views.SystemUpdateDelete.as_view()),
-    # # urls.py
-    # path("rest/systems/", views.SystemList.as_view(), name='system-list'),
-    # path('api/systems/', views.get_systems_by_asset, name='systems-by-asset'),
-
-    # path('schedule/add-task/', views.add_task, name='add-task'),
 ]

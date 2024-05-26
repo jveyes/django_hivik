@@ -14,11 +14,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='ruta',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ruta'),
-        ),
-        migrations.AddField(
             model_name='failurereport',
             name='impact',
             field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('s', 'La seguridad personal'), ('m', 'El medio ambiente'), ('i', 'Integridad del equipo/sistema'), ('o', 'El desarrollo normal de las operaciones')], max_length=1), blank=True, default=list, size=None),

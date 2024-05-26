@@ -48,7 +48,7 @@
                 <th scope="col">Nombre</th>
                 <th scope="col">Supervisor</th>
                 <th scope="col">Área</th>
-                <th scope="col">%</th>
+                <th scope="col">%PM</th>
             </tr>
         </thead>
         <tbody>
@@ -57,7 +57,7 @@
 					<td data-cell="Nombre">{{asset.abbreviation}} - {{asset.name}}</td>
 					<td data-cell="Supervisor">{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
 					<td data-cell="Área">{{asset.get_area_display}}</td>
-					<td data-cell="Porcentaje de mantenimiento">{{asset.ind_mtto}}</td>
+					<td data-cell="% Plan de mantenimiento">{{asset.ind_mtto}}</td>
 				</tr>
             {% empty %}
                 <tr>

@@ -64,7 +64,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         asset_id = self.request.GET.get('asset_id')
         worker_id = self.request.GET.get('worker')
         # contexto adicional:
-        context['asset'] = Asset.objects.all()
+        context['assets'] = Asset.objects.all()
         context['serport_members'] = all_users
         if asset_id:  # Nombre assets para filtrar
             context['selected_asset_name'] = Asset.objects.get(abbreviation=asset_id)
@@ -130,7 +130,7 @@ class Reschedule_task(UpdateView):
 class AssetsListView(LoginRequiredMixin, generic.ListView):
 
     model = Asset
-    paginate_by = 15
+    paginate_by = 20
 
     def get_queryset(self):
         queryset = Asset.objects.all()
@@ -407,7 +407,7 @@ class FailureReportUpdate(LoginRequiredMixin, UpdateView):
 def crear_ot_failure_report(request, fail_id):
     fail = get_object_or_404(FailureReport, pk=fail_id)
     nueva_ot = Ot(
-        description=f"Reporte de falla -{fail.equipo}",
+        description=f"Reporte de falla - {fail.equipo}",
         state='x',  # Ejecución
         super=request.user,
         tipo_mtto='c',

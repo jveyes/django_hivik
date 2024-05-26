@@ -108,8 +108,10 @@ class Migration(migrations.Migration):
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ot')),
                 ('responsible', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('priority', models.IntegerField(blank=True, default=0, null=True)),
+                ('ruta', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ruta')),
             ],
             options={
+                'ordering': ['-priority', '-start_date'],
                 'permissions': (('can_reschedule_task', 'Reprogramar actividades'),),
             },
         ),
