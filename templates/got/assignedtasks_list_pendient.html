@@ -59,36 +59,33 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% if task_list %}
-				{% for act in task_list %}
-					<tr data-href="{% url 'got:finish-task' act.id %}">
-						<td data-cell="Orden de trabajo"  class="nowrap"><strong>OT-{{act.ot.num_ot}}</strong></td>
-						<td data-cell="Sistema">{{act.ot.system.asset}}/ {{act.ot.system.name}}</td>
-						<td data-cell="Descripción" >{{act.description}}</td>
-						<td data-cell="Responsable">{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-						<td data-cell="Tiempo de ejecución">{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
-						<td data-cell="Estado">
-
-							<div class="dropdown">
-								<button class="btn status {% if act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-									{% if act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
-								</button>
-								<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-									<li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
-									<li><a class="dropdown-item" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
-									{% if perms.got.can_reschedule_task %}
-										<li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
-									{% endif %}
-								</ul>
-							</div>
-						</td>
-					</tr>
-				{% endfor %}
-				
-			{% else %}
-				<p>No hay actividades pendientes.</p>
-			{% endif %}
-			
+			{% for act in task_list %}
+				<tr data-href="{% url 'got:finish-task' act.id %}">
+					<td data-cell="Orden de trabajo"  class="nowrap"><strong>OT-{{act.ot.num_ot}}</strong></td>
+					<td data-cell="Sistema">{{act.ot.system.asset}}/ {{act.ot.system.name}}</td>
+					<td data-cell="Descripción" >{{act.description}}</td>
+					<td data-cell="Responsable">{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
+					<td data-cell="Tiempo de ejecución">{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
+					<td data-cell="Estado">
+						<div class="dropdown">
+							<button class="btn status {% if act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+								{% if act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+								<li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
+								<li><a class="dropdown-item" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
+								{% if perms.got.can_reschedule_task %}
+									<li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
+								{% endif %}
+							</ul>
+						</div>
+					</td>
+				</tr>
+			{% empty %}
+				<tr>
+					<td data-cell="Actividades" colspan="6">No hay actividades registrados.</td>
+				</tr>
+			{% endfor %}
 		</tbody>
 	</table>
 </section>

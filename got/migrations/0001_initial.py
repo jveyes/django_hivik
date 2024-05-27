@@ -88,6 +88,7 @@ class Migration(migrations.Migration):
                 ('lubricante', models.CharField(blank=True, max_length=100, null=True)),
                 ('volumen', models.IntegerField(blank=True, default=0, null=True)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='equipos', to='got.system')),
+                ('tipo', models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2)),
             ],
             options={
                 'ordering': ['name', 'code'],
@@ -114,5 +115,14 @@ class Migration(migrations.Migration):
                 'ordering': ['-priority', '-start_date'],
                 'permissions': (('can_reschedule_task', 'Reprogramar actividades'),),
             },
+        ),
+        migrations.CreateModel(
+            name='Image',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('image', models.ImageField(upload_to=got.models.get_upload_path)),
+                ('failure', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.failurereport')),
+                ('task', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.task')),
+            ],
         ),
     ]

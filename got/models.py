@@ -239,17 +239,6 @@ class Salida(models.Model):
         return reverse('got:salida-detail', args=[str(self.id)])
 
 
-# EXPERIMENTAL
-class SalidaItem(models.Model):
-    salida = models.ForeignKey(Salida, on_delete=models.CASCADE, related_name='items')
-    item = models.ForeignKey(Component, on_delete=models.CASCADE)
-    cantidad = models.PositiveIntegerField()
-    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.cantidad}x {self.item.name} ({self.salida})"
-
-
 class HistoryHour(models.Model):
 
     report_date = models.DateField()
@@ -323,10 +312,10 @@ class Ruta(models.Model):
     suministros = models.TextField(default="", blank=True, null=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
-    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
+    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
     ot = models.ForeignKey(Ot, on_delete=models.SET_NULL, null=True, blank=True)
     dependencia = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='dependiente')
-    astillero = models.CharField(max_length=50, default="", null=True, blank=True)
+    astillero = models.CharField(max_length=50, null=True, blank=True)
 
 
     @property
@@ -486,3 +475,87 @@ class Operation(models.Model):
 
     def __str__(self):
         return f"{self.proyecto}/{self.asset} ({self.start} - {self.start})"
+
+
+class Megger(models.Model):
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    fecha = models.DateField()
+    
+    # Estator prueba inicial
+    estator_pi_1min_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_1min_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_1min_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_1min_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_1min_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_1min_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    estator_pi_10min_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_10min_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_10min_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_10min_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_10min_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_10min_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    estator_pi_obs_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_obs_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_obs_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_obs_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_obs_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pi_obs_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Estator prueba final
+    estator_pf_1min_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_1min_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_1min_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_1min_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_1min_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_1min_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    estator_pf_10min_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_10min_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_10min_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_10min_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_10min_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_10min_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    estator_pf_obs_l1_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_obs_l2_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_obs_l3_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_obs_l1_l2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_obs_l2_l3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    estator_pf_obs_l3_l1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Excitatriz prueba inicial
+    excitatriz_pi_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    excitatriz_pi_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    excitatriz_pi_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Excitatriz prueba final
+    excitatriz_pf_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    excitatriz_pf_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    excitatriz_pf_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Rotor principal prueba inicial
+    rotor_p_pi_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_p_pi_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_p_pi_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Rotor principal prueba final
+    rotor_p_pf_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_p_pf_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_p_pf_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Rotor auxiliar prueba inicial
+    rotor_aux_pi_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_aux_pi_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_aux_pi_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    # Rotor auxiliar prueba final
+    rotor_aux_pf_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_aux_pf_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    rotor_aux_pf_obs_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+        return f"Prueba #{self.id}/{self.equipo} ({self.fecha})"

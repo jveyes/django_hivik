@@ -509,16 +509,14 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
         context['failure_report'] = failure_report
 
-        try:
-            ruta_asociada = ot.ruta_set.first()
-        except AttributeError:
-            ruta_asociada = None
+        rutas = ot.ruta_set.all()
+        context['rutas'] = rutas
 
-        # Si hay una ruta asociada, agregar su ID al contexto
-        if ruta_asociada:
-            context['ruta_id'] = ruta_asociada
-        else:
-            context['ruta_id'] = None
+        equipos = []
+        for ruta in rutas:
+            equipos.append(ruta.equipo)
+        context['equipos'] = set(equipos)
+        # context['equipos_por_ruta'] = {ruta.code: [ruta.equipo] if ruta.equipo else [] for ruta in rutas}
 
         return context
 
@@ -743,9 +741,6 @@ class TaskUpdate(UpdateView):
         self.object = self.get_object()
         form = self.get_form()
         image_form = self.second_form_class(request.POST, request.FILES)
-        # if 'delete_images' in request.POST:
-        #     self.object.images.all().delete()
-        #     return redirect(self.get_success_url())
         if form.is_valid() and image_form.is_valid():
             response = super().form_valid(form)
             if form.cleaned_data.get('delete_images'):
@@ -774,8 +769,6 @@ class TaskCreate(CreateView):
     def form_valid(self, form):
         # Obtener el valor del parámetro pk desde la URL
         pk = self.kwargs['pk']
-
-        # Obtener el objeto System relacionado con el pk
         ruta = get_object_or_404(Ruta, pk=pk)
 
         # Establecer el valor del campo system en el formulario
@@ -957,8 +950,6 @@ class RutaCreate(CreateView):
     def form_valid(self, form):
         # Obtener el valor del parámetro pk desde la URL
         pk = self.kwargs['pk']
-
-        # Obtener el objeto System relacionado con el pk
         system = get_object_or_404(System, pk=pk)
 
         # Establecer el valor del campo system en el formulario
@@ -979,9 +970,7 @@ class RutaCreate(CreateView):
 
 
 class RutaUpdate(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = Ruta
     form_class = RutaForm
 
@@ -1023,7 +1012,6 @@ def crear_ot_desde_ruta(request, ruta_id):
                 description=task.description,
                 procedimiento=task.procedimiento,
                 hse=task.hse,
-                news=task.news,
                 evidence=task.evidence,
                 start_date=timezone.now().date(),
                 men_time=1,

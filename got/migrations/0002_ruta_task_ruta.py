@@ -51,13 +51,9 @@ class Migration(migrations.Migration):
                 ('reporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
                 ('related_ot', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='failure_report', to='got.ot')),
                 ('closed', models.BooleanField(default=False)),
+                ('impact', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('s', 'La seguridad personal'), ('m', 'El medio ambiente'), ('i', 'Integridad del equipo/sistema'), ('o', 'El desarrollo normal de las operaciones')], max_length=1), blank=True, default=list, size=None)),
             ],
             options={'ordering': ['-moment']},
-        ),
-        migrations.AddField(
-            model_name='equipo',
-            name='tipo',
-            field=models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2),
         ),
         migrations.CreateModel(
             name='HistoryHour',

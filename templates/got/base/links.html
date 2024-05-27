@@ -200,6 +200,76 @@
         font-size: 0.8rem;
     }
 
+    .detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        grid-template-areas: 
+            "title title title"
+            "ot-detail tasks tasks"
+            "add-info tasks tasks"
+            ". tasks tasks";
+    }
+
+    .detail .title {
+        margin-top: 10px;
+        grid-area: title;
+    }
+
+    .detail .ot-detail {
+        grid-area: ot-detail;
+    }
+
+    .detail .add-info {
+        grid-area: add-info;
+    }
+
+    .detail .tasks {
+        grid-area: tasks;
+    }
+
+    .table-info {
+        width: 100%;
+        margin: 15px 0;
+        border-collapse: collapse;
+        font-size: 0.8em;
+        overflow: hidden;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+    }
+
+    .table-info th {
+        text-align: left;
+        background-color: #2E6E79;
+        color: #fff;
+        border: 0.2px solid #191645;
+        padding: 8px;
+    }
+
+    .table-info td {
+        padding: 8px;
+        border: 0.2px solid #191645;
+    }
+
+    .table-info thead tr:first-child th {
+        text-align: center;
+        background-color: #191645;
+        font-weight: bold;
+        font-size: 1.2em;
+        padding: 10px;
+    }
+
+    .table-info thead .add:hover {
+        background-color: #43C6AC;
+    }
+
+    .table-info tbody tr:hover .status {
+        box-shadow: 0 4px 6px 0 rgba(0,0,0,0.34);
+    }
+
+    .table-info tbody tr:hover {
+        color: #43C6AC;
+    }
+
 	@media (max-width: 650px) {
 
         .btn-group {
