@@ -272,32 +272,42 @@
 
 	@media (max-width: 650px) {
 
+        .detail {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            grid-template-areas: 
+                "title"
+                "ot-detail"
+                "tasks"
+                "add-info";
+        }
+
         .btn-group {
             width: 100%;
             height: 80%;
         }
 
-		th {
+		.table-content th {
 			display: none;
 		}
 
-		td {
+		.table-content td {
 			display: grid;
 			gap: 0.4rem;
 			grid-template-columns: 15ch auto;
 			padding: 0.5rem 1rem;
 		}
 
-		td:first-child {
+		.table-content td:first-child {
 			padding-top: 2rem;
 		}
 
-		td::before {
+		.table-content td::before {
 			content: attr(data-cell) ": ";
 			font-weight: 700;
 		}
 
-		td:last-child {
+		.table-content td:last-child {
 			padding-bottom: 2rem;	
 		}
 	}
