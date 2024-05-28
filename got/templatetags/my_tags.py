@@ -30,14 +30,7 @@ def get_impact_display(impact_code):
     return FailureReport().get_impact_display(impact_code)
 
 
-@register.filter
-def is_instance_of(item, cls_name):
-    try:
-        cls = eval(cls_name)
-        return isinstance(item, cls)
-    except NameError:
-        # Handle the case where cls_name is not defined
-        if cls_name == 'HistoricalSystem':
-            return isinstance(item, type(System.history.first()))
-        return False
+@register.filter(name='can_edit_task')
+def can_edit_task(user, task):
+    return user == task.responsible or user.has_perm('myapp.can_modify_any_task')
 

@@ -232,11 +232,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name='megger',
-            name='rotor_aux_pf_obs_l_tierra',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
-        ),
-        migrations.AlterField(
-            model_name='megger',
             name='rotor_aux_pi_10min_l_tierra',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
         ),

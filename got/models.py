@@ -417,7 +417,10 @@ class Task(models.Model):
         return self.start_date + timedelta(days=self.men_time)
  
     class Meta:
-        permissions = (('can_reschedule_task', 'Reprogramar actividades'),)
+        permissions = (
+            ('can_reschedule_task', 'Reprogramar actividades'),
+            ('can_modify_any_task', 'Can modify any task'),
+            )
         ordering = ['-priority', '-start_date'] 
 
 

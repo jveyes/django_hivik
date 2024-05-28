@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ('rotor_aux_pi_obs_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_aux_pf_1min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_aux_pf_10min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('rotor_aux_pf_obs_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
+                ('rotor_aux_pf_obs_l_tierra', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
                 ('equipo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.equipo')),
                 ('task', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.task')),
             ],
