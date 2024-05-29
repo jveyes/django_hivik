@@ -156,17 +156,18 @@
                     </thead>
                     <tbody>
                         {% for act in ot.task_set.all %}
-                            <tr {% if request.user|can_edit_task:act %}data-href="{% url 'got:finish-task' act.id %}"{% endif %}>
+                            <!-- <tr {% if request.user|can_edit_task:act %}data-href="{% url 'got:finish-task' act.id %}"{% endif %}> -->
+                            <tr>
                                 <th scope="row">{{forloop.counter}}</th>
-                                <td>{{ act.description|linebreaksbr }}</td>
+                                <td><a href="{% if request.user|can_edit_task:act %}{% url 'got:finish-task' act.id %}{% endif %}">{{ act.description|linebreaksbr }}</a></td>
                                 <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
                                 <td>{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
                                 <td class="nowrap">
                                     <div class="dropdown">
-                                        <button class="btn status {% if act.finished %}finished{% elif act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <button class="btn status {% if act.finished %}finished{% elif act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
                                             {% if act.finished %}Finalizado{% elif act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
                                         </button>
-                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                             <li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
                                             <li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
                                             <li><a class="dropdown-item {% if not perms.got.change_task %}disabled{% endif %}" href="{% url 'got:task-update' act.id %}">Editar</a></li>                                  
@@ -239,4 +240,21 @@
             </div>
         {% endif %}
 	</main>
+
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const taskRows = document.querySelectorAll('.task-row');
+    
+            taskRows.forEach(function (row) {
+                row.addEventListener('click', function () {
+                    let dropdownId = 'dropdownMenuButton' + (Array.from(taskRows).indexOf(row) + 1);
+                    let dropdownButton = document.getElementById(dropdownId);
+                    let bootstrapDropdown = new bootstrap.Dropdown(dropdownButton);
+    
+                    bootstrapDropdown.toggle();
+                });
+            });
+        });
+    </script> -->
+    
 {% endblock %}

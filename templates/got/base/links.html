@@ -64,6 +64,7 @@
     }
 
     h1 {
+        margin-top: 10px; 
         color: #191645;
     }
 
@@ -238,9 +239,9 @@
 
     .table-info th {
         text-align: left;
-        background-color: #2E6E79;
+        background-color: #0157a4;
         color: #fff;
-        /* border: 0.2px solid #191645; */
+        border-bottom: 0.2px solid #191645;
         padding: 8px;
     }
 
@@ -273,14 +274,33 @@
         box-shadow: 0 4px 6px 0 rgba(0,0,0,0.34);
     }
 
-    /* .table-info thead,
-    .table-info tbody th {
-        border: 1px solid #191645;
-        border-bottom: 1px solid #ddd;
-    } */
+    .main-asset {
+        margin: 10px;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        grid-template-areas: 
+            "title title title"
+            "sistemas sistemas detail"
+            "ruta ruta detail";
+            /* ". tasks tasks"; */
+    }
 
-    .table-info tbody tr:hover {
-        color: #43C6AC;
+    .main-asset .title-asset {
+        margin-top: 10px;
+        grid-area: title;
+    }
+
+    .main-asset .info-asset {
+        grid-area: detail;
+    }
+
+    .main-asset .sistemas {
+        grid-area: sistemas;
+    }
+
+    .main-asset .rutinas {
+        grid-area: ruta;
     }
 
 	@media (max-width: 650px) {
@@ -333,12 +353,12 @@
 
     a {
         text-decoration: none; /* Elimina la línea de abajo */
-        color: black; /* Color del texto */
+        color: #191645; /* Color del texto */
     }
     
     a:hover {
-        background-color: yellowgreen;
-        color: #fff;
+        background-color: transparent;
+        color: #43C6AC;
     }
 
     .radioOptions {

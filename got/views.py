@@ -31,6 +31,9 @@ from datetime import timedelta, date
 from xhtml2pdf import pisa
 from io import BytesIO
 import itertools
+from django.db.models import ExpressionWrapper, F, DateField, DurationField
+from django.db.models.functions import ExtractMonth, ExtractYear
+from datetime import datetime
 
 
 # ---------------------------- Main views ------------------------------------#
@@ -169,20 +172,55 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
         other_asset_systems = System.objects.filter(location=asset.name).exclude(asset=asset)
         combined_systems = (sys.union(other_asset_systems)).order_by('group')
-        rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
+        
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+        month_names_es = {
+            "January": "Enero",
+            "February": "Febrero",
+            "March": "Marzo",
+            "April": "Abril",
+            "May": "Mayo",
+            "June": "Junio",
+            "July": "Julio",
+            "August": "Agosto",
+            "September": "Septiembre",
+            "October": "Octubre",
+            "November": "Noviembre",
+            "December": "Diciembre"
+        }
+
+        # Obtener el nombre completo del mes actual en inglés
+        current_month_name_en = datetime.now().strftime("%B")
+
+        # Obtener el nombre del mes actual en español
+        current_month_name_es = month_names_es[current_month_name_en]
+
+        # Filtrar las rutas que cumplen con la condición del mes y año actuales
+        filtered_rutas = []
+        for ruta in Ruta.objects.filter(system__in=sys):
+            if ruta.next_date.month == current_month and ruta.next_date.year == current_year:
+                filtered_rutas.append(ruta)
+
+        # Ordenar las rutas filtradas por next_date
+        filtered_rutas.sort(key=lambda t: t.next_date)
+
+        # rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
         
         # Limitar a mostrar 10 sistemas
-        paginator = Paginator(combined_systems, 20)
+        paginator = Paginator(combined_systems, 10)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        paginator_rutas = Paginator(rutas, 20)
+        # paginator_rutas = Paginator(rutas, 10)
         page_number_rutas = self.request.GET.get('page_rutas')
-        page_obj_rutas = paginator_rutas.get_page(page_number_rutas)
+        # page_obj_rutas = paginator_rutas.get_page(page_number_rutas)
 
         context['sys_form'] = SysForm()
         context['page_obj'] = page_obj
-        context['page_obj_rutas'] = page_obj_rutas
+        # context['page_obj_rutas'] = page_obj_rutas
+        context['page_obj_rutas'] = filtered_rutas
+        context['mes'] = current_month_name_es
         context['rotativos'] = rotativos
         context['other_asset_systems'] = other_asset_systems
         context['add_sys'] = combined_systems
