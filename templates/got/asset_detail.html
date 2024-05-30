@@ -1,23 +1,22 @@
 {% extends "got/base/base_detail.html" %}
 {% load my_tags %}
 
-{% block header %}{% endblock %}
-
 {% block content %}
 
 <main class="main-asset">
     <div class="title-asset">
-        <!-- {% if perms.got.view_asset %}
-            <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
-        {% endif %} -->
-        <h1>{{ asset.name }}</h1>
+        <h1>
+            {% if perms.got.view_asset %}
+                <a href="{% url 'got:asset-list' %}"><i class="bi bi-arrow-bar-left"></i></a>
+            {% endif %}
+            {{ asset.name }}
+        </h1>
 
-        <ul class="nav justify-content-end">
+        <ul class="nav nav-justified">
             <li class="nav-item">
-              <form action="{% url 'got:generate_asset_pdf' asset.abbreviation %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="nav-link">Plan de mantenimiento</button>
-            </form>
+                <form action="{% url 'got:generate_asset_pdf' asset.abbreviation %}" method="POST">{% csrf_token %}
+                    <button type="submit" class="nav-link">Plan de mantenimiento</button>
+                </form>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'got:ot-create' asset.abbreviation %}">Nueva orden de trabajo</a>
@@ -40,8 +39,8 @@
         <table class="table-info">
             <thead>
                 {% if asset.imagen %}
-                    <tr>
-                        <img src="{{ asset.imagen.url }}" style="max-width: 450px;">
+                    <tr colspan="2">
+                        <img src="{{ asset.imagen.url }}" width="350px">
                     </tr>
                 {% endif %}
                 <tr>
@@ -110,8 +109,8 @@
                     <tr>
                         <th colspan="{% if asset.area == 'a' %}4{% else %}5{% endif %}">
                             Sistemas
-                            <button type="button" class="btn btn-sm" style="background-color: transparent; color: #43C6AC;" data-bs-toggle="modal" data-bs-target="#sysModal">
-                                <i class="bi bi-plus-circle-fill"></i>
+                            <button type="button" class="add-sys" data-bs-toggle="modal" data-bs-target="#sysModal">
+                                <i class="bi bi-plus-circle"></i>
                             </button>
                         </th>
                     </tr>
@@ -126,12 +125,14 @@
                         <!-- {% if perms.got.change_system %}
                             <th scope="col">Acciones</th>
                         {% endif %} -->
-                    </tr>
+                    </tr>    
+                    
                 </thead>
-                <tbody>           
+                <tbody>
+                           
                     {% for sys in page_obj %}
                         <tr>
-                            <th data-cell="Grupo" scope="row">{{sys.group}}</th>
+                            <td data-cell="Grupo" scope="row">{{sys.group}}</td>
                             <td data-cell="Sistema"><a href="{{ sys.get_absolute_url }}">{{sys.name}}</a></td>
                             {% if not asset.area == 'a' %}
                                 <td data-cell="Ubicación">{{ sys.location }}</td>
@@ -199,13 +200,13 @@
         	<tbody>
 		    	{% for ruta in page_obj_rutas %}
 					<tr class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
-					    <th scope="row">{{ ruta.system.equipo.name }}</th>
-					    <th scope="row">{{ ruta.name }}</th>
-					    <td>{{ ruta.frecuency }}</td>
-					    <td>{{ ruta.get_control_display }}</td>
-					    <td>{% if ruta.ot %}{{ ruta.intervention_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
-						<td>{% if ruta.ot %}{{ ruta.next_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
-					    <td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
+					    <td scope="row" data-cell="Equipo">{{ ruta.equipo.name }}</td>
+					    <td scope="row" data-cell="Codigo">{{ ruta.name }}</td>
+					    <td data-cell="Frecuencia">{{ ruta.frecuency }}</td>
+					    <td data-cell="Control">{{ ruta.get_control_display }}</td>
+					    <td data-cell="Ultima intervención">{% if ruta.ot %}{{ ruta.intervention_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
+						<td data-cell="Proxima Intervención">{% if ruta.ot %}{{ ruta.next_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
+					    <td data-cell="Orden de trabajo"><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
 				    </tr>
                 {% empty %}
                     <tr>

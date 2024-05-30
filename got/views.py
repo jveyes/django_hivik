@@ -199,7 +199,7 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         # Filtrar las rutas que cumplen con la condición del mes y año actuales
         filtered_rutas = []
         for ruta in Ruta.objects.filter(system__in=sys):
-            if ruta.next_date.month == current_month and ruta.next_date.year == current_year:
+            if (ruta.next_date.month == current_month and ruta.next_date.year == current_year) or (ruta.intervention_date.month == current_month and ruta.intervention_date.year == current_year):
                 filtered_rutas.append(ruta)
 
         # Ordenar las rutas filtradas por next_date
