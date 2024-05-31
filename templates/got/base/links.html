@@ -231,7 +231,7 @@
 
     .detail .tasks {
         grid-area: tasks;
-    }
+    }   
 
     .table-info {
         width: 100%;
@@ -240,6 +240,8 @@
         font-size: 0.8em;
         overflow: hidden;
         box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
+        /* position: absolute; */
+        z-index: 10;
     }
 
     .table-info tr:hover {
@@ -255,7 +257,7 @@
     }
 
     .table-info td {
-        padding: 8px;
+        padding: 6px;
         border-bottom: 1px solid #ddd;
     }
 
@@ -280,7 +282,7 @@
     }
 
     .main-asset {
-        margin: 10px;
+        margin: 15px;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 10px;
@@ -293,19 +295,23 @@
 
     .main-asset .title-asset {
         margin-top: 10px;
+        margin-right: 20px;
         grid-area: title;
         border-bottom: 1px solid #191645;
     }
 
     .main-asset .info-asset {
+        margin-right: 20px;
         grid-area: detail;
     }
 
     .main-asset .sistemas {
+        margin-right: 20px;
         grid-area: sistemas;
     }
 
     .main-asset .rutinas {
+        margin-right: 20px;
         grid-area: ruta;
     }
 
@@ -320,6 +326,32 @@
         color: #fff;
     }
 
+    #asset { 
+        width: 350px;
+        height: 300px; 
+        object-fit: cover; 
+    }   
+
+    /* .tasks {
+        position: relative;
+    }
+
+
+    .dropdown-menu {
+        position: fixed;
+        z-index: 999;
+        top: 0;
+        left: 0;
+    } */
+
+    .table-info .info-special {
+        text-align: center;
+        background-color: #191645;
+        font-weight: bold;
+        font-size: 1.2em;
+        padding: 10px;
+    }
+
     @media (max-width: 780px) {
 
         .main-asset {
@@ -332,7 +364,6 @@
                 "sistemas"
                 "ruta"
                 "detail";
-                /* ". tasks tasks"; */
         }
     }
 
@@ -361,7 +392,7 @@
 			display: none;
 		}
 
-        .table-info thead tr:not(:first-child) th{
+        .table-info thead tr:not(:first-child) th, .info-asset .table-info th{
 			display: none;
 		}
 
@@ -374,13 +405,17 @@
 		}
 
 		.table-content td:first-child, .table-info td:first-child {
-			padding-top: 2rem;
+			padding-top: 1.8rem;
 		}
 
-		.table-content td::before, .table-info td::before {
+		.table-content td[data-cell]::before, .table-info td[data-cell]::before {
 			content: attr(data-cell) ": ";
 			font-weight: 700;
 		}
+
+        .no-display {
+            display: none;
+        }
 
 		.table-content td:last-child, .table-info td:last-child {
 			padding-bottom: 2rem;	

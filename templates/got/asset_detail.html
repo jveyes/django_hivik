@@ -38,63 +38,65 @@
     <div class="info-asset"> 
         <table class="table-info">
             <thead>
-                {% if asset.imagen %}
-                    <tr colspan="2">
-                        <img src="{{ asset.imagen.url }}" width="350px">
-                    </tr>
-                {% endif %}
                 <tr>
                     <th colspan="2" class="text-center">Información general</th>
                 </tr>
             </thead>
             <tbody>
+                {% if asset.imagen %}
+                    <tr style="text-align: center; padding: 0;">
+                        <td colspan="2">
+                            <img src="{{ asset.imagen.url }}" id="asset">
+                        </td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Supervisor</th>
-                    <td>{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
+                    <td data-cell="Supervisor">{{asset.supervisor.first_name}} {{asset.supervisor.last_name}}</td>
                 </tr>
                 <tr>
-                    <th>Area</th>
-                    <td>{{asset.get_area_display}}</td>
+                    <th>Área</th>
+                    <td data-cell="Área">{{asset.get_area_display}}</td>
                 </tr>
                 {% if asset.area == 'a' %}
                     <tr>
-                        <th colspan="2" class="text-center">Información especifica</th>
+                        <th colspan="2" class="info-special">Información especifica</th>
                     </tr>
                     <tr>
-                        <th>bandera</th>
-                        <td>{{asset.bandera}}</td>
+                        <th>Bandera</th>
+                        <td data-cell="Bandera">{{asset.bandera}}</td>
                     </tr>
                     <tr>
                         <th>Eslora</th>
-                        <td>{{asset.eslora}} m</td>
+                        <td data-cell="Eslora">{{asset.eslora}} m</td>
                     </tr>
                     <tr>
                         <th>Manga</th>
-                        <td>{{asset.manga}}  m</td>
+                        <td data-cell="Manga">{{asset.manga}}  m</td>
                     </tr>
                     <tr>
                         <th>Puntal</th>
-                        <td>{{asset.puntal}} m</td>
+                        <td data-cell="Puntal">{{asset.puntal}} m</td>
                     </tr>
                     <tr>
                         <th>Calado maximo</th>
-                        <td>{{asset.calado_maximo}}</td>
+                        <td data-cell="Calado maximo">{{asset.calado_maximo}}</td>
                     </tr>
                     <tr>
                         <th>Deadweight</th>
-                        <td>{{asset.deadweight}}</td>
+                        <td data-cell="Deadweight">{{asset.deadweight}}</td>
                     </tr>
                     <tr>
                         <th>Arqueo bruto</th>
-                        <td>{{asset.arqueo_bruto}}</td>
+                        <td data-cell="Arqueo bruto">{{asset.arqueo_bruto}}</td>
                     </tr>
                     <tr>
                         <th>Arqueo neto</th>
-                        <td>{{asset.arqueo_neto}}</td>
+                        <td data-cell="Arqueo neto">{{asset.arqueo_neto}}</td>
                     </tr>
                     <tr>
                         <th>Espacio libre sobre cubierta</th>
-                        <td>{{asset.espacio_libre_cubierta}} m2</td>
+                        <td data-cell="Espacio libre sobre cubierta">{{asset.espacio_libre_cubierta}} m2</td>
                     </tr>
                 {% endif %}
                 </tbody>
@@ -122,9 +124,6 @@
                         {% endif %}
                         <th scope="col">Estado</th>
                         <th scope="col">Mantenimiento</th>
-                        <!-- {% if perms.got.change_system %}
-                            <th scope="col">Acciones</th>
-                        {% endif %} -->
                     </tr>    
                     
                 </thead>
@@ -189,12 +188,12 @@
             <p>No hay sistemas registrados.</p>
         {% endif %}
     </div>
-<!-- 4362654 -->
+    
 	<div class="rutinas">
 		<table class="table-info">
 			<thead>
                 <tr>
-                    <th colspan="7">Rutinas de mantenimiento - {{ mes }}</th>
+                    <th colspan="7">{{ mes }}/Rutinas de mantenimiento</th>
                 </tr>
 				<tr>
 					<th scope="col">Equipo</th>

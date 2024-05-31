@@ -163,7 +163,7 @@
                                 <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
                                 <td>{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
                                 <td class="nowrap">
-                                    <div class="dropdown">
+                                    <div class="btn-group dropstart">
                                         <button class="btn status {% if act.finished %}finished{% elif act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
                                             {% if act.finished %}Finalizado{% elif act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
                                         </button>
