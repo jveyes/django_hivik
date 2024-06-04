@@ -15,6 +15,7 @@ urlpatterns = [
 
     # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
+    path('sys/<int:pk>/<str:view_type>/', views.SysDetailView.as_view(), name='sys-detail-view'),
     path('sys/<int:pk>/update/', views.SysUpdate.as_view(), name='sys-update'),
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
@@ -37,6 +38,7 @@ urlpatterns = [
 
     path("task/<int:pk>/reschedule/", views.Reschedule_task.as_view(), name='reschedule-task'),
     path('task/<int:pk>/finish/', views.Finish_task.as_view(), name='finish-task'),
+    path('task/<int:pk>/finish-ot/', views.Finish_task_ot.as_view(), name='finish-task-ot'),
 
     path('task-rut/<int:pk>/update/', views.TaskUpdaterut.as_view(), name='update-task'),
     path('delete_task/<int:pk>/', views.TaskDeleterut.as_view(), name='delete-task'),

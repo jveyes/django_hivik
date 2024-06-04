@@ -9,7 +9,6 @@
 {% block content %}
 
 <aside>
-	<!-------------------------------------------- Filtro de actividades -------------------------------------------------->
 	{% if not request.user|has_group:"buzos_members" %}
 		{% if not request.user|has_group:"maq_members" %}
 			<div class="btn-group" role="group">
@@ -43,14 +42,13 @@
 			</div>
 		{% endif %}
 	{% endif %}
-	<!--------------------------------------------------------------------------------------------------------------------->
 </aside>
 
 <section class="table-responsive">
-	<table class="table-content">
-		<thead class="table-secondary">
+	<table class="table-list">
+		<thead>
 			<tr>
-				<th scope="col">OT-#</th>
+				<th scope="col">#OT</th>
 				<th scope="col">Sistema</th>
 				<th scope="col">Descripción</th>
 				<th scope="col">Responsable</th>
@@ -73,7 +71,7 @@
 							</button>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 								<li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
-								<li><a class="dropdown-item" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
+								<li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
 								{% if perms.got.can_reschedule_task %}
 									<li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
 								{% endif %}

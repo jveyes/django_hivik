@@ -72,7 +72,7 @@ class Asset(models.Model):
     def ind_mtto(self):
         rutas = self.system_set.all().annotate(total_rutas=Count('rutas')).exclude(total_rutas=0)
         if not rutas:
-            return "---"  # Si no hay rutas, retorna un indicador de no disponible.
+            return "---"
 
         total_rutas = 0
         total_on_time = 0
@@ -159,6 +159,16 @@ class Equipo(models.Model):
         ('nr', 'No rotativo'),
     )
 
+    # SS = (
+    #     ('p', 'Planos'),
+    #     ('mp', 'Maquinaria propulsora'),
+    #     ('st', 'Sistemas de tranmisión'),
+    #     ('ge', 'Generación eléctrica'),
+    #     ('ate', 'Almacenamiento y transferencia de energía'),
+    #     ('si', 'Sistema de iluminación'),
+    #     ('si', 'Sistema de iluminación'),
+    # )
+
     name = models.CharField(max_length=50)
     date_inv = models.DateField()
     code = models.CharField(primary_key=True, max_length=50)
@@ -170,7 +180,6 @@ class Equipo(models.Model):
     imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
     manual_pdf = models.FileField(upload_to=get_upload_pdfs, null=True, blank=True)
 
-    # Componentes de tipo rotativo
     tipo = models.CharField(choices=TIPO, default='nr', max_length=2)
     initial_hours = models.IntegerField(default=0)
     horometro = models.IntegerField(default=0, null=True, blank=True)
@@ -178,8 +187,8 @@ class Equipo(models.Model):
     lubricante = models.CharField(max_length=100, null=True, blank=True)
     volumen = models.IntegerField(default=0, null=True, blank=True)
 
-
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='equipos')
+    subsystem = models.CharField(max_length=100, null=True, blank=True)
 
     def calculate_horometro(self):
         total_hours = self.hours.aggregate(total=Sum('hour'))['total'] or 0
@@ -196,28 +205,29 @@ class Equipo(models.Model):
         ordering = ['name', 'code']
 
     def get_absolute_url(self):
-        return reverse('got:sys-detail', args=[self.system.id])
+        return reverse('got:sys-detail-view', args=[self.system.id, self.code])
 
 
 # EXPERIMENTAL
-class Component(models.Model):
-    name = models.CharField(max_length=50)
-    serial = models.CharField(max_length=50, null=True, blank=True)
-    marca = models.CharField(max_length=50, null=True, blank=True)
-    presentacion = models.CharField(max_length=50)
-    equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
+# class Component(models.Model):
+#     name = models.CharField(max_length=50)
+#     serial = models.CharField(max_length=50, null=True, blank=True)
+#     marca = models.CharField(max_length=50, null=True, blank=True)
+#     presentacion = models.CharField(max_length=50)
+#     equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
-# EXPERIMENTAL
 class Location(models.Model):
 
     name = models.CharField(max_length=50)
     direccion = models.CharField(max_length=100)
-    contact = models.CharField(max_length=50)
-    num_contact = models.CharField(max_length=50)
+    contact = models.CharField(max_length=50, null=True, blank=True)
+    num_contact = models.CharField(max_length=50, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -323,25 +333,31 @@ class Ruta(models.Model):
         if self.control == 'd':
             ndays = self.frecuency
             return self.intervention_date + timedelta(days=ndays)
+        
+        if self.control == 'h' and not self.ot:
+            inv = self.frecuency - self.equipo.horometro
+            try:
+                ndays = int(inv/self.equipo.prom_hours)
+            except (ZeroDivisionError, AttributeError):
+                ndays = int(inv/1)
+        
         elif self.control == 'h':
             period = self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0
             inv = self.frecuency - period
             try:
                 ndays = int(inv/self.equipo.prom_hours)
             except (ZeroDivisionError, AttributeError):
-                ndays = int(self.frecuency/1)
-        elif self.control == 'h' and not self.ot:
-            inv = self.frecuency - self.equipo.horometro
-            try:
-                ndays = int(inv/self.equipo.prom_hours)
-            except (ZeroDivisionError, AttributeError):
-                ndays = int(self.frecuency/1)
+                ndays = int(inv/1)
         
         return date.today() + timedelta(days=ndays)
 
     @property
     def daysleft(self):
-        return (self.next_date - date.today()).days
+        if self.control == 'd':
+            return (self.next_date - date.today()).days
+        else:
+            return int(self.frecuency - self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0)
+             
 
     @property
     def percentage_remaining(self):

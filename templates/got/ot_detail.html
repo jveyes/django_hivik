@@ -39,7 +39,7 @@
                 {% endif %}
             </aside>
             
-            <table class="table-info">
+            <table class="table-list table-detail">
                 <thead>
                     <tr>
                         <th colspan="2">Información general</th>
@@ -90,7 +90,7 @@
     
         <div class="add-info">
             {% if failure_report or rutas %}
-                <table class="table-info">
+                <table class="table-list table-detail">
                     <thead>
                         {% if failure_report %}
                             <tr data-href="{% url 'got:failure-report-detail' failure_report.pk %}">
@@ -139,7 +139,7 @@
             </aside>    
 
             <div class="table-responsive">
-                <table class="table-info">
+                <table class="table-list table-detail">
                     <thead>
                         <tr>
                             <th colspan="5">
@@ -163,13 +163,13 @@
                                 <td>{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
                                 <td>{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
                                 <td class="nowrap">
-                                    <div class="btn-group dropstart">
+                                    <div class="btn-group">
                                         <button class="btn status {% if act.finished %}finished{% elif act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton{{ forloop.counter }}" data-bs-toggle="dropdown" aria-expanded="false">
                                             {% if act.finished %}Finalizado{% elif act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
                                         </button>
                                         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ forloop.counter }}">
                                             <li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
-                                            <li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
+                                            <li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task-ot' act.id %}">Finalizar</a></li>
                                             <li><a class="dropdown-item {% if not perms.got.change_task %}disabled{% endif %}" href="{% url 'got:task-update' act.id %}">Editar</a></li>                                  
                                             <li><button class="dropdown-item {% if not perms.got.delete_task %}disabled{% endif %}" type="button" data-bs-toggle="modal" data-bs-target="#delete{{ act.id }}">Eliminar</button></li>                                  
                                             <li><a class="dropdown-item {% if not perms.got.can_reschedule_task %}disabled{% endif %}" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
@@ -202,7 +202,7 @@
                             {% if act.news %}
                                 <tr>
                                     <td colspan="5">
-                                        <strong>Novedades: </strong>{{ act.news }}
+                                        <strong>Novedades:<br> </strong>{{ act.news|linebreaksbr }}
                                     </td>
                                 </tr>
                             {% endif %}
@@ -241,20 +241,21 @@
         {% endif %}
 	</main>
 
-    <!-- <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const taskRows = document.querySelectorAll('.task-row');
-    
-            taskRows.forEach(function (row) {
-                row.addEventListener('click', function () {
-                    let dropdownId = 'dropdownMenuButton' + (Array.from(taskRows).indexOf(row) + 1);
-                    let dropdownButton = document.getElementById(dropdownId);
-                    let bootstrapDropdown = new bootstrap.Dropdown(dropdownButton);
-    
-                    bootstrapDropdown.toggle();
-                });
-            });
+    <script>
+        document.addEventListener("shown.bs.dropdown", function (event) {
+            let tableResponsive = document.querySelector('.table-responsive');
+            if (tableResponsive) {
+                tableResponsive.style.overflow = 'visible';
+            }
         });
-    </script> -->
+
+        document.addEventListener("hidden.bs.dropdown", function (event) {
+            let tableResponsive = document.querySelector('.table-responsive');
+            if (tableResponsive) {
+                tableResponsive.style.overflow = 'auto';
+            }
+        });
+
+    </script>
     
 {% endblock %}

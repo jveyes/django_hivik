@@ -36,15 +36,15 @@
     </div>
    
     <div class="info-asset"> 
-        <table class="table-info">
+        <table class="table-list">
             <thead>
                 <tr>
-                    <th colspan="2" class="text-center">Información general</th>
+                    <th colspan="2" class="visible">Información general</th>
                 </tr>
             </thead>
             <tbody>
                 {% if asset.imagen %}
-                    <tr style="text-align: center; padding: 0;">
+                    <tr>
                         <td colspan="2">
                             <img src="{{ asset.imagen.url }}" id="asset">
                         </td>
@@ -106,14 +106,16 @@
     <div class="sistemas">
         
         {% if asset.system_set.all %}
-            <table class="table-info">
+            <table class="table-list table-detail">
                 <thead>
                     <tr>
                         <th colspan="{% if asset.area == 'a' %}4{% else %}5{% endif %}">
                             Sistemas
-                            <button type="button" class="add-sys" data-bs-toggle="modal" data-bs-target="#sysModal">
-                                <i class="bi bi-plus-circle"></i>
-                            </button>
+                            {% if perms.got.add_system %}
+                                <button type="button" class="add-sys" data-bs-toggle="modal" data-bs-target="#sysModal">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            {% endif %}
                         </th>
                     </tr>
                     <tr>
@@ -188,28 +190,28 @@
             <p>No hay sistemas registrados.</p>
         {% endif %}
     </div>
-    
+
 	<div class="rutinas">
-		<table class="table-info">
+		<table class="table-list table-detail">
 			<thead>
                 <tr>
-                    <th colspan="7">{{ mes }}/Rutinas de mantenimiento</th>
+                    <th colspan="7">Rutinas de mantenimiento/{{ mes }}</th>
                 </tr>
 				<tr>
 					<th scope="col">Equipo</th>
 					<th scope="col">Codigo</th>
 					<th scope="col">Frecuencia</th>
 					<th scope="col">Control</th>
-					<th scope="col">Fecha de ultima intervención</th>
-					<th scope="col">Fecha proxima intervención</th>
-					<th scope="col">Ultima Orden de trabajo</th>
+					<th scope="col">Ultima intervención</th>
+					<th scope="col">Proxima intervención</th>
+					<th scope="col">Orden de trabajo</th>
 				</tr>
 			</thead>
         	<tbody>
 		    	{% for ruta in page_obj_rutas %}
-					<tr class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
-					    <td scope="row" data-cell="Equipo">{{ ruta.equipo.name }}</td>
-					    <td scope="row" data-cell="Codigo">{{ ruta.name }}</td>
+					<tr data-href="{% url 'got:sys-detail-view' ruta.system.id 'sys' %}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
+					    <td scope="row" data-cell="Equipo">{% if ruta.equipo %}{{ ruta.equipo.name }}{% else %}{{ ruta.system.name }}{% endif %}</td>
+					    <td scope="row" data-cell="Codigo" class="nowrap">{{ ruta.name }}</td>
 					    <td data-cell="Frecuencia">{{ ruta.frecuency }}</td>
 					    <td data-cell="Control">{{ ruta.get_control_display }}</td>
 					    <td data-cell="Ultima intervención">{% if ruta.ot %}{{ ruta.intervention_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
@@ -218,7 +220,7 @@
 				    </tr>
                 {% empty %}
                     <tr>
-                        <td>No hay rutinas registradas.</td>
+                        <td colspan="6">No hay rutinas registradas para el mes {{mes}}.</td>
                     </tr>    
                 {% endfor %}
 			</tbody>
@@ -270,4 +272,17 @@
         </div>
     </div>
 </div>
+
+
+<script>
+	document.addEventListener("DOMContentLoaded", () => {
+		const rows = document.querySelectorAll("tr[data-href]");
+
+		rows.forEach(row => {
+			row.addEventListener("click", () => {
+				window.location.href = row.dataset.href;
+			})
+		})
+	})
+</script>
 {% endblock %}

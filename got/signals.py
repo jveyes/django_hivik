@@ -18,7 +18,7 @@ def update_equipo_horometro(sender, instance, **kwargs):
     #     promedio_horas=Avg('hour'))['promedio_horas']
 
     ultimos_30_registros = HistoryHour.objects.filter(
-        component=equipo).order_by('-report_date')[:30]
+        component=equipo).order_by('-report_date')[:10]
 
     # Calcula el promedio de horas de los últimos 30 registros.
     promedio_horas = ultimos_30_registros.aggregate(

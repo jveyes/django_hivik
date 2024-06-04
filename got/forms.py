@@ -92,6 +92,7 @@ class EquipoForm(forms.ModelForm):
             'initial_hours': 'Horas iniciales (Si aplica)',
             'lubricante': 'Lubricante (Si aplica)',
             'volumen': 'Capacidad lubricante - Galones (Si aplica)',
+            'subsystem': 'Categoria (Si aplica)'
             }
         widgets = {
             'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),

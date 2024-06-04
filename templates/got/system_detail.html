@@ -1,327 +1,55 @@
-{% extends "got/base_generic.html" %}
-
-{% block header %}
-	<a href="{% url 'got:asset-detail' system.asset.abbreviation %}"><i class="bi bi-arrow-90deg-left"></i></a>
-	{{ system.asset }}/{{ system.name }}
-{% endblock %}
+{% extends "got/base/base_detail.html" %}
 
 {% block content %}
 
 
-<ul class="nav nav-tabs justify-content-end" id="myTab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-tab-pane" type="button" role="tab" aria-controls="home-tab-pane" aria-selected="true">
-            Equipos
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-tab-pane" type="button" role="tab" aria-controls="profile-tab-pane" aria-selected="false">
-            Rutinas
-        </button>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'got:equipo-create' system.id %}">Crear nuevo componente</a>
-    </li>
-</ul>
-
-<div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel" aria-labelledby="home-tab" tabindex="0">
-	<h2 style="margin: 40px">Equipos</h2>
-		<!-- Equipos -->
-		{% if system.equipos.all %}
-		{% if  not is_structures %}
-				{% for equipo in system.equipos.all %}
-					<section>
-						<table class="table table-bordered shadow mt-0">
-					
-							<tbody>
-								<tr style="height: 20%;">
-									<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
-										<h2>{{equipo.name}}</h2>
-										{% if perms.got.add_equipo %}
-											<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
-											<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
-										{% endif %}
-										{% if equipo.tipo == 'r' %}
-											<a href="{% url 'got:horas' equipo.code %}" class="btn btn-secondary float-end">reporte horas</a>
-										{% endif %}
-									</td>
-									{% if equipo.imagen %}
-										<td rowspan="2"><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" width="600px"></td>
-									{% endif %}
-								</tr>
-								<tr>
-									<td>
-										<table style="margin-top: 0;">
-											<tr>
-												<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información General</strong></h4></td>
-											</tr>
-											<tr>
-												<td><strong>Código interno:</strong></td>  
-												<td>{{equipo.code}}</td>
-											</tr>
-											<tr>
-												<td class="pt-0"><strong>Modelo:</strong></td>  
-												<td class="pt-0">{{equipo.model}}</td>
-											</tr>
-											<tr>
-												<td class="pt-0"><strong>Marca:</strong></td>  
-												<td class="pt-0">{{equipo.marca}}</td>
-											</tr>
-											{% if system.asset.area == 'v' %}
-												<tr>
-													<td class="pt-0"><strong>Placa:</strong></td>  
-													<td class="pt-0">{{equipo.serial}}</td>
-												</tr>
-											{% else %}	
-												<tr>
-													<td class="pt-0"><strong>Serial:</strong></td>  
-													<td class="pt-0">{{equipo.serial}}</td>
-												</tr>
-											{% endif %}
-											<tr>
-												<td class="pt-0"><strong>Fecha ingreso:</strong></td>  
-												<td class="pt-0">{{equipo.date_inv}}</td>
-											</tr>
-											<tr>
-												<td class="pt-0"><strong>Estado:</strong></td>  
-												<td class="pt-0">{{system.get_state_display}}</td>
-											</tr>
-											<tr>	
-												<td class="pt-0"><strong>Ubicación:</strong></td>  
-												<td class="pt-0">{{system.location}}</td>
-											</tr>
-											{% if equipo.tipo == 'r' %}
-												<tr>
-													<td class="pt-0"><strong>Horometro:</strong></td>
-													<td class="pt-0">{{equipo.horometro}}</td>
-												</tr>
-												<tr>
-													<td class="pt-0"><strong>Prom hora/día:</strong></td>
-													<td class="pt-0">{{equipo.prom_hours}}</td>
-												</tr>
-											{% endif %}
-											<tr>
-												<td class="pt-0"><strong>Fabricante:</strong></td>  
-												<td class="pt-0">{{equipo.fabricante}}</td>
-											</tr>
-											<tr>
-												<td colspan="2" style="border-bottom: 0.5px solid gray;"><h4><strong>Información Específica del Equipo</strong></h4></td>
-											</tr>
-											<tr>
-												<td class="pt-0"><strong>Especificaciones:</strong></td>  
-												<td>{{equipo.feature|linebreaksbr }}</td>
-											</tr>
-											{% if equipo.manual_pdf %}
-												<tr>
-													<td class="pt-0"><strong>Manual:</strong></td>  
-													<td class="pt-0"><a href="{{ equipo.manual_pdf.url }}" target="_blank">Ver PDF</a></td>
-												</tr>
-											{% endif %}
-										</table>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-						{% if equipo.component_set.all %}
-						<div class="wrapper">
-							<table class="mt-2">
-								<caption>
-									Componentes
-								</caption>
-								<tr>
-									<th>Nombre</th>
-									<th>Presentación</th>
-									<th>Marca</th>
-									<th>Serial/referencia</th>
-								</tr>
-								{% for com in equipo.component_set.all %}
-									<tr>
-										<td data-cell="Nombre">{{com.name}}</td>
-										<td data-cell="Presentación">{{com.presentacion}}</td>
-										<td data-cell="Marca">{{com.marca}}</td>
-										<td data-cell="Serial/referencia">{{com.serial}}</td>
-									</tr>
-								{% endfor %}
-							</table>
-						</div>
-						{% endif %}
-					</section>
-				{% endfor %}
-				{% else %}
-				{% for equipo in system.equipos.all %}
-				<section>
-					<table class="table table-bordered shadow mt-0">
-				
-						<tbody>
-							<tr style="height: 20%;">
-								<td  style="width: 50%; background-color: rgb(52, 78, 107); color: white;">
-									<h2>{{equipo.name}}</h2>
-									{% if perms.got.add_equipo %}
-										<a href="{% url 'got:equipo-delete' equipo.code %}" style="color: white;"><i class="bi bi-file-earmark-minus-fill"></i></a>
-										<a href="{% url 'got:equipo-update' equipo.code %}" style="color: white;"><i class="bi bi-pen"></i></a>
-									{% endif %}
-								</td>
-								
-							</tr>
-							<tr>
-								{% if equipo.imagen %}
-									<td><img src="{{ equipo.imagen.url }}" alt="Imagen del Equipo" width="100%"></td>
-								{% endif %}
-							</tr>
-						</tbody>
-					</table>
-					{% if equipo.component_set.all %}
-					<div class="wrapper">
-						<table class="mt-2">
-							<caption>
-								Componentes
-							</caption>
-							<tr>
-								<th>Nombre</th>
-								<th>Presentación</th>
-								<th>Marca</th>
-								<th>Serial/referencia</th>
-							</tr>
-							{% for com in equipo.component_set.all %}
-								<tr>
-									<td data-cell="Nombre">{{com.name}}</td>
-									<td data-cell="Presentación">{{com.presentacion}}</td>
-									<td data-cell="Marca">{{com.marca}}</td>
-									<td data-cell="Serial/referencia">{{com.serial}}</td>
-								</tr>
-							{% endfor %}
-						</table>
-					</div>
-					{% endif %}
-				</section>
-			{% endfor %}
-				{% endif %}
-			{% else %}
-				<section class="container mt-5">
-					<p>No hay equipos registrados.</p>
-				</section>
-			{% endif %}
-
-
-
+<main class="sys">
+	<div class="title-sys">
+		<h1>
+			<a href="{% url 'got:asset-detail' system.asset.abbreviation %}"><i class="bi bi-arrow-90deg-left"></i></a>
+			{{ system.asset }}/{{ system.name }}
+			<box-icon name='chevron-left'></box-icon>
+		</h1>
 	</div>
-	<div class="tab-pane fade" id="profile-tab-pane" role="tabpanel" aria-labelledby="profile-tab" tabindex="0">
-<!-- Rutinas -->
-<section class="container mt-4">
-	<div>
-		<h2>Rutinas de mantenimiento</h2>
-		{% if perms.got.add_system %}
-			<a href="{% url 'got:ruta-create' system.id %}" class="btn btn-secondary">Crear nueva rutina</a>
-		{% endif %}
 	
-		{% if system.rutas.all %}
-			<table class="table table-striped mt-1">
-				<thead>
-					<tr>
-						<th scope="col">Codigo</th>
-						<th scope="col">Frecuencia</th>
-						<th scope="col">Control</th>
-						<th scope="col">Fecha de ultima intervención</th>
-						<th scope="col">Fecha proxima intervención</th>
-						<th scope="col">Ultima Orden de trabajo</th>
-						<th scope="col">Acciones</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for ruta in system.rutas.all %}
-					<tr data-bs-toggle="collapse" data-bs-target="#collapse{{ ruta.code }}" aria-expanded="false" aria-controls="collapse{{ ruta.code }}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
-						<th scope="row">{{ ruta.name }}</th>
-						<td>{{ ruta.frecuency }}</td>
-						<td>{{ ruta.get_control_display }}</td>
-						<td>{% if ruta.ot %}{{ ruta.intervention_date }}{% else %}---{% endif %}</td>
-						<td>{{ ruta.next_date }}</td>
-						<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
-						<td>
-							<button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#crearOtModal{{ ruta.code }}">
-								<i class="bi bi-clipboard-plus"></i>
-							</button>
+	<div class="nav-sys">
 
-							{% if perms.got.add_system %}
-								<a class="btn btn-secondary btn-sm" href="{% url 'got:ruta-update' ruta.code %}"><i class="bi bi-pen"></i></a>
-								<a class="btn btn-outline-danger btn-sm" href="{% url 'got:ruta-delete' ruta.code %}"><i class="bi bi-file-earmark-minus-fill"></i></a>
-							{% endif %}
-							</td>
-					</tr>
-
-					<!-- Modal para la creación de OT -->
-					<div class="modal fade" id="crearOtModal{{ ruta.code }}" tabindex="-1" aria-labelledby="crearOtModalLabel{{ ruta.code }}" aria-hidden="true">
-						<div class="modal-dialog">
-							<div class="modal-content">
-								<div class="modal-header">
-									<h5 class="modal-title" id="crearOtModalLabel{{ ruta.code }}">Crear Orden de Trabajo</h5>
-									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-								</div>
-								<div class="modal-body">
-									¿Desea crear una orden de trabajo para la rutina <strong>{{ ruta.name }}</strong>?
-								</div>
-								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-									<a href="{% url 'got:crear_ot_desde_ruta' ruta.code %}" class="btn btn-success">Crear OT</a>
-								</div>
-							</div>
-						</div>
-					</div>
-					<!-- Fin del Modal -->
-					
-					<!-- Actividades -->
-					<tr>
-						<td colspan="7">
-							<div id="collapse{{ ruta.code }}" class="collapse">
-								<h3>Actividades:</h3>
-
-								{% if perms.got.add_equipo %}
-									<a href="{% url 'got:task-create' ruta.code %}" class="btn btn-secondary"><i class="bi bi-clipboard2-plus-fill"></i></a>
-								{% endif %}
-								{% if ruta.dependencia %}
-									Relación con rutina {{ ruta.dependencia.name }}
-								{% endif %}
-
-								{% if ruta.task_set.all %}
-								<ol>
-									{% for task in ruta.task_set.all %}
-										<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
-
-											{% if perms.got.add_equipo %}
-												<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
-												<a href="{% url 'got:delete-task' task.id %}"><i class="bi bi-file-earmark-minus-fill"></i></a></li>
-											{% endif %}
-											
-										<ul style="list-style-type: none;">
-											{% if task.procedimiento %}
-											<li><strong>Procedimiento:<br></strong>{{ task.procedimiento|linebreaksbr }}</li>
-											{% endif %}
-											{% if task.suministros %}
-											<li><strong>Equipos, herramientas y consumibles:<br></strong>{{ task.suministros|linebreaksbr }}</li>
-											{% endif %}
-											{% if task.hse %}
-											<li><strong>Precauciones de seguridad:<br></strong>{{ task.hse|linebreaksbr }}</li>
-											{% endif %}
-										</ul>
-									{% endfor %}
-								</ol>
-								<hr>
-								{% else %}
-									<p>No hay actividades registradas.</p>
-								{% endif %}
-								<!-- Fin de actividades -->
-							</div>
-						</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		{% else %}
-			<p>No hay rutinas registradas.</p>
-		{% endif %}
+		<ul>
+			<li class="tit"><h5><a href="{% url 'got:sys-detail-view' system.id 'history' %}">Bitacora</a></h5></li>
+			<li class="tit"><h5><a href="{% url 'got:sys-detail-view' system.id 'sys' %}">Sistemas</a></h4></li>
+			{% for subsystem in unique_subsystems %}
+				<li><a href="{% url 'got:sys-detail-view' system.id subsystem %}">{{ subsystem }}</a></li>
+			{% endfor %}
+			<li class="tit"><h5><a href="{% url 'got:sys-detail-view' system.id 'equipment' %}">Equipos</a></h5></li>
+			<li><a class="{% if perms.got.add_equipo %}disabled{% endif %}" href="{% url 'got:equipo-create' system.id %}">Crear equipo</a></li>
+			{% for equipo in system.equipos.all %}
+				<li><a href="{% url 'got:sys-detail-view' system.id equipo.code %}">{{ equipo.name }}</a></li>
+			{% endfor %}
+		</ul>
 	</div>
-</section>
-<!-- Fin de rutinas -->
-</div>
+
+	{% if not view_type == 'history' %}	
+		{% include 'got/system_history.html' %} 
+	{% endif %}
+	
+	<div class="main-info-sys">
+
+		{% if view_type == 'history' %}	
+			{% include 'got/system_history.html' %} 
+        {% elif view_type == 'sys' %}
+            {% include 'got/system_equipos.html' %}
+		{% elif equipo %}
+			{% include 'got/equipment_detail.html' %}
+		{% else %}
+			{% include 'got/system_subsystems.html' %}
+        {% endif %}
+
+		
+
+	</div>
+
+			
+</main>
+
 
 {% endblock %}

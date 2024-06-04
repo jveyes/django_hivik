@@ -21,7 +21,9 @@ def copiar_rutas_de_sistema(system_id):
                     intervention_date=ruta.intervention_date,
                     suministros=ruta.suministros,
                     astillero=ruta.astillero,
-                    system=sistema
+                    system=sistema,
+                    equipo=ruta.equipo.code,
+                    dependencia=ruta.dependencia,
                 )
                 
                 # Copiar todas las tareas asociadas a cada ruta

@@ -158,16 +158,12 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
 
         if self.request.user.groups.filter(name='santamarta_station').exists():
-            systems = asset.system_set.filter(location='Santa Marta')
             sys = asset.system_set.filter(location='Santa Marta').exclude(state='x')
         elif self.request.user.groups.filter(name='ctg_station').exists():
-            systems = asset.system_set.filter(location='Cartagena')
             sys = asset.system_set.filter(location='Cartagena').exclude(state='x')
         elif self.request.user.groups.filter(name='guyana_station').exists():
-            systems = asset.system_set.filter(location='Guyana')
             sys = asset.system_set.filter(location='Guyana').exclude(state='x')
         else:
-            systems = asset.system_set.all()
             sys = asset.system_set.all()
 
         other_asset_systems = System.objects.filter(location=asset.name).exclude(asset=asset)
@@ -190,16 +186,13 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             "December": "Diciembre"
         }
 
-        # Obtener el nombre completo del mes actual en inglés
         current_month_name_en = datetime.now().strftime("%B")
-
-        # Obtener el nombre del mes actual en español
         current_month_name_es = month_names_es[current_month_name_en]
 
         # Filtrar las rutas que cumplen con la condición del mes y año actuales
         filtered_rutas = []
         for ruta in Ruta.objects.filter(system__in=sys):
-            if (ruta.next_date.month == current_month and ruta.next_date.year == current_year) or (ruta.intervention_date.month == current_month and ruta.intervention_date.year == current_year):
+            if (ruta.next_date.month <= current_month and ruta.next_date.year <= current_year) or (ruta.intervention_date.month == current_month and ruta.intervention_date.year == current_year) or (ruta.ot and ruta.ot.state == 'x'):
                 filtered_rutas.append(ruta)
 
         # Ordenar las rutas filtradas por next_date
@@ -240,6 +233,7 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             context = {'asset': asset, 'sys_form': sys_form}
             return render(request, self.template_name, context)
 
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # ---------------------------- Systems -------------------------------------- #
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
@@ -250,6 +244,40 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         system = self.get_object()
         context['is_structures'] = system.name.lower() == "estructuras"
+        
+        orders_list = Ot.objects.filter(system=system)
+
+        view_type = self.kwargs.get('view_type', 'sys')  # Default a 'history'
+        context['view_type'] = view_type
+
+        if view_type == 'sys':
+            paginator = Paginator(orders_list, 10)
+        else:
+            paginator = Paginator(orders_list, 4)
+
+        page = self.request.GET.get('page')  # obtiene el número de página de GET request
+        try:
+            orders = paginator.page(page)
+        except PageNotAnInteger:
+            # Si la página no es un entero, entregar la primera página.
+            orders = paginator.page(1)
+        except EmptyPage:
+            # Si la página está fuera de rango, entregar la última página de resultados.
+            orders = paginator.page(paginator.num_pages)
+
+        context['orders'] = orders
+
+        try:
+            equipment = Equipo.objects.get(code=view_type)
+            context['equipo'] = equipment
+        except Equipo.DoesNotExist:
+            equipments = Equipo.objects.filter(system=system, subsystem=view_type)
+            context['equipos'] = equipments
+
+        subsystems = Equipo.objects.filter(system=system).exclude(subsystem__isnull=True).exclude(subsystem__exact='').values_list('subsystem', flat=True)
+
+        # Usar set para eliminar duplicados, si el distinct no está funcionando como se espera
+        context['unique_subsystems'] = list(set(subsystems))
         
         return context
 
@@ -715,9 +743,7 @@ class OtUpdate(UpdateView):
 
 
 class OtDelete(DeleteView):
-    '''
-    Vista formulario para confirmar eliminacion de ordenes de trabajo (v1.0)
-    '''
+
     model = Ot
     success_url = reverse_lazy('got:ot-list')
 
@@ -751,6 +777,56 @@ class Finish_task(UpdateView):
 
     def form_valid(self, form):
         return super().form_valid(form)
+
+    def form_invalid(self, form, **kwargs):
+        return self.render_to_response(self.get_context_data(form=form, **kwargs))
+    
+
+from django.http import HttpResponseRedirect
+
+class Finish_task_ot(UpdateView):
+
+    model = Task
+    form_class = FinishTask
+    template_name = 'got/task_finish_form.html'
+    second_form_class = UploadImages
+    # success_url = reverse_lazy('got:my-tasks')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'image_form' not in context:
+            context['image_form'] = self.second_form_class()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        image_form = self.second_form_class(request.POST, request.FILES)
+        if form.is_valid() and image_form.is_valid():
+            return self.form_valid(form, image_form)
+
+            # response = super().form_valid(form)
+            # for img in request.FILES.getlist('file_field'):
+            #     Image.objects.create(task=self.object, image=img)
+            # return response
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form, image_form):
+        self.object = form.save()
+
+        # Guardar las imágenes
+        for img in self.request.FILES.getlist('file_field'):
+            Image.objects.create(task=self.object, image=img)
+
+        # Aquí se establece el success_url dinámicamente
+        ot = self.object.ot
+        success_url = reverse('got:ot-detail', kwargs={'pk': ot.pk})
+        return HttpResponseRedirect(success_url)
+        # response = super().form_valid(form)
+        # ot = self.object.ot 
+        # self.success_url = reverse('got:ot-detail', kwargs={'pk': ot.pk})
+        # return response
 
     def form_invalid(self, form, **kwargs):
         return self.render_to_response(self.get_context_data(form=form, **kwargs))

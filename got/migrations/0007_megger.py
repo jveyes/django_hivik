@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
                 ('excitatriz_pf_obs_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_p_pi_1min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_p_pi_10min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('rotor_p_pi_obs_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
+                ('rotor_p_pi_obs_l_tierra', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
                 ('rotor_p_pf_1min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_p_pf_10min_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),
                 ('rotor_p_pf_obs_l_tierra', models.DecimalField(decimal_places=2, max_digits=5)),

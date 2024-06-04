@@ -61,10 +61,10 @@
 
     
     <div class="table-responsive">
-    <table class="table-content">
+    <table class="table-list">
         <thead>
             <tr>
-                <th scope="col">OT-#</th>
+                <th scope="col">OT#</th>
                 <th scope="col">Fecha</th>
                 <th scope="col">Descripción</th>
                 <th scope="col">Sistema</th>
@@ -73,7 +73,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- class=" -->
             {% for ot in ot_list %}
                 <tr  data-href="{{ ot.get_absolute_url }}">
                     <td class="nowrap" data-cell="OT">OT-{{ ot.num_ot }}</td>

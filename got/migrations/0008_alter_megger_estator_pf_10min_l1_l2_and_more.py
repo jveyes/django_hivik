@@ -270,9 +270,4 @@ class Migration(migrations.Migration):
             name='rotor_p_pi_1min_l_tierra',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
         ),
-        migrations.AlterField(
-            model_name='megger',
-            name='rotor_p_pi_obs_l_tierra',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True),
-        ),
     ]
