@@ -37,7 +37,9 @@
 										{% if ruta.maintenance_status == 'c' %}Completado{%elif ruta.maintenance_status == 'p' %}Planeado{%elif ruta.maintenance_status == 'e' %}Sin información{% else %}Retrasado{% endif %}
 									</button>
 									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-										<li><a class="dropdown-item" href="{% url 'got:sys-detail-view' system.id ruta.equipo.code %}">Ver detalle</a></li>
+										{% if ruta.equipo %}
+											<li><a class="dropdown-item" href="{% url 'got:sys-detail-view' system.id ruta.equipo.code %}">Ver detalle</a></li>
+										{% endif %}
 										<li>
 											<button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#crearOtModal{{ ruta.code }}">
 												Crear nueva OT

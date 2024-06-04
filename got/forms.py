@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Megger
     )
 
 
@@ -533,4 +533,32 @@ class OperationForm(forms.ModelForm):
             'start': 'Fecha de Inicio',
             'end': 'Fecha de Fin',
             'requirements': 'Requerimientos',
+        }
+
+
+from .models import Location
+
+class LocationForm(forms.ModelForm):
+    class Meta:
+        model = Location
+        fields = ['name', 'direccion', 'contact', 'num_contact', 'latitude', 'longitude']
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput()
+        }
+
+
+class MeggerForm(forms.ModelForm):
+    class Meta:
+        model = Megger
+        fields = '__all__'
+        widgets = {
+            'fecha': XYZ_DateInput(format=['%Y-%m-%d'],),
+            'estator_pi_1min_l1_tierra': forms.NumberInput(attrs={'class': 'form-control'}),
+            # Añade widgets para los demás campos
+        }
+        labels = {
+            'fecha': 'Fecha',
+            'equipo': 'Nombre de equipo',
+            'estator_pi_1min_l1_tierra': 'Prueba inicial',
         }

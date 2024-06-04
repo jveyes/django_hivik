@@ -17,13 +17,11 @@ from django.utils import timezone
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Megger, Location
 )
 from .forms import (
-    RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm,
-    EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm,EquipoFormUpdate,
-    OtFormNoSup, ActFormNoSup, UploadImages, OperationForm
+    RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
+    ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -296,6 +294,22 @@ class SysUpdate(UpdateView):
 
     model = System
     form_class = SysForm
+    template_name = 'got/system_form.html'
+
+
+def add_location(request):
+    if request.method == 'POST':
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            location = form.save()
+            return redirect('view-location', pk=location.pk)  # Redirige a una URL de éxito
+    else:
+        form = LocationForm()
+    return render(request, 'got/add_location.html', {'form': form})
+
+def view_location(request, pk):
+    location = get_object_or_404(Location, pk=pk)
+    return render(request, 'got/view_location.html', {'location': location})
 
 # ---------------------------- Equipos ---------------------------- #
 class EquipoCreateView(CreateView):
@@ -1565,3 +1579,10 @@ def generate_asset_pdf(request, asset_id):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+
+# class Meggeado(LoginRequiredMixin, generic.ListView):
+
+#     model = Megger
+#     template_name = 'got/assignedtasks_list_pendient.html'
+#     paginate_by = 15

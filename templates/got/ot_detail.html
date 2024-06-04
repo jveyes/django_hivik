@@ -7,8 +7,9 @@
         <div class="title">
             <h1>
                 {% if perms.got.view_ot %}
-                    <a href="{% url 'got:ot-list' %}"><i class="bi bi-arrow-90deg-left"></i></a>
+                    <a href="{% url 'got:ot-list' %}?asset_id={{ ot.system.asset.abbreviation }}"><i class="bi bi-arrow-90deg-left add-more"></i></a>
                 {% endif %}
+                {{ ot.system.asset }}/
                 Orden de trabajo #{{ ot.num_ot }}
             </h1>
         </div>

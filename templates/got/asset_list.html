@@ -23,24 +23,6 @@
 
 {% block content %}
 
-    <aside>
-        {% if not request.user|has_group:"buzos_members" %}
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    Filtrar por area
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}">Mostrar todos</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=a">Barcos</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=b">Buceo</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=o">Oceanografia</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=l">Locativo</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=v">Vehiculos</a></li>
-                    <li><a class="dropdown-item" href="{% url 'got:asset-list' %}?area=x">Apoyo</a></li>
-                </ul>
-            </div>
-        {% endif %}
-    </aside>
 
     <table class="table-list">
         <thead>

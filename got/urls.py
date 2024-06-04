@@ -16,7 +16,7 @@ urlpatterns = [
     # ---------------------------- Systems view ----------------------------- #
     path("sys/<int:pk>/", views.SysDetailView.as_view(), name="sys-detail"),
     path('sys/<int:pk>/<str:view_type>/', views.SysDetailView.as_view(), name='sys-detail-view'),
-    path('sys/<int:pk>/update/', views.SysUpdate.as_view(), name='sys-update'),
+    path('system/<int:pk>/update/', views.SysUpdate.as_view(), name='sys-update'),
     path('sys/<int:pk>/delete/', views.SysDelete.as_view(), name='sys-delete'),
 
     # ---------------------------- Equipos view ----------------------------- #
@@ -77,4 +77,8 @@ urlpatterns = [
     path("operation/<int:pk>/delete/", views.OperationDelete.as_view(), name="operation-delete"),
 
     path('assets/<str:asset_id>/generate-pdf/', views.generate_asset_pdf, name='generate_asset_pdf'),
+
+
+    path('add-location/', views.add_location, name='add-location'),
+    path('location/<int:pk>/', views.view_location, name='view-location'),
 ]
