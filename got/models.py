@@ -356,8 +356,7 @@ class Ruta(models.Model):
         if self.control == 'd':
             return (self.next_date - date.today()).days
         else:
-            return int(self.frecuency - self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0)
-             
+            return int(self.frecuency - (self.equipo.hours.filter(report_date__gte=self.intervention_date, report_date__lte=date.today()).aggregate(total_hours=Sum('hour'))['total_hours'] or 0))
 
     @property
     def percentage_remaining(self):
