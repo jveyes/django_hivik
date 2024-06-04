@@ -24,7 +24,7 @@
 				<tbody>
 					{% for ruta in system.rutas.all %}
 						<tr id="row{{forloop.counter}}" onclick="toggleDetails('details{{forloop.counter}}', this, event)" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
-							<td class="nowrap">{% if ruta.equipo %}{{ ruta.equipo }}{% else %}{{ ruta.system }}{% endif %}</td>
+							<td class="nowrap">{% if ruta.equipo %}{{ ruta.equipo }}{% else %}{{ ruta.system.name }}{% endif %}</td>
 							<td class="nowrap">{{ ruta.name }}</td>
 							<td>{{ ruta.frecuency }}</td>
 							<td>{{ ruta.get_control_display }}</td>
@@ -33,7 +33,7 @@
 							<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
 							<td data-cell="Acciones">
 								<div class="dropdown">
-									<button class="btn status {% if ruta.maintenance_status == 'c' %}finished{%elif ruta.maintenance_status == 'p' %}pending{%elif ruta.maintenance_status == 'e' %}shipped{% else %}closed{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+									<button class="btn status {% if ruta.maintenance_status == 'c' %}finished{%elif ruta.maintenance_status == 'p' %}pending{%elif ruta.maintenance_status == 'e' %}shipped{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
 										{% if ruta.maintenance_status == 'c' %}Completado{%elif ruta.maintenance_status == 'p' %}Planeado{%elif ruta.maintenance_status == 'e' %}Sin información{% else %}Retrasado{% endif %}
 									</button>
 									<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
