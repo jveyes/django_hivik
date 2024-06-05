@@ -1,0 +1,11 @@
+{% extends "got/base_generic.html" %}
+
+{% block content %}
+<h1>Añadir Documento para {{ asset }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Subir</button>
+    </form>
+    <a href="{% url 'got:asset-detail' pk=asset.abbreviation %}">Volver al detalle del activo</a>
+{% endblock %}

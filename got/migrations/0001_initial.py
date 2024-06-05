@@ -89,6 +89,7 @@ class Migration(migrations.Migration):
                 ('volumen', models.IntegerField(blank=True, default=0, null=True)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='equipos', to='got.system')),
                 ('tipo', models.CharField(choices=[('r', 'Rotativo'), ('nr', 'No rotativo')], default='nr', max_length=2)),
+                ('subsystem', models.CharField(blank=True, max_length=100, null=True)),
             ],
             options={
                 'ordering': ['name', 'code'],

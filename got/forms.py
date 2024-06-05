@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Megger
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document#, Megger
     )
 
 
@@ -536,8 +536,6 @@ class OperationForm(forms.ModelForm):
         }
 
 
-from .models import Location
-
 class LocationForm(forms.ModelForm):
     class Meta:
         model = Location
@@ -548,17 +546,30 @@ class LocationForm(forms.ModelForm):
         }
 
 
-class MeggerForm(forms.ModelForm):
+class DocumentForm(forms.ModelForm):
     class Meta:
-        model = Megger
-        fields = '__all__'
+        model = Document
+        fields = ['description', 'file']
         widgets = {
-            'fecha': XYZ_DateInput(format=['%Y-%m-%d'],),
-            'estator_pi_1min_l1_tierra': forms.NumberInput(attrs={'class': 'form-control'}),
-            # Añade widgets para los demás campos
+            'file': forms.FileInput(attrs={'class': 'form-control'})
         }
         labels = {
-            'fecha': 'Fecha',
-            'equipo': 'Nombre de equipo',
-            'estator_pi_1min_l1_tierra': 'Prueba inicial',
+            'description': 'Nombre del documento',
+            'file': 'Documento'
         }
+
+
+# class MeggerForm(forms.ModelForm):
+#     class Meta:
+#         model = Megger
+#         fields = '__all__'
+#         widgets = {
+#             'fecha': XYZ_DateInput(format=['%Y-%m-%d'],),
+#             'estator_pi_1min_l1_tierra': forms.NumberInput(attrs={'class': 'form-control'}),
+#             # Añade widgets para los demás campos
+#         }
+#         labels = {
+#             'fecha': 'Fecha',
+#             'equipo': 'Nombre de equipo',
+#             'estator_pi_1min_l1_tierra': 'Prueba inicial',
+#         }

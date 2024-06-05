@@ -17,11 +17,12 @@ from django.utils import timezone
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Megger, Location
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document#Megger,
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
-    ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm
+    ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
+    DocumentForm
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -937,9 +938,7 @@ class TaskUpdaterut(UpdateView):
 
 
 class TaskDeleterut(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
+
     model = Task
 
     def get_success_url(self):
@@ -1580,6 +1579,24 @@ def generate_asset_pdf(request, asset_id):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
+
+class DocumentCreateView(generic.View):
+    form_class = DocumentForm
+    template_name = 'got/add-document.html'
+
+    def get(self, request, asset_id):
+        asset = get_object_or_404(Asset, pk=asset_id)
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form, 'asset': asset})
+
+    def post(self, request, asset_id):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.asset = get_object_or_404(Asset, pk=asset_id)
+            document.save()
+            return redirect('got:asset-detail', pk=asset_id)
+        return render(request, self.template_name, {'form': form})
 
 # class Meggeado(LoginRequiredMixin, generic.ListView):
 
