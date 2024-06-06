@@ -30,7 +30,7 @@
 					<td data-cell="Solicitante">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
 					<td data-cell="Estado">
                         <div class="dropdown">
-							<button class="btn status {% if rq.approved %}pending{% elif rq.num_sc %}finished{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+							<button class="btn status {% if rq.num_sc %}finished{% elif rq.approved %}pending{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
 								{% if rq.num_sc %}Tramitado{% elif rq.approved %}Aprobado{% else %}No aprobado{% endif %}
 							</button>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
