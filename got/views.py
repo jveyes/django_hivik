@@ -199,8 +199,8 @@ def update_sc(request, pk):
         num_sc = request.POST.get('num_sc')
         solicitud.num_sc = num_sc
         solicitud.save()
-        return redirect('got/rq-list')  # Asegúrate de redirigir a la vista adecuada
-    return redirect('got/rq-list') 
+        return redirect('got:rq-list')  # Asegúrate de redirigir a la vista adecuada
+    return redirect('got:rq-list') 
 
 class Reschedule_task(UpdateView):
 

@@ -31,7 +31,7 @@
 					<td data-cell="Estado">
                         <div class="dropdown">
 							<button class="btn status {% if rq.approved %}pending{% elif rq.num_sc %}finished{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-								{% if rq.approved %}Aprobado{% elif rq.num_sc %}Tramitado{% else %}No aprobado{% endif %}
+								{% if rq.num_sc %}Tramitado{% elif rq.approved %}Aprobado{% else %}No aprobado{% endif %}
 							</button>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 {% if not rq.approved %}
