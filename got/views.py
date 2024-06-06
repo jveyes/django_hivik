@@ -182,11 +182,13 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         Solicitante: {instance.solicitante.get_full_name()}
         OT: {instance.ot.num_ot if instance.ot else "N/A"}
         Asset: {instance.asset.name if instance.asset else "N/A"}
-        Suministros: {instance.suministros}
+        Suministros: 
+        
+        {instance.suministros}
 
         Estado de aprobación: {"Aprobado" if instance.approved else "No aprobado"}
         '''
-        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
@@ -197,8 +199,8 @@ def update_sc(request, pk):
         num_sc = request.POST.get('num_sc')
         solicitud.num_sc = num_sc
         solicitud.save()
-        return redirect('solicitud-list')  # Asegúrate de redirigir a la vista adecuada
-    return redirect('solicitud-list') 
+        return redirect('got/solicitud-list')  # Asegúrate de redirigir a la vista adecuada
+    return redirect('got/solicitud-list') 
 
 class Reschedule_task(UpdateView):
 
