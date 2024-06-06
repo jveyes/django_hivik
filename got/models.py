@@ -474,7 +474,7 @@ class Solicitud(models.Model):
         ('r', 'Repuestos'),
     )
 
-    creation_date = models.DateField(auto_now_add=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     solicitante = models.ForeignKey(User, on_delete=models.CASCADE)
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True)

@@ -23,10 +23,10 @@
         <tbody>
             {% for rq in solicitud_list %}
 				<tr data-href="#">
-					<td data-cell="Fecha">{{ rq.creation_date|date:"d/m/Y" }}</td>
+					<td data-cell="Fecha" class="nowrap">{{ rq.creation_date|date:"d/m/Y H:i" }}</td>
 					<td data-cell="Orden de trabajo">{% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}</td>
 					<td data-cell="Solicitud">{{ rq.suministros|linebreaks }}</td>
-					<td data-cell="Centro de costo">{{ rq.asset.name}}</td>
+					<td data-cell="Centro de costo" class="nowrap">{{ rq.asset.name}}</td>
 					<td data-cell="Solicitante">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
 					<td data-cell="Estado">
                         <div class="dropdown">
