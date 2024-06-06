@@ -74,8 +74,10 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=50)),
                 ('direccion', models.CharField(max_length=100)),
-                ('contact', models.CharField(max_length=50)),
-                ('num_contact', models.CharField(max_length=50)),
+                ('contact', models.CharField(blank=True, max_length=50, null=True)),
+                ('num_contact', models.CharField(blank=True, max_length=50, null=True)),
+                ('latitude', models.DecimalField(blank=True, decimal_places=20, max_digits=20, null=True)),
+                ('longitude', models.DecimalField(blank=True, decimal_places=20, max_digits=20, null=True)),
             ],
         ),
         migrations.CreateModel(

@@ -74,4 +74,30 @@
     <img src="{{ i.image.url }}" width=200>
 {% endfor %}
 
+<h4>Solicitudes asociadas a la OT - {{ task.ot.num_ot }}</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Suministros</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for solicitud in task.ot.solicitud_set.all %}
+            <tr>
+                <td>{{ solicitud.creation_date|date:"d/m/Y" }}</td>
+                <td>{{ solicitud.suministros }}</td>
+                <td>{{ solicitud.get_seccion_display }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">No hay solicitudes asociadas a esta OT.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+
 {% endblock %}

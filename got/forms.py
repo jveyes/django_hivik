@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document#, Megger
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document, Megger, Solicitud
     )
 
 
@@ -556,6 +556,42 @@ class DocumentForm(forms.ModelForm):
         labels = {
             'description': 'Nombre del documento',
             'file': 'Documento'
+        }
+
+
+class SolicitudForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ['suministros']
+        labels = {
+            'suministros': 'Suministros'
+        }
+        widgets = {
+            'suministros': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }
+
+class ScForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ['num_sc']
+        labels = {
+            'num_sc': 'Numero de solicitud'
+        }
+        widgets = {
+            'num_sc': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+
+class SolicitudAssetForm(forms.ModelForm):
+    class Meta:
+        model = Solicitud
+        fields = ['suministros', 'seccion']
+        labels = {
+            'suministros': 'Solicitud',
+            'seccion': 'Sección'
+        }
+        widgets = {
+            'suminsitros': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
 

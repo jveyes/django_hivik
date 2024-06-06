@@ -67,6 +67,13 @@
                         </a>
                     </li>
                 {% endif %}
+                {% if request.user|has_group:"super_members" %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'rq-list' %}active{% endif %}" href="{% url 'got:rq-list' %}">
+                            Solicitudes
+                        </a>
+                    </li>
+                {% endif %}
                 {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'got:dashboard' %}">
@@ -77,7 +84,7 @@
                 {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'operation-list' %}active{% endif %}" href="{% url 'got:operation-list' %}">
-                            Operaciones
+                            Proyectos
                         </a>
                     </li>
                 {% endif %}

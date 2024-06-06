@@ -13,7 +13,7 @@
             {{ asset.name }}
         </h1>
 
-        <ul class="nav nav-justified">
+        <ul class="nav nav-justified" style="font-size: 0.9rem;">
             <li class="nav-item">
                 <form action="{% url 'got:generate_asset_pdf' asset.abbreviation %}" method="POST">{% csrf_token %}
                     <button type="submit" class="nav-link">Plan de mantenimiento</button>
@@ -36,8 +36,41 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'got:add-document' asset_id=asset.abbreviation %}">Añadir documento</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#addSolicitudModal">Solicitar materiales/servicios</a>
+            </li>
         </ul>
     </div>
+
+    <!-- Modal para nueva solicitud de suministros -->
+<div class="modal fade" id="addSolicitudModal" tabindex="-1" aria-labelledby="addSolicitudModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSolicitudModalLabel">Nueva Solicitud para {{ asset.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'got:create-solicitud-asset' asset.abbreviation %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="seccion" class="form-label">Sección</label>
+                        <select class="form-control" id="seccion" name="seccion">
+                            <option value="c">Consumibles</option>
+                            <option value="h">Herramientas</option>
+                            <option value="r">Repuestos</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="suministros" class="form-label">Suministros requeridos</label>
+                        <textarea class="form-control" id="suministros" name="suministros" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
    
     <div class="info-asset"> 
         <table class="table-list">

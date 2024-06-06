@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views import generic
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
 from django.template.loader import get_template
@@ -14,15 +14,18 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.views import View
+
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document#Megger,
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document, Megger, Solicitud
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
-    DocumentForm
+    DocumentForm, SolicitudForm
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -117,6 +120,86 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
+from .forms import SolicitudAssetForm
+
+def create_solicitud_asset(request, asset_id):
+    asset = get_object_or_404(Asset, pk=asset_id)
+    if request.method == 'POST':
+        form = SolicitudAssetForm(request.POST)
+        if form.is_valid():
+            solicitud = form.save(commit=False)
+            solicitud.asset = asset
+            solicitud.solicitante = request.user
+            solicitud.save()
+            # Redirigir a la vista de detalle del asset, o donde consideres apropiado
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    else:
+        form = SolicitudAssetForm()
+    return render(request, 'asset/solicitud_form.html', {'form': form, 'asset': asset})
+
+class CreateSolicitudView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        ot_id = request.POST.get('ot_id')
+        asset_id = request.POST.get('asset_id')
+        suministros = request.POST.get('suministros')
+        
+        Solicitud.objects.create(
+            solicitante=request.user,
+            ot_id=ot_id,
+            asset_id=asset_id,
+            suministros=suministros,
+            approved=False
+        )
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+class EditSolicitudView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        solicitud = get_object_or_404(Solicitud, pk=kwargs['pk'])
+        suministros = request.POST.get('suministros')
+        if suministros:
+            solicitud.suministros = suministros
+            solicitud.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    
+
+class ApproveSolicitudView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        solicitud = Solicitud.objects.get(id=kwargs['pk'])
+        solicitud.approved = not solicitud.approved
+        solicitud.save()
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+@receiver(post_save, sender=Solicitud)
+def send_email_on_new_solicitud(sender, instance, created, **kwargs):
+    if created:  # Comprueba si se ha creado una nueva solicitud
+        subject = f'Nueva Solicitud de Suministros: {instance}'
+        message = f'''
+        Ha sido creada una nueva solicitud de suministros:
+        Fecha: {instance.creation_date.strftime("%d/%m/%Y")}
+        Solicitante: {instance.solicitante.get_full_name()}
+        OT: {instance.ot.num_ot if instance.ot else "N/A"}
+        Asset: {instance.asset.name if instance.asset else "N/A"}
+        Suministros: {instance.suministros}
+
+        Estado de aprobación: {"Aprobado" if instance.approved else "No aprobado"}
+        '''
+        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
+        send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
+    
+
+@login_required
+def update_sc(request, pk):
+    if request.method == 'POST':
+        solicitud = get_object_or_404(Solicitud, pk=pk)
+        num_sc = request.POST.get('num_sc')
+        solicitud.num_sc = num_sc
+        solicitud.save()
+        return redirect('solicitud-list')  # Asegúrate de redirigir a la vista adecuada
+    return redirect('solicitud-list') 
+
 class Reschedule_task(UpdateView):
 
     model = Task
@@ -144,6 +227,12 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(area=area)
 
         return queryset
+
+
+class SolicitudesListView(LoginRequiredMixin, generic.ListView):
+    
+    model = Solicitud
+    paginate_by = 15
 
 
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
@@ -232,7 +321,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             context = {'asset': asset, 'sys_form': sys_form}
             return render(request, self.template_name, context)
 
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 # ---------------------------- Systems -------------------------------------- #
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
@@ -797,8 +885,6 @@ class Finish_task(UpdateView):
         return self.render_to_response(self.get_context_data(form=form, **kwargs))
     
 
-from django.http import HttpResponseRedirect
-
 class Finish_task_ot(UpdateView):
 
     model = Task
@@ -1068,9 +1154,7 @@ def RutaListView(request):
 
 
 class RutaCreate(CreateView):
-    '''
-    Vista formulario para crear ordenes de trabajo (v1.0)
-    '''
+
     model = Ruta
     form_class = RutaForm
 
@@ -1597,6 +1681,33 @@ class DocumentCreateView(generic.View):
             document.save()
             return redirect('got:asset-detail', pk=asset_id)
         return render(request, self.template_name, {'form': form})
+    
+
+class SolicitudCreate(CreateView):
+
+    model = Solicitud
+    form_class = SolicitudForm
+
+    def form_valid(self, form):
+        # Obtener el valor del parámetro pk desde la URL
+        pk = self.kwargs['pk']
+        system = get_object_or_404(System, pk=pk)
+
+        # Establecer el valor del campo system en el formulario
+        form.instance.system = system
+
+        # Llamar al método form_valid de la clase base
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        ruta = self.object
+        # Redirigir a la vista de detalle del objeto recién creado
+        return reverse('got:sys-detail', args=[ruta.system.id])
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
+        return kwargs
 
 # class Meggeado(LoginRequiredMixin, generic.ListView):
 

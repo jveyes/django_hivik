@@ -75,10 +75,34 @@
 								{% if perms.got.can_reschedule_task %}
 									<li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
 								{% endif %}
+								<li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#solicitudModal{{ act.id }}">Solicitudes</a></li>
 							</ul>
 						</div>
 					</td>
 				</tr>
+
+				<div class="modal fade" id="solicitudModal{{ act.id }}" tabindex="-1" aria-labelledby="solicitudModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="solicitudModalLabel">Nueva Solicitud para OT-{{ act.ot.num_ot }}</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+							</div>
+							<div class="modal-body">
+								<form method="post" action="{% url 'got:create-solicitud' %}">
+									{% csrf_token %}
+									<input type="hidden" name="ot_id" value="{{ act.ot.num_ot }}">
+									<input type="hidden" name="asset_id" value="{{ act.ot.system.asset.abbreviation }}">
+									<div class="mb-3">
+										<label for="suministros" class="form-label">Suministros requeridos</label>
+										<textarea class="form-control" id="suministros" name="suministros" rows="3"></textarea>
+									</div>
+									<button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
 			{% empty %}
 				<tr>
 					<td data-cell="Actividades" colspan="6">No hay actividades registrados.</td>

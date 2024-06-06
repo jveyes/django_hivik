@@ -1,0 +1,108 @@
+{% extends "got/base_generic.html" %}
+{% load my_tags %}
+
+
+{% block header %}
+    Solicitudes de materiales/servicios
+{% endblock %}
+
+{% block content %}
+
+
+    <table class="table-list">
+        <thead>
+            <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Orden de trabajo</th>
+                <th scope="col">Solicitud</th>
+                <th scope="col">Centro de costos</th>
+                <th scope="col">Solicitante</th>
+                <th scope="col">Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rq in solicitud_list %}
+				<tr data-href="#">
+					<td data-cell="Fecha">{{ rq.creation_date|date:"d/m/Y" }}</td>
+					<td data-cell="Orden de trabajo">{% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}</td>
+					<td data-cell="Solicitud">{{ rq.suministros|linebreaks }}</td>
+					<td data-cell="Centro de costo">{{ rq.asset.name}}</td>
+					<td data-cell="Solicitante">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
+					<td data-cell="Estado">
+                        <div class="dropdown">
+							<button class="btn status {% if rq.approved %}pending{% elif rq.num_sc %}finished{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+								{% if rq.approved %}Aprobado{% elif rq.num_sc %}Tramitado{% else %}No aprobado{% endif %}
+							</button>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% if not rq.approved %}
+								<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editSolicitudModal{{ rq.id }}">Editar</a></li>
+                                <li><a class="dropdown-item" href="{% url 'got:approve-solicitud' rq.id %}">{% if not rq.approved %}Aprobar{% else %}Desaprobar{% endif %}</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#scModal{{ rq.id }}">Tramitar</a></li>
+                                {% endif %}
+							</ul>
+						</div>
+                    </td>
+				</tr>
+                <div class="modal fade" id="editSolicitudModal{{ rq.id }}" tabindex="-1" aria-labelledby="editSolicitudModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editSolicitudModalLabel">Editar Solicitud para OT-{{ rq.ot.num_ot }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'got:edit-solicitud' rq.id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="suministros" class="form-label">Suministros requeridos</label>
+                                        <textarea class="form-control" id="suministros" name="suministros" rows="8">{{ rq.suministros }}</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="scModal{{ rq.id }}" tabindex="-1" aria-labelledby="scModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="scModalLabel">Tramitar Solicitud OT-{{ rq.ot.num_ot }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'got:update-sc' rq.id %}">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="num_sc{{ rq.id }}" class="form-label">Número de SC</label>
+                                        <input type="text" class="form-control" id="num_sc{{ rq.id }}" name="num_sc" value="{{ rq.num_sc }}">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Guardar Tramitación</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <tr>
+                    <td colspan="6">No hay solicitudes registradas.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const rows = document.querySelectorAll("tr[data-href]");
+
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                })
+            })
+        })
+    </script>
+
+{% endblock %}
