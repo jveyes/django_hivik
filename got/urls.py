@@ -91,4 +91,6 @@ urlpatterns = [
     path('solicitud/update-sc/<int:pk>/', views.update_sc, name='update-sc'),
 
     path('solicitud-asset/<str:asset_id>/', views.create_solicitud_asset, name='create-solicitud-asset'),
+
+    path('system/<str:asset_id>/<int:system_id>/pdf/', views.generate_system_pdf_with_attachments, name='generate-system-pdf'),
 ]

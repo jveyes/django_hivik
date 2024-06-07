@@ -244,8 +244,6 @@ class CreateSolicitudView(LoginRequiredMixin, View):
 #     return render(request, 'got/assignedtasks_list_pendient.html', context)
 
 
-
-
 class EditSolicitudView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         solicitud = get_object_or_404(Solicitud, pk=kwargs['pk'])
@@ -1762,6 +1760,77 @@ def generate_asset_pdf(request, asset_id):
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
+
+import requests
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from .models import Asset, System, Ruta
+from django.template.loader import get_template
+from io import BytesIO
+import PyPDF2
+from xhtml2pdf import pisa  # Asegúrate de tener esta librería instalada
+
+def generate_system_pdf_with_attachments(request, asset_id, system_id):
+    asset = get_object_or_404(Asset, pk=asset_id)
+    system = get_object_or_404(System, pk=system_id, asset=asset)
+
+    rutas_data = []
+    rutas = Ruta.objects.filter(system=system).prefetch_related('task_set')
+    for ruta in rutas:
+        tasks = ruta.task_set.all()
+        ot_pdfs = []
+        for task in tasks:
+            if task.ot and task.ot.info_contratista_pdf:
+                response = requests.get(task.ot.info_contratista_pdf.url, stream=True)
+                if response.status_code == 200:
+                    ot_pdfs.append(BytesIO(response.content))
+        rutas_data.append({
+            'ruta': ruta,
+            'tasks': tasks,
+            'ot_num': ruta.ot.num_ot if ruta.ot else 'N/A',
+            'ot_pdfs': ot_pdfs  # Lista de PDFs descargados
+        })
+
+    context = {
+        'asset': asset,
+        'system': system,
+        'rutas_data': rutas_data
+    }
+
+    # Crear PDF principal del sistema
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="System_{system_id}_Asset_{asset_id}_with_attachments.pdf"'
+    template = get_template('got/system_pdf_with_attachments_template.html')
+    html = template.render(context)
+    main_pdf = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=main_pdf)
+    
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+
+    # Comenzar la combinación de PDFs
+    pdf_merger = PyPDF2.PdfMerger()
+    main_pdf.seek(0)
+    pdf_merger.append(main_pdf)
+
+    # Adjuntar cada PDF descargado
+    for ruta in rutas_data:
+        for pdf_buffer in ruta['ot_pdfs']:
+            pdf_buffer.seek(0)
+            pdf_merger.append(pdf_buffer)
+
+    # Generar el PDF combinado
+    combined_pdf = BytesIO()
+    pdf_merger.write(combined_pdf)
+    pdf_merger.close()
+
+    # Establecer el PDF combinado como la respuesta
+    response.write(combined_pdf.getvalue())
+    return response
+
+
+
+
 
 
 class DocumentCreateView(generic.View):
