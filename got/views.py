@@ -183,26 +183,28 @@ class CreateSolicitudView(LoginRequiredMixin, View):
         items_ids = request.POST.getlist('item_id')
         cantidades = request.POST.getlist('cantidad')
 
+        print("Items IDs:", items_ids)
+        print("Cantidades:", cantidades)
+
         for item_id, cantidad in zip(items_ids, cantidades):
-            if item_id and cantidad:  # Verifica que ambos item_id y cantidad no estén vacíos
+            print("Procesando item:", item_id, "con cantidad:", cantidad)  # Debugging statement
+            if item_id and cantidad:
                 try:
                     item = Item.objects.get(id=item_id)
-                    cantidad = int(cantidad)  # Convierte cantidad a entero
-                    if cantidad > 0:  # Procesa solo si la cantidad es positiva
+                    cantidad = int(cantidad)
+                    if cantidad > 0:
                         Suministro.objects.create(
                             Solicitud=nueva_solicitud,
                             item=item,
                             cantidad=cantidad
                         )
+                        print("Suministro creado con éxito.")  # Debugging statement
                 except Item.DoesNotExist:
-                    # El ítem no existe, se ignora silenciosamente
-                    pass
+                    print("Item no encontrado:", item_id)  # Debugging statement
                 except ValueError:
-                    # La cantidad no es un entero válido, se ignora silenciosamente
-                    pass
-                except Exception:
-                    # Ignora cualquier otro error no esperado
-                    pass
+                    print("Valor no válido para cantidad:", cantidad)  # Debugging statement
+                except Exception as e:
+                    print("Error no esperado:", str(e))
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     
 
@@ -267,8 +269,8 @@ from django.core.mail import send_mail
 @receiver(post_save, sender=Solicitud)
 def send_email_on_new_solicitud(sender, instance, created, **kwargs):
     if created:  # Comprueba si se ha creado una nueva solicitud
-        suministros = Suministro.objects.filter(solicitud=instance)
-        suministros_list = "\n".join([f"{suministro.item.nombre}: {suministro.cantidad}" for suministro in suministros])
+        suministros = Suministro.objects.filter(Solicitud=instance)
+        suministros_list = "\n".join([f"{suministro.item}: {suministro.cantidad}" for suministro in suministros])
         subject = f'Nueva Solicitud de Suministros: {instance}'
         message = f'''
         Ha sido creada una nueva solicitud de suministros:
@@ -284,7 +286,7 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         {suministros_list}
 
         '''
-        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
