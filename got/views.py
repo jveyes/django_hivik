@@ -274,7 +274,7 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         Ha sido creada una nueva solicitud de suministros:
         Fecha de solicitud: {instance.creation_date.strftime("%d/%m/%Y")}
         Solicitante: {instance.solicitante.get_full_name()}
-        Orden de trabajo: {instance.ot.num_ot if instance.ot else "N/A"}
+        Orden de trabajo: {instance.ot if instance.ot else "N/A"}
         Centro de costos: {instance.asset.name if instance.asset else "N/A"}
         Suministros: 
         
@@ -284,7 +284,7 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         {suministros_list}
 
         '''
-        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
