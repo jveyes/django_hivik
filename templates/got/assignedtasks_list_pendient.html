@@ -1,129 +1,175 @@
 {% extends "got/base_generic.html" %}
 {% load my_tags %}
 
-
 {% block header %}
-	Actividades pendientes {% if selected_asset_name %} - {{ selected_asset_name }}{% endif %}{% if worker %}/{{ worker }}{% endif %}
+    Actividades pendientes {% if selected_asset_name %} - {{ selected_asset_name }}{% endif %}{% if worker %}/{{ worker }}{% endif %}
 {% endblock %}
 
 {% block content %}
-
 <aside>
-	{% if not request.user|has_group:"buzos_members" %}
-		{% if not request.user|has_group:"maq_members" %}
-			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-					Filtrar por equipo
-				</button>
-				<ul class="dropdown-menu">
-					<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
-					{% for asset in assets %}
-						<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ asset.abbreviation }}{% if worker_id %}&worker={{ worker_id }}{% endif %}">{{ asset.name }}</a></li>
-					{% endfor %}
-				</ul>
-			</div>
-		{% endif %}
-
-		{% if not request.user|has_group:"serport_members" %}
-			<div class="btn-group" role="group">
-				<button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-					Filtrar por taller
-				</button>
-				<ul class="dropdown-menu">
-					<li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
-					{% for u in serport_members %}
-						<li>
-							<a class="dropdown-item" href="{% url 'got:my-tasks' %}?{% if asset_id %}asset_id={{ asset_id }}&{% endif %}worker={{ u.id }}">
-								{{ u.first_name }} {{ u.last_name }}
-							</a>
-						</li>
-					{% endfor %}
-				</ul>
-			</div>
-		{% endif %}
-	{% endif %}
+    {% if not request.user|has_group:"buzos_members" %}
+        {% if not request.user|has_group:"maq_members" %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filtrar por equipo
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
+                    {% for asset in assets %}
+                        <li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?asset_id={{ asset.abbreviation }}{% if worker_id %}&worker={{ worker_id }}{% endif %}">{{ asset.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% if not request.user|has_group:"serport_members" %}
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Filtrar por taller
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{% url 'got:my-tasks' %}">Mostrar todos</a></li>
+                    {% for u in serport_members %}
+                        <li><a class="dropdown-item" href="{% url 'got:my-tasks' %}?{% if asset_id %}asset_id={{ asset_id }}&{% endif %}worker={{ u.id }}">{{ u.first_name }} {{ u.last_name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endif %}
 </aside>
 
 <section class="table-responsive">
-	<table class="table-list">
-		<thead>
-			<tr>
-				<th scope="col">#OT</th>
-				<th scope="col">Sistema</th>
-				<th scope="col">Descripción</th>
-				<th scope="col">Responsable</th>
-				<th scope="col">Tiempo de ejecución</th>
-				<th scope="col">Acciones</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for act in task_list %}
-				<tr data-href="{% url 'got:finish-task' act.id %}">
-					<td data-cell="Orden de trabajo"  class="nowrap"><strong>OT-{{act.ot.num_ot}}</strong></td>
-					<td data-cell="Sistema">{{act.ot.system.asset}}/ {{act.ot.system.name}}</td>
-					<td data-cell="Descripción" >{{act.description}}</td>
-					<td data-cell="Responsable">{{act.responsible.first_name}} {{act.responsible.last_name}}</td>
-					<td data-cell="Tiempo de ejecución">{{act.start_date|date:"d/m/Y"}}-{{act.final_date|date:"d/m/Y"}}</td>
-					<td data-cell="Estado">
-						<div class="dropdown">
-							<button class="btn status {% if act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-								{% if act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
-							</button>
-							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-								<li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
-								<li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
-								{% if perms.got.can_reschedule_task %}
-									<li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
-								{% endif %}
-								<li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#solicitudModal{{ act.id }}">Solicitudes</a></li>
-							</ul>
-						</div>
-					</td>
-				</tr>
+    <table class="table-list">
+        <thead>
+            <tr>
+                <th scope="col">#OT</th>
+                <th scope="col">Sistema</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Responsable</th>
+                <th scope="col">Tiempo de ejecución</th>
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for act in task_list %}
+                <tr data-href="{% url 'got:finish-task' act.id %}">
+                    <td data-cell="Orden de trabajo" class="nowrap"><strong>OT-{{ act.ot.num_ot }}</strong></td>
+                    <td data-cell="Sistema">{{ act.ot.system.asset }}/{{ act.ot.system.name }}</td>
+                    <td data-cell="Descripción">{{ act.description }}</td>
+                    <td data-cell="Responsable">{{ act.responsible.first_name }} {{ act.responsible.last_name }}</td>
+                    <td data-cell="Tiempo de ejecución">{{ act.start_date|date:"d/m/Y" }}-{{ act.final_date|date:"d/m/Y" }}</td>
+                    <td data-cell="Estado">
+                        <div class="dropdown">
+                            <button class="btn status {% if act.is_overdue %}close{% else %}pending{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if act.is_overdue %}Retrasado{% else %}En progreso{% endif %}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" href="{{ act.get_absolute_url }}">Ver detalle</a></li>
+                                <li><a class="dropdown-item {% if not request.user|can_edit_task:act %}disabled{% endif %}" href="{% url 'got:finish-task' act.id %}">Finalizar</a></li>
+                                {% if perms.got.can_reschedule_task %}
+                                    <li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#solicitudModal{{ act.id }}">Solicitudes</a></li>
+                            </ul>
+                        </div>
+                    </td>
+                </tr>
 
-				<div class="modal fade" id="solicitudModal{{ act.id }}" tabindex="-1" aria-labelledby="solicitudModalLabel" aria-hidden="true">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="solicitudModalLabel">Nueva Solicitud para OT-{{ act.ot.num_ot }}</h5>
-								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body">
-								<form method="post" action="{% url 'got:create-solicitud' %}">
-									{% csrf_token %}
-									<input type="hidden" name="ot_id" value="{{ act.ot.num_ot }}">
-									<input type="hidden" name="asset_id" value="{{ act.ot.system.asset.abbreviation }}">
-									<div class="mb-3">
-										<label for="suministros" class="form-label">Suministros requeridos</label>
-										<textarea class="form-control" id="suministros" name="suministros" rows="3"></textarea>
-									</div>
-									<button type="submit" class="btn btn-primary">Enviar Solicitud</button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-			{% empty %}
-				<tr>
-					<td data-cell="Actividades" colspan="6">No hay actividades registrados.</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+                <!-- Modal para la creación de solicitudes -->
+                <div class="modal fade" id="solicitudModal{{ act.id }}" tabindex="-1" aria-labelledby="solicitudModalLabel{{ act.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <form method="post" action="{% url 'got:create-solicitud' %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="solicitudModalLabel{{ act.id }}">Nueva Solicitud para OT-{{ act.ot.num_ot }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="ot_id" value="{{ act.ot.num_ot }}">
+                                    <input type="hidden" name="asset_id" value="{{ act.ot.system.asset.abbreviation }}">
+                                    <div class="mb-3">
+                                        <label for="suministros{{ act.id }}" class="form-label">Suministros requeridos</label>
+                                        <textarea class="form-control" id="suministros{{ act.id }}" name="suministros" rows="3"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="articulo{{ act.id }}" class="form-label">Artículo</label>
+                                        <select class="form-control" id="articulo{{ act.id }}" name="item_id">
+                                            <option value="">Seleccionar artículo (opcional)</option>
+                                            {% for item in all_items %}
+                                            <option value="{{ item.id }}">{{ item }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="cantidad{{ act.id }}" class="form-label">Cantidad</label>
+                                        <input type="number" class="form-control" id="cantidad{{ act.id }}" name="cantidad">
+                                        <button type="button" class="btn btn-secondary mt-2" onclick="añadirArticulo('{{ act.id }}')">Añadir Artículo</button>
+                                    </div>
+                                    <!-- Contenedor para artículos añadidos -->
+                                    <div id="articulosContainer{{ act.id }}" class="articulos-container"></div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </tbody>
+    </table>
 </section>
 
 <script>
-	document.addEventListener("DOMContentLoaded", () => {
-		const rows = document.querySelectorAll("tr[data-href]");
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tr[data-href]");
 
-		rows.forEach(row => {
-			row.addEventListener("click", (event) => {
-				if (!event.target.matches('.dropdown, .dropdown *, .dropdown-toggle, .dropdown-menu, .dropdown-item')) {
-					window.location.href = row.dataset.href;
-				}
-			});
-    	});
-	});
+        rows.forEach(row => {
+            row.addEventListener("click", (event) => {
+                if (!event.target.matches('.dropdown, .dropdown *, .dropdown-toggle, .dropdown-menu, .dropdown-item')) {
+                    window.location.href = row.dataset.href;
+                }
+            });
+        });
+    });
+
+	function añadirArticulo(actId) {
+		var articuloSelect = document.getElementById('articulo' + actId);
+		var cantidadInput = document.getElementById('cantidad' + actId);
+		var articulo = articuloSelect.value;
+		var cantidad = cantidadInput.value;
+		var articuloText = articuloSelect.options[articuloSelect.selectedIndex].text;
+
+		if (articulo && cantidad) {
+			var form = document.querySelector('#solicitudModal' + actId + ' form');
+			var container = document.createElement('div');
+			form.insertBefore(container, form.children[form.children.length - 1]);
+
+			// Crear y añadir los elementos de entrada ocultos para enviar con el formulario
+			var inputArticulo = document.createElement('input');
+			inputArticulo.type = 'hidden';
+			inputArticulo.name = 'item_id';
+			inputArticulo.value = articulo;
+			container.appendChild(inputArticulo);
+
+			var inputCantidad = document.createElement('input');
+			inputCantidad.type = 'hidden';
+			inputCantidad.name = 'cantidad';
+			inputCantidad.value = cantidad;
+			container.appendChild(inputCantidad);
+
+			// Mostrar visualmente el artículo añadido
+			var newItem = document.createElement('p');
+			newItem.textContent = `Artículo: ${articuloText}, Cantidad: ${cantidad}`;
+			container.appendChild(newItem);
+
+			// Limpiar campos
+			articuloSelect.value = '';
+			cantidadInput.value = '';
+		} else {
+			alert('Por favor, rellene todos los campos.');
+		}
+	}
+
+
 </script>
 
 {% endblock %}

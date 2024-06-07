@@ -83,11 +83,12 @@ urlpatterns = [
     path('location/<int:pk>/', views.view_location, name='view-location'),
     path('asset/<str:asset_id>/add-document/', views.DocumentCreateView.as_view(), name='add-document'),
     path('create-solicitud/', views.CreateSolicitudView.as_view(), name='create-solicitud'),
+    # path('solicitud/crear/', views.create_solicitud, name='create-solicitud'),
     path("solicitud/", views.SolicitudesListView.as_view(), name="rq-list"),
 
     path('edit-solicitud/<int:pk>/', views.EditSolicitudView.as_view(), name='edit-solicitud'),
     path('approve-solicitud/<int:pk>/', views.ApproveSolicitudView.as_view(), name='approve-solicitud'),
     path('solicitud/update-sc/<int:pk>/', views.update_sc, name='update-sc'),
 
-     path('solicitud-asset/<str:asset_id>/', views.create_solicitud_asset, name='create-solicitud-asset'),
+    path('solicitud-asset/<str:asset_id>/', views.create_solicitud_asset, name='create-solicitud-asset'),
 ]

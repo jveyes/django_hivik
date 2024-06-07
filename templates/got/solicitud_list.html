@@ -44,6 +44,17 @@
 						</div>
                     </td>
 				</tr>
+                
+                <tr class="suministros-details">
+                    <td colspan="6">
+                        <strong>Suministros:</strong>
+                        <ul>
+                            {% for suministro in rq.suministro_set.all %}
+                            <li>{{ suministro.item }}: {{ suministro.cantidad }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
                 <div class="modal fade" id="editSolicitudModal{{ rq.id }}" tabindex="-1" aria-labelledby="editSolicitudModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">

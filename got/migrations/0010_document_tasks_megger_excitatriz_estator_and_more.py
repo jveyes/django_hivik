@@ -3,6 +3,7 @@
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
+import django.utils.timezone
 
 
 class Migration(migrations.Migration):
@@ -124,13 +125,14 @@ class Migration(migrations.Migration):
             name='Solicitud',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('creation_date', models.DateField(auto_now_add=True)),
-                ('seccion', models.CharField(choices=[('c', 'Consumibles'), ('h', 'Herramientas'), ('r', 'Repuestos')], max_length=1)),
+                ('creation_date', models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now)),
+                ('seccion', models.CharField(choices=[('c', 'Consumibles'), ('h', 'Herramientas'), ('r', 'Repuestos')], default='c', max_length=1)),
                 ('suministros', models.TextField()),
                 ('approved', models.BooleanField(default=False)),
                 ('asset', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.asset')),
                 ('ot', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.ot')),
                 ('solicitante', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('num_sc', models.TextField(blank=True, null=True)),
             ],
         ),
     ]

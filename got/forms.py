@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document, Megger, Solicitud
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document, Megger, Solicitud, Suministro
     )
 
 
@@ -593,6 +593,24 @@ class SolicitudAssetForm(forms.ModelForm):
         widgets = {
             'suminsitros': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
+
+from django.forms import inlineformset_factory
+from django.forms import modelformset_factory
+
+# Considerando que ya tienes importado SolicitudForm y tus modelos
+# SuministroFormset = inlineformset_factory(
+#     Solicitud, Suministro, fields=('item', 'cantidad'), extra=1, can_delete=True
+# )
+
+SuministroFormset = modelformset_factory(
+    Suministro,
+    fields=('item', 'cantidad',),
+    extra=1,
+    widgets={
+        'item': forms.Select(attrs={'class': 'form-control'}),
+        'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
+    }
+)
 
 
 # class MeggerForm(forms.ModelForm):

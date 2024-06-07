@@ -7,7 +7,6 @@ from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import Count
-# from django.core.exceptions import ValidationError
 
 
 def get_upload_path(instance, filename):
@@ -209,22 +208,6 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# EXPERIMENTAL
-class Salida(models.Model):
-
-    lugar_destino = models.ForeignKey(Location, on_delete=models.CASCADE)
-    fecha = models.DateField(auto_now_add=True)
-    motivo = models.TextField()
-    persona_transporte = models.CharField(max_length=100)
-    matricula_vehiculo = models.CharField(max_length=10)
-
-    def __str__(self):
-        return f"Salida a {self.lugar_destino} ({self.fecha})"
-
-    def get_absolute_url(self):
-        return reverse('got:salida-detail', args=[str(self.id)])
 
 
 class HistoryHour(models.Model):
@@ -466,6 +449,25 @@ class Operation(models.Model):
         return f"{self.proyecto}/{self.asset} ({self.start} - {self.start})"
     
 
+class Item(models.Model):
+
+    SECCION = (
+        ('c', 'Consumibles'),
+        ('h', 'Herramientas'),
+        ('r', 'Repuestos'),
+    )
+
+    name = models.CharField(max_length=50)
+    reference = models.CharField(max_length=100, null=True, blank=True)
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    presentacion = models.CharField(max_length=10)
+    code = models.CharField(max_length=50, null=True, blank=True)
+    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
+
+    def __str__(self):
+        return f"{self.name} {self.reference} ({self.presentacion})"
+
+
 class Solicitud(models.Model):
 
     SECCION = (
@@ -485,6 +487,19 @@ class Solicitud(models.Model):
 
     def __str__(self):
         return f"Suministros para {self.asset}/{self.ot}"
+    
+    class Meta:
+        ordering = ['-creation_date']
+
+
+class Suministro(models.Model):
+
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    Solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.item} ({self.cantidad})"
 
 
 class Megger(models.Model):
@@ -591,7 +606,7 @@ class Image(models.Model):
 
     failure = models.ForeignKey(FailureReport, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey(Task, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
-    # solicitud = models.ForeignKey(Solicitud, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    solicitud = models.ForeignKey(Solicitud, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to=get_upload_path)
 
 

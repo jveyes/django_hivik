@@ -20,12 +20,13 @@ from django.views import View
 
 # ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
-    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document, Megger, Solicitud
+    Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
+    Megger, Solicitud, Suministro, Item
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
-    DocumentForm, SolicitudForm
+    DocumentForm, SolicitudForm, SuministroFormset
 )
 
 # ---------------------------- Librerias auxiliares ------------------------- #
@@ -44,7 +45,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
     model = Task
     template_name = 'got/assignedtasks_list_pendient.html'
-    paginate_by = 15
+    paginate_by = 20
 
     def dispatch(self, request, *args, **kwargs):
         current_user = request.user
@@ -79,7 +80,24 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
             context['worker'] = f'{worker.first_name} {worker.last_name}'
             context['worker_id'] = worker_id
 
+        context['solicitud_form'] = SolicitudForm()
+        context['suministro_formset'] = SuministroFormset(queryset=Suministro.objects.none())
+        context['all_items'] = Item.objects.all()
+
         return context
+    
+    def post(self, request, *args, **kwargs):
+        solicitud_form = SolicitudForm(request.POST)
+        suministro_formset = SuministroFormset(request.POST)
+        if solicitud_form.is_valid() and suministro_formset.is_valid():
+            solicitud = solicitud_form.save(commit=False)
+            solicitud.solicitante = request.user
+            solicitud.save()
+            suministro_formset.instance = solicitud
+            suministro_formset.save()
+            return redirect('got:my-tasks')
+        return self.get(request, *args, **kwargs)
+
 
     def get_queryset(self):
         queryset = Task.objects.filter(ot__isnull=False, start_date__isnull=False)
@@ -139,18 +157,92 @@ def create_solicitud_asset(request, asset_id):
 
 class CreateSolicitudView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
+
+        print(request.POST)  # Esto mostrará todos los datos del POST
+        ot_id = request.POST.get('ot_id')
+        asset_id = request.POST.get('asset_id')
+        suministros = request.POST.get('suministros')
+        items_ids = request.POST.getlist('item_id')
+        cantidades = request.POST.getlist('cantidad')
+
+        print("Items IDs:", items_ids)
+        print("Cantidades:", cantidades)
+
         ot_id = request.POST.get('ot_id')
         asset_id = request.POST.get('asset_id')
         suministros = request.POST.get('suministros')
         
-        Solicitud.objects.create(
+        nueva_solicitud = Solicitud.objects.create(
             solicitante=request.user,
             ot_id=ot_id,
             asset_id=asset_id,
             suministros=suministros,
             approved=False
         )
+
+        items_ids = request.POST.getlist('item_id')
+        cantidades = request.POST.getlist('cantidad')
+
+        for item_id, cantidad in zip(items_ids, cantidades):
+            if item_id and cantidad:  # Verifica que ambos item_id y cantidad no estén vacíos
+                try:
+                    item = Item.objects.get(id=item_id)
+                    cantidad = int(cantidad)  # Convierte cantidad a entero
+                    if cantidad > 0:  # Procesa solo si la cantidad es positiva
+                        Suministro.objects.create(
+                            Solicitud=nueva_solicitud,
+                            item=item,
+                            cantidad=cantidad
+                        )
+                except Item.DoesNotExist:
+                    # El ítem no existe, se ignora silenciosamente
+                    pass
+                except ValueError:
+                    # La cantidad no es un entero válido, se ignora silenciosamente
+                    pass
+                except Exception:
+                    # Ignora cualquier otro error no esperado
+                    pass
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+    
+
+# from django.shortcuts import render, redirect
+# from .forms import SolicitudForm, SuministroFormset
+# from .models import Solicitud, Suministro, Item
+
+# def create_solicitud(request):
+#     if request.method == 'POST':
+#         solicitud_form = SolicitudForm(request.POST)
+#         suministro_formset = SuministroFormset(request.POST)
+#         if solicitud_form.is_valid() and suministro_formset.is_valid():
+#             solicitud = solicitud_form.save(commit=False)
+#             solicitud.solicitante = request.user
+            
+#             solicitud.save()
+            
+#             # Crear un suministro por cada formulario en el formset
+#             for form in suministro_formset:
+#                 if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+#                     Suministro.objects.create(
+#                         solicitud=solicitud,
+#                         item=form.cleaned_data['item'],
+#                         cantidad=form.cleaned_data['cantidad']
+#                     )
+#             return redirect(request.path)  # Redirige a la misma página
+#         else:
+#             print(solicitud_form.errors, suministro_formset.errors)
+#     else:
+#         solicitud_form = SolicitudForm()
+#         suministro_formset = SuministroFormset(queryset=Suministro.objects.none())  # Inicia el formset vacío
+
+#     context = {
+#         'solicitud_form': solicitud_form,
+#         'suministro_formset': suministro_formset
+#     }
+#     return render(request, 'got/assignedtasks_list_pendient.html', context)
+
+
+
 
 class EditSolicitudView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
@@ -175,20 +267,24 @@ from django.core.mail import send_mail
 @receiver(post_save, sender=Solicitud)
 def send_email_on_new_solicitud(sender, instance, created, **kwargs):
     if created:  # Comprueba si se ha creado una nueva solicitud
+        suministros = Suministro.objects.filter(solicitud=instance)
+        suministros_list = "\n".join([f"{suministro.item.nombre}: {suministro.cantidad}" for suministro in suministros])
         subject = f'Nueva Solicitud de Suministros: {instance}'
         message = f'''
         Ha sido creada una nueva solicitud de suministros:
-        Fecha: {instance.creation_date.strftime("%d/%m/%Y")}
+        Fecha de solicitud: {instance.creation_date.strftime("%d/%m/%Y")}
         Solicitante: {instance.solicitante.get_full_name()}
-        OT: {instance.ot.num_ot if instance.ot else "N/A"}
-        Asset: {instance.asset.name if instance.asset else "N/A"}
+        Orden de trabajo: {instance.ot.num_ot if instance.ot else "N/A"}
+        Centro de costos: {instance.asset.name if instance.asset else "N/A"}
         Suministros: 
         
         {instance.suministros}
 
-        Estado de aprobación: {"Aprobado" if instance.approved else "No aprobado"}
+        Detalles de los Suministros Solicitados:
+        {suministros_list}
+
         '''
-        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
