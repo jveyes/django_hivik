@@ -284,7 +284,7 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         {suministros_list}
 
         '''
-        recipient_list = ['auxiliarmto@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
@@ -1761,14 +1761,14 @@ def generate_asset_pdf(request, asset_id):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-import requests
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from .models import Asset, System, Ruta
 from django.template.loader import get_template
 from io import BytesIO
 import PyPDF2
-from xhtml2pdf import pisa  # Asegúrate de tener esta librería instalada
+from xhtml2pdf import pisa  # Asegúrate de tener esta librería instalada para generar PDF desde HTML
 
 def generate_system_pdf_with_attachments(request, asset_id, system_id):
     asset = get_object_or_404(Asset, pk=asset_id)
@@ -1778,17 +1778,12 @@ def generate_system_pdf_with_attachments(request, asset_id, system_id):
     rutas = Ruta.objects.filter(system=system).prefetch_related('task_set')
     for ruta in rutas:
         tasks = ruta.task_set.all()
-        ot_pdfs = []
-        for task in tasks:
-            if task.ot and task.ot.info_contratista_pdf:
-                response = requests.get(task.ot.info_contratista_pdf.url, stream=True)
-                if response.status_code == 200:
-                    ot_pdfs.append(BytesIO(response.content))
+        ot_pdfs = [task.ot.info_contratista_pdf for task in tasks if task.ot and task.ot.info_contratista_pdf]
         rutas_data.append({
             'ruta': ruta,
             'tasks': tasks,
             'ot_num': ruta.ot.num_ot if ruta.ot else 'N/A',
-            'ot_pdfs': ot_pdfs  # Lista de PDFs descargados
+            'ot_pdfs': ot_pdfs  # Lista de PDFs asociados
         })
 
     context = {
@@ -1806,18 +1801,22 @@ def generate_system_pdf_with_attachments(request, asset_id, system_id):
     pisa_status = pisa.CreatePDF(html, dest=main_pdf)
     
     if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return HttpResponse('We had some errors creating the main PDF <pre>' + html + '</pre>')
 
     # Comenzar la combinación de PDFs
     pdf_merger = PyPDF2.PdfMerger()
     main_pdf.seek(0)
     pdf_merger.append(main_pdf)
 
-    # Adjuntar cada PDF descargado
+    # Adjuntar cada PDF relacionado
     for ruta in rutas_data:
-        for pdf_buffer in ruta['ot_pdfs']:
-            pdf_buffer.seek(0)
-            pdf_merger.append(pdf_buffer)
+        for pdf in ruta['ot_pdfs']:
+            if pdf:  # Asegurarse de que el archivo exista y no esté vacío
+                pdf_path = pdf.path  # Asumiendo que estás usando el modelo FileField o similar
+                try:
+                    pdf_merger.append(open(pdf_path, 'rb'))
+                except Exception as e:
+                    print(f"Failed to append PDF {pdf_path}: {str(e)}")
 
     # Generar el PDF combinado
     combined_pdf = BytesIO()
@@ -1827,7 +1826,6 @@ def generate_system_pdf_with_attachments(request, asset_id, system_id):
     # Establecer el PDF combinado como la respuesta
     response.write(combined_pdf.getvalue())
     return response
-
 
 
 
