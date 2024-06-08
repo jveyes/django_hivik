@@ -44,7 +44,7 @@
 						</div>
                     </td>
 				</tr>
-                
+                {% if rq.suministro_set.all %}
                 <tr class="suministros-details">
                     <td colspan="6">
                         <strong>Suministros:</strong>
@@ -55,6 +55,7 @@
                         </ul>
                     </td>
                 </tr>
+                {% endif %}
                 <div class="modal fade" id="editSolicitudModal{{ rq.id }}" tabindex="-1" aria-labelledby="editSolicitudModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
