@@ -7,7 +7,9 @@ from datetime import datetime
 import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.db.models import Count
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils import timezone
 
 def get_upload_path(instance, filename):
     ext = filename.split('.')[-1]
@@ -467,6 +469,9 @@ class Item(models.Model):
     def __str__(self):
         return f"{self.name} {self.reference} ({self.presentacion})"
 
+    class Meta:
+        ordering = ['name', 'reference']
+
 
 class Solicitud(models.Model):
 
@@ -485,11 +490,28 @@ class Solicitud(models.Model):
     num_sc = models.TextField(null=True, blank=True)
     approved = models.BooleanField(default=False)
 
+    approval_date = models.DateTimeField(null=True, blank=True) 
+    sc_change_date = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f"Suministros para {self.asset}/{self.ot}"
     
     class Meta:
+        permissions = (('can_approve', 'Aprobar solicitudes'),)
         ordering = ['-creation_date']
+
+@receiver(pre_save, sender=Solicitud)
+def update_solicitud_dates(sender, instance, **kwargs):
+    if instance.id is not None:
+        old_instance = Solicitud.objects.get(id=instance.id)
+        
+        # Verifica si se está aprobando por primera vez
+        if not old_instance.approved and instance.approved:
+            instance.approval_date = timezone.now()
+
+        # Verifica si num_sc cambia de None o vacío a algún valor
+        if not old_instance.num_sc and instance.num_sc:
+            instance.sc_change_date = timezone.now()
 
 
 class Suministro(models.Model):

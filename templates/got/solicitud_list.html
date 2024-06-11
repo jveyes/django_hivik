@@ -22,7 +22,7 @@
         </thead>
         <tbody>
             {% for rq in solicitud_list %}
-				<tr data-href="#">
+				<tr>
 					<td data-cell="Fecha" class="nowrap">{{ rq.creation_date|date:"d/m/Y H:i" }}</td>
 					<td data-cell="Orden de trabajo">{% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}</td>
 					<td data-cell="Solicitud">{{ rq.suministros|linebreaks }}</td>
@@ -35,22 +35,52 @@
 							</button>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 {% if not rq.approved %}
-								<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editSolicitudModal{{ rq.id }}">Editar</a></li>
-                                <li><a class="dropdown-item" href="{% url 'got:approve-solicitud' rq.id %}">{% if not rq.approved %}Aprobar{% else %}Desaprobar{% endif %}</a></li>
+                                    {% if perms.got.can_approve %}
+								        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editSolicitudModal{{ rq.id }}">Editar</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'got:approve-solicitud' rq.id %}">{% if not rq.approved %}Aprobar{% else %}Desaprobar{% endif %}</a></li>
+                                    {% endif %}
                                 {% else %}
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#scModal{{ rq.id }}">Tramitar</a></li>
+                                        <li><a class="dropdown-item" href="" data-bs-toggle="modal" data-bs-target="#scModal{{ rq.id }}">Tramitar</a></li>
                                 {% endif %}
 							</ul>
 						</div>
                     </td>
+                    
+                
 				</tr>
                 {% if rq.suministro_set.all %}
                 <tr class="suministros-details">
                     <td colspan="6">
-                        <strong>Suministros:</strong>
+                        {% if rq.approval_date %}Aprobado: {{ rq.approval_date|date:"d/m/Y H:i" }}{% endif %}
+                        {% if rq.sc_change_date %}/Tramitado: {{ rq.sc_change_date|date:"d/m/Y H:i" }}{% endif %}
+                        <h5>Suministros:</h5>
                         <ul>
                             {% for suministro in rq.suministro_set.all %}
-                            <li>{{ suministro.item }}: {{ suministro.cantidad }}</li>
+                                <li onclick="openModal{{ suministro.id }}()" style="cursor: pointer;">
+                                    {{ suministro.cantidad }} {{ suministro.item.presentacion }} {{ suministro.item.name }} {{ suministro.item.reference }} - {{ suministro.item.code }}
+                                </li>
+                                <div class="modal fade" id="itemModal{{ suministro.id }}" tabindex="-1" aria-labelledby="itemModalLabel{{ suministro.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="itemModalLabel{{ suministro.id }}">{{ suministro.item.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <img src="{{ suministro.item.imagen.url }}" alt="Imagen de {{ suministro.item.name }}" class="img-fluid">
+                                                <p>Referencia: {{ suministro.item.reference }}</p>
+                                                <p>Presentación: {{ suministro.item.presentacion }}</p>
+                                                <p>Código: {{ suministro.item.code }}</p>
+                                                <p>Sección: {{ suministro.item.get_seccion_display }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script>
+                                    function openModal{{ suministro.id }}() {
+                                        new bootstrap.Modal(document.getElementById('itemModal{{ suministro.id }}')).show();
+                                    }
+                                </script>
                             {% endfor %}
                         </ul>
                     </td>

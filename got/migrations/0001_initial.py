@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ('creation_date', models.DateField(auto_now_add=True)),
                 ('num_ot', models.AutoField(primary_key=True, serialize=False)),
                 ('description', models.TextField()),
-                ('state', models.CharField(choices=[('a', 'Abierto'), ('x', 'En ejecucion'), ('f', 'Finalizado'), ('c', 'Cancelado')], default='x', max_length=50)),
+                ('state', models.CharField(choices=[('a', 'Abierto'), ('x', 'En ejecución'), ('f', 'Finalizado'), ('c', 'Cancelado')], default='x', max_length=1)),
                 ('tipo_mtto', models.CharField(choices=[('p', 'Preventivo'), ('c', 'Correctivo'), ('m', 'Modificativo')], max_length=1)),
                 ('super', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
                 ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.system')),
@@ -114,16 +114,11 @@ class Migration(migrations.Migration):
             ],
             options={
                 'ordering': ['-priority', '-start_date'],
-                'permissions': (('can_reschedule_task', 'Reprogramar actividades'),),
+                'permissions': (
+                    ('can_reschedule_task', 'Reprogramar actividades'),
+                    ('can_modify_any_task', 'Can modify any task')
+                    ),
             },
         ),
-        migrations.CreateModel(
-            name='Image',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('image', models.ImageField(upload_to=got.models.get_upload_path)),
-                ('failure', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.failurereport')),
-                ('task', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='images', to='got.task')),
-            ],
-        ),
+        
     ]

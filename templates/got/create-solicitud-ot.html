@@ -1,0 +1,168 @@
+{% extends "got/base_generic.html" %}
+
+{% block content %}
+
+    <h1>
+        Solicitud de materiales/servicios - {{ asset }} 
+        {% if ot %}
+            {{ ot }}
+        {% endif %}
+    </h1>
+
+    <form method="post" action="" id="solicitudForm">{% csrf_token %}
+
+        <label for="suministros" class="form-label">Descripción de solicitud:</label>
+        <textarea name="suministros" id="suministros" rows="8" cols="50" class="form-control"></textarea>
+
+        <h4 class="mt-4">Artículos Añadidos</h4>
+
+        <table class="table-list table-detail">
+            <thead>
+                <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            
+            <tbody id="items-wrapper">
+                <!-- Contenedor para elementos dinámicos -->
+            </tbody>
+        </table>
+
+        <input type="submit" class="btn btn-primary mb-4" value="Enviar Solicitud">
+
+        <h3>Artículos</h3>
+
+        <input type="text" id="search-name-input" onkeyup="filterItems()" placeholder="Buscar por nombre..." class="form-control mb-1">
+        <input type="text" id="search-reference-input" onkeyup="filterItems()" placeholder="Buscar por referencia..." class="form-control mb-3 mt-4">
+
+        <div class="row" id="articles-container">
+            {% for item in items %}
+                <div class="col-lg-3 mb-3 article-card" data-name="{{ item|lower }}" data-reference="{{ item.reference|lower }}">
+                    <div class="card">
+                        {% if item.imagen %}
+                            <img src="{{ item.imagen.url }}" class="card-img-top" alt="Imagen de {{ item.name }}" style="height: 200px; object-fit: cover;" data-bs-toggle="modal" data-bs-target="#imageModal{{ item.id }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text">
+                                Referencia: {{ item.reference }}<br>
+                                Presentación: {{ item.presentacion }}<br>
+                                Código: {{ item.code }}<br>
+                                Sección: {{ item.get_seccion_display }}
+                            </p>
+                            <input type="number" id="quantity-{{ item.id }}" placeholder="Cantidad" min="1" class="form-control mb-2">
+                            <button type="button" class="btn btn-primary" onclick="addItem('{{ item.id }}', '{{ item }}')">Añadir Artículo</button>
+                        </div>
+                    </div>
+                </div>
+
+                {% if item.imagen %}
+                    <div class="modal fade" id="imageModal{{ item.id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ item.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title" id="imageModalLabel{{ item.id }}">{{ item.name }} {{ item.reference }}</h6>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <img src="{{ item.imagen.url }}" class="img-fluid" alt="Responsive image">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- <div class="pagination">
+            {% if items.has_previous %}
+                <a href="?page=1&search={{ request.GET.search }}">Primero</a>
+                <a href="?page={{ items.previous_page_number }}&search={{ request.GET.search }}">Anterior</a>
+            {% endif %}
+            <span class="current">
+                Página {{ items.number }} de {{ items.paginator.num_pages }}.
+            </span>
+            {% if items.has_next %}
+                <a href="?page={{ items.next_page_number }}&search={{ request.GET.search }}">Siguiente</a>
+                <a href="?page={{ items.paginator.num_pages }}&search={{ request.GET.search }}">Último</a>
+            {% endif %}
+        </div> -->
+    </form>
+
+    <script>
+        function addItem(itemId, itemName) {
+            const quantityInput = document.getElementById('quantity-' + itemId);
+            const quantity = quantityInput.value;
+            const itemsWrapper = document.getElementById('items-wrapper');
+
+            if (quantity <= 0 || quantity === '') {
+                alert('Por favor, introduzca una cantidad válida.');
+                return;
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${itemName}</td><td>${quantity}</td>`;
+            row.appendChild(createRemoveButton(row));
+            row.appendChild(createHiddenInput('item_id[]', itemId));
+            row.appendChild(createHiddenInput('cantidad[]', quantity));
+            itemsWrapper.appendChild(row);
+
+            // Resetear la cantidad
+            quantityInput.value = '';
+        }
+
+        function createHiddenInput(name, value) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
+        }
+
+        function createRemoveButton(row) {
+            const btn = document.createElement('button');
+            btn.textContent = 'Eliminar';
+            btn.className = 'btn btn-sm btn-danger';
+            btn.onclick = () => row.remove();
+            const cell = document.createElement('td');
+            cell.appendChild(btn);
+            return cell;
+        }
+
+        function filterItems() {
+            const searchName = document.getElementById('search-name-input').value.toLowerCase();
+            const searchReference = document.getElementById('search-reference-input').value.toLowerCase();
+            const articles = document.querySelectorAll('.article-card');
+
+            articles.forEach(card => {
+                const itemName = card.getAttribute('data-name');
+                const itemReference = card.getAttribute('data-reference');
+                if (itemName.includes(searchName) && itemReference.includes(searchReference)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // function updatePaginationLinks(searchName, searchReference) {
+        //     const paginationLinks = document.querySelectorAll('.pagination a');
+        //     paginationLinks.forEach(link => {
+        //         const url = new URL(link.href);
+        //         url.searchParams.set('searchName', searchName);
+        //         url.searchParams.set('searchReference', searchReference);
+        //         link.href = url.toString();
+        //     });
+        // }
+
+        // function filterItems() {
+        //     const searchName = document.getElementById('search-name-input').value.toLowerCase();
+        //     const searchReference = document.getElementById('search-reference-input').value.toLowerCase();
+        //     updatePaginationLinks(searchName, searchReference);
+        //     // Filtrado como antes...
+        // }
+
+    </script>
+{% endblock %}

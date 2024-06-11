@@ -1,24 +1,22 @@
-# ---------------------------- Librerias de Django -------------------------- #
 from django.shortcuts import render, get_object_or_404, redirect
+from django.dispatch import receiver
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
+from django.core.mail import EmailMessage, send_mail
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views import generic
+from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
-from django.template.loader import get_template
-from django.template.loader import render_to_string
-from django.core.mail import EmailMessage
 from django.conf import settings
-from django.core.paginator import Paginator
+from django.template.loader import get_template, render_to_string
+
+
+from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
+from django.db.models.signals import post_save
 from django.utils import timezone
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.views import View
 
-
-# ---------------------------- Modelos y formularios ------------------------ #
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
     Megger, Solicitud, Suministro, Item
@@ -26,21 +24,15 @@ from .models import (
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
-    DocumentForm, SolicitudForm, SuministroFormset
+    DocumentForm, SolicitudForm, SuministroFormset, SolicitudAssetForm
 )
 
-# ---------------------------- Librerias auxiliares ------------------------- #
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 from xhtml2pdf import pisa
 from io import BytesIO
 import itertools
-from django.db.models import ExpressionWrapper, F, DateField, DurationField
-from django.db.models.functions import ExtractMonth, ExtractYear
-from datetime import datetime
 
 
-# ---------------------------- Main views ------------------------------------#
-# ---------------------------- Mis actividades ------------------------------ #
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
     model = Task
@@ -51,7 +43,6 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         current_user = request.user
         if current_user.groups.filter(name='gerencia').exists():
             return redirect('got:operation-list')
-
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -59,189 +50,115 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         current_user = self.request.user
         all_users = User.objects.none()
 
+        asset_id = self.request.GET.get('asset_id')
+        if asset_id:
+            context['selected_asset_name'] = Asset.objects.get(abbreviation=asset_id)
+            context['asset_id'] = asset_id
+
+        worker_id = self.request.GET.get('worker')
+        if worker_id: 
+            worker = User.objects.get(id=worker_id)
+            context['worker'] = f'{worker.first_name} {worker.last_name}'
+            context['worker_id'] = worker_id
+
         if current_user.groups.filter(name='super_members').exists():
             all_users = User.objects.all()
+
         elif current_user.groups.filter(name__in=['maq_members', 'buzos_members']).exists():
             talleres = Group.objects.get(name='serport_members')
             taller_list = list(talleres.user_set.all())
             taller_list.append(current_user)
             all_users = User.objects.filter(id__in=[user.id for user in taller_list])
 
-        asset_id = self.request.GET.get('asset_id')
-        worker_id = self.request.GET.get('worker')
-        # contexto adicional:
         context['assets'] = Asset.objects.all()
         context['serport_members'] = all_users
-        if asset_id:  # Nombre assets para filtrar
-            context['selected_asset_name'] = Asset.objects.get(abbreviation=asset_id)
-            context['asset_id'] = asset_id
-        if worker_id:  # Nombre usuarios para filtrar
-            worker = User.objects.get(id=worker_id)
-            context['worker'] = f'{worker.first_name} {worker.last_name}'
-            context['worker_id'] = worker_id
-
-        context['solicitud_form'] = SolicitudForm()
-        context['suministro_formset'] = SuministroFormset(queryset=Suministro.objects.none())
-        context['all_items'] = Item.objects.all()
 
         return context
-    
-    def post(self, request, *args, **kwargs):
-        solicitud_form = SolicitudForm(request.POST)
-        suministro_formset = SuministroFormset(request.POST)
-        if solicitud_form.is_valid() and suministro_formset.is_valid():
-            solicitud = solicitud_form.save(commit=False)
-            solicitud.solicitante = request.user
-            solicitud.save()
-            suministro_formset.instance = solicitud
-            suministro_formset.save()
-            return redirect('got:my-tasks')
-        return self.get(request, *args, **kwargs)
-
 
     def get_queryset(self):
-        queryset = Task.objects.filter(ot__isnull=False, start_date__isnull=False)
+
+        queryset = Task.objects.filter(ot__isnull=False, start_date__isnull=False, finished=False).order_by('start_date')
         current_user = self.request.user
 
         asset_id = self.request.GET.get('asset_id')
-        responsable_id = self.request.GET.get('worker')
-
-        maq_group = Group.objects.get(name='maq_members')
-        buzos_group = Group.objects.get(name='buzos_members')
-        users_maq = maq_group.user_set.all()
-        users_buzos = buzos_group.user_set.all()
-        
         if asset_id:
             queryset = queryset.filter(ot__system__asset_id=asset_id)
+
+        responsable_id = self.request.GET.get('worker')
         if responsable_id:
             queryset = queryset.filter(responsible=responsable_id)
 
-        if current_user.has_perm("got.can_see_completely"):
-            queryset = queryset.filter(finished=False).order_by('start_date')
+        if current_user.groups.filter(name='super_members').exists():
+            return queryset
 
-        elif current_user in users_maq:
-            queryset = queryset.filter(finished=False, ot__system__asset__supervisor=current_user)
+        if current_user.groups.filter(name='serport_members').exists():
+            return queryset.filter(responsible=current_user)
 
-        elif current_user in users_buzos:
-            if current_user.groups.filter(name='santamarta_station').exists():
-                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Santa Marta')
-            elif current_user.groups.filter(name='ctg_station').exists():
-                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Cartagena')
-            elif current_user.groups.filter(name='guyana_station').exists():
-                queryset = queryset.filter(finished=False, ot__system__asset__area='b', ot__system__location='Guyana')
-            else:
-                queryset = queryset.filter(finished=False, ot__system__asset__area='b')
+        if current_user.groups.filter(name='maq_members').exists():
+            return queryset.filter(ot__system__asset__supervisor=current_user)
 
-        else:
-            queryset = queryset.filter(Q(responsible=self.request.user) & Q(finished=False)).order_by('start_date')
+        if current_user.groups.filter(name='buzos_members').exists():
+            location_filters = {
+                'santamarta_station': 'Santa Marta',
+                'ctg_station': 'Cartagena',
+                'guyana_station': 'Guyana'
+            }
+            locations = [loc for group, loc in location_filters.items() if current_user.groups.filter(name=group).exists()]
+            if locations:
+                return queryset.filter(ot__system__asset__area='b', ot__system__location__in=locations)
+            return queryset.filter(ot__system__asset__area='b')
 
-        return queryset
-
-
-from .forms import SolicitudAssetForm
-
-def create_solicitud_asset(request, asset_id):
-    asset = get_object_or_404(Asset, pk=asset_id)
-    if request.method == 'POST':
-        form = SolicitudAssetForm(request.POST)
-        if form.is_valid():
-            solicitud = form.save(commit=False)
-            solicitud.asset = asset
-            solicitud.solicitante = request.user
-            solicitud.save()
-            # Redirigir a la vista de detalle del asset, o donde consideres apropiado
-            return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
-    else:
-        form = SolicitudAssetForm()
-    return render(request, 'asset/solicitud_form.html', {'form': form, 'asset': asset})
-
-class CreateSolicitudView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-
-        print(request.POST)  # Esto mostrará todos los datos del POST
-        ot_id = request.POST.get('ot_id')
-        asset_id = request.POST.get('asset_id')
-        suministros = request.POST.get('suministros')
-        items_ids = request.POST.getlist('item_id')
-        cantidades = request.POST.getlist('cantidad')
-
-        print("Items IDs:", items_ids)
-        print("Cantidades:", cantidades)
-
-        ot_id = request.POST.get('ot_id')
-        asset_id = request.POST.get('asset_id')
-        suministros = request.POST.get('suministros')
-        
-        nueva_solicitud = Solicitud.objects.create(
-            solicitante=request.user,
-            ot_id=ot_id,
-            asset_id=asset_id,
-            suministros=suministros,
-            approved=False
-        )
-
-        items_ids = request.POST.getlist('item_id')
-        cantidades = request.POST.getlist('cantidad')
-
-        print("Items IDs:", items_ids)
-        print("Cantidades:", cantidades)
-
-        for item_id, cantidad in zip(items_ids, cantidades):
-            print("Procesando item:", item_id, "con cantidad:", cantidad)  # Debugging statement
-            if item_id and cantidad:
-                try:
-                    item = Item.objects.get(id=item_id)
-                    cantidad = int(cantidad)
-                    if cantidad > 0:
-                        Suministro.objects.create(
-                            Solicitud=nueva_solicitud,
-                            item=item,
-                            cantidad=cantidad
-                        )
-                        print("Suministro creado con éxito.")  # Debugging statement
-                except Item.DoesNotExist:
-                    print("Item no encontrado:", item_id)  # Debugging statement
-                except ValueError:
-                    print("Valor no válido para cantidad:", cantidad)  # Debugging statement
-                except Exception as e:
-                    print("Error no esperado:", str(e))
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+        return queryset.none() 
     
 
-# from django.shortcuts import render, redirect
-# from .forms import SolicitudForm, SuministroFormset
-# from .models import Solicitud, Suministro, Item
+class CreateSolicitudOt(LoginRequiredMixin, View):
+    template_name = 'got/create-solicitud-ot.html'
 
-# def create_solicitud(request):
-#     if request.method == 'POST':
-#         solicitud_form = SolicitudForm(request.POST)
-#         suministro_formset = SuministroFormset(request.POST)
-#         if solicitud_form.is_valid() and suministro_formset.is_valid():
-#             solicitud = solicitud_form.save(commit=False)
-#             solicitud.solicitante = request.user
-            
-#             solicitud.save()
-            
-#             # Crear un suministro por cada formulario en el formset
-#             for form in suministro_formset:
-#                 if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-#                     Suministro.objects.create(
-#                         solicitud=solicitud,
-#                         item=form.cleaned_data['item'],
-#                         cantidad=form.cleaned_data['cantidad']
-#                     )
-#             return redirect(request.path)  # Redirige a la misma página
-#         else:
-#             print(solicitud_form.errors, suministro_formset.errors)
-#     else:
-#         solicitud_form = SolicitudForm()
-#         suministro_formset = SuministroFormset(queryset=Suministro.objects.none())  # Inicia el formset vacío
+    def get(self, request, asset_id, ot_num=None):
+        asset = get_object_or_404(Asset, abbreviation=asset_id)
+        ot = None if not ot_num else get_object_or_404(Ot, num_ot=ot_num)
+        items = Item.objects.all()
+        # items_list = Item.objects.all()
 
-#     context = {
-#         'solicitud_form': solicitud_form,
-#         'suministro_formset': suministro_formset
-#     }
-#     return render(request, 'got/assignedtasks_list_pendient.html', context)
+        # page = request.GET.get('page', 1)
+        # paginator = Paginator(items_list, 10)
+
+        # try:
+        #     items = paginator.page(page)
+        # except PageNotAnInteger:
+        #     items = paginator.page(1)
+        # except EmptyPage:
+        #     items = paginator.page(paginator.num_pages)
+
+        return render(request, self.template_name, {
+            'ot': ot,
+            'asset': asset,
+            'items': items
+        })
+
+    def post(self, request, asset_id, ot_num=None):
+            asset = get_object_or_404(Asset, abbreviation=asset_id)
+            ot = None if not ot_num else get_object_or_404(Ot, num_ot=ot_num)
+            items_ids = request.POST.getlist('item_id[]') 
+            cantidades = request.POST.getlist('cantidad[]')
+            suministros = request.POST.get('suministros', '')
+
+            solicitud = Solicitud.objects.create(
+                solicitante=request.user,
+                ot=ot,
+                asset=asset,
+                suministros=suministros
+            )
+
+            for item_id, cantidad in zip(items_ids, cantidades):
+                if item_id and cantidad:
+                    item = get_object_or_404(Item, id=item_id)
+                    Suministro.objects.create(
+                        item=item,
+                        cantidad=int(cantidad),
+                        Solicitud=solicitud
+                    )
+            return redirect('got:my-tasks')
 
 
 class EditSolicitudView(LoginRequiredMixin, View):
@@ -261,9 +178,7 @@ class ApproveSolicitudView(LoginRequiredMixin, View):
         solicitud.save()
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
     
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.core.mail import send_mail
+
 @receiver(post_save, sender=Solicitud)
 def send_email_on_new_solicitud(sender, instance, created, **kwargs):
     if created:  # Comprueba si se ha creado una nueva solicitud
@@ -276,11 +191,11 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         Solicitante: {instance.solicitante.get_full_name()}
         Orden de trabajo: {instance.ot if instance.ot else "N/A"}
         Centro de costos: {instance.asset.name if instance.asset else "N/A"}
-        Suministros: 
+        Detalles de los Suministros Solicitados: 
         
         {instance.suministros}
 
-        Detalles de los Suministros Solicitados:
+        
         {suministros_list}
 
         '''
@@ -295,7 +210,7 @@ def update_sc(request, pk):
         num_sc = request.POST.get('num_sc')
         solicitud.num_sc = num_sc
         solicitud.save()
-        return redirect('got:rq-list')  # Asegúrate de redirigir a la vista adecuada
+        return redirect('got:rq-list')
     return redirect('got:rq-list') 
 
 class Reschedule_task(UpdateView):

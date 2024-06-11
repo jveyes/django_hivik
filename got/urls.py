@@ -90,7 +90,9 @@ urlpatterns = [
     path('approve-solicitud/<int:pk>/', views.ApproveSolicitudView.as_view(), name='approve-solicitud'),
     path('solicitud/update-sc/<int:pk>/', views.update_sc, name='update-sc'),
 
-    path('solicitud-asset/<str:asset_id>/', views.create_solicitud_asset, name='create-solicitud-asset'),
-
     path('system/<str:asset_id>/<int:system_id>/pdf/', views.generate_system_pdf_with_attachments, name='generate-system-pdf'),
+
+
+    path('nueva-solicitud/<str:asset_id>/', views.CreateSolicitudOt.as_view(), name='create-solicitud'),
+    path('nueva-solicitud/<str:asset_id>/<int:ot_num>/', views.CreateSolicitudOt.as_view(), name='create-solicitud-ot'),
 ]

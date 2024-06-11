@@ -68,51 +68,11 @@
                                 {% if perms.got.can_reschedule_task %}
                                     <li><a class="dropdown-item" href="{% url 'got:reschedule-task' act.id %}">Reprogramar</a></li>
                                 {% endif %}
-                                <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#solicitudModal{{ act.id }}">Solicitudes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'got:create-solicitud-ot' act.ot.system.asset.abbreviation act.ot.num_ot %}">Nueva solicitud</a></li>
                             </ul>
                         </div>
                     </td>
                 </tr>
-
-                <!-- Modal para la creación de solicitudes -->
-                <div class="modal fade" id="solicitudModal{{ act.id }}" tabindex="-1" aria-labelledby="solicitudModalLabel{{ act.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <form method="post" action="{% url 'got:create-solicitud' %}">
-                                {% csrf_token %}
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="solicitudModalLabel{{ act.id }}">Nueva Solicitud para OT-{{ act.ot.num_ot }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <input type="hidden" name="ot_id" value="{{ act.ot.num_ot }}">
-                                    <input type="hidden" name="asset_id" value="{{ act.ot.system.asset.abbreviation }}">
-                                    <div class="mb-3">
-                                        <label for="suministros{{ act.id }}" class="form-label">Suministros requeridos</label>
-                                        <textarea class="form-control" id="suministros{{ act.id }}" name="suministros" rows="3"></textarea>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="articulo{{ act.id }}" class="form-label">Artículo</label>
-                                        <select class="form-control" id="articulo{{ act.id }}" name="item_id">
-                                            <option value="">Seleccionar artículo (opcional)</option>
-                                            {% for item in all_items %}
-                                            <option value="{{ item.id }}">{{ item }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <label for="cantidad{{ act.id }}" class="form-label">Cantidad</label>
-                                        <input type="number" class="form-control" id="cantidad{{ act.id }}" name="cantidad">
-                                        <button type="button" class="btn btn-secondary mt-2" onclick="añadirArticulo('{{ act.id }}')">Añadir Artículo</button>
-                                    </div>
-                                    <!-- Contenedor para artículos añadidos -->
-                                    <div id="articulosContainer{{ act.id }}" class="articulos-container"></div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             {% endfor %}
         </tbody>
     </table>
@@ -130,46 +90,6 @@
             });
         });
     });
-
-	function añadirArticulo(actId) {
-		var articuloSelect = document.getElementById('articulo' + actId);
-		var cantidadInput = document.getElementById('cantidad' + actId);
-		var articulo = articuloSelect.value;
-		var cantidad = cantidadInput.value;
-		var articuloText = articuloSelect.options[articuloSelect.selectedIndex].text;
-
-		if (articulo && cantidad) {
-			var form = document.querySelector('#solicitudModal' + actId + ' form');
-			var container = document.createElement('div');
-			form.insertBefore(container, form.children[form.children.length - 1]);
-
-			// Crear y añadir los elementos de entrada ocultos para enviar con el formulario
-			var inputArticulo = document.createElement('input');
-			inputArticulo.type = 'hidden';
-			inputArticulo.name = 'item_id';
-			inputArticulo.value = articulo;
-			container.appendChild(inputArticulo);
-
-			var inputCantidad = document.createElement('input');
-			inputCantidad.type = 'hidden';
-			inputCantidad.name = 'cantidad';
-			inputCantidad.value = cantidad;
-			container.appendChild(inputCantidad);
-
-			// Mostrar visualmente el artículo añadido
-			var newItem = document.createElement('p');
-			newItem.textContent = `Artículo: ${articuloText}, Cantidad: ${cantidad}`;
-			container.appendChild(newItem);
-
-			// Limpiar campos
-			articuloSelect.value = '';
-			cantidadInput.value = '';
-		} else {
-			alert('Por favor, rellene todos los campos.');
-		}
-	}
-
-
 </script>
 
 {% endblock %}
