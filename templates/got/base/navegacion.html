@@ -60,14 +60,14 @@
                 {% endif %}
 
                 <!-- Opciones limitadas para supervisores de serport -->
-                {% if request.user|has_group:"super_members" %}
+                {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'ruta-list' %}active{% endif %}" href="{% url 'got:ruta-list' %}">
                             Rutinas
                         </a>
                     </li>
                 {% endif %}
-                {% if request.user|has_group:"super_members" %}
+                {% if request.user|has_group:"super_members" or request.user|has_group:"gerencia" %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'rq-list' %}active{% endif %}" href="{% url 'got:rq-list' %}">
                             Solicitudes

@@ -291,6 +291,11 @@ class ActForm(forms.ModelForm):
         self.fields['start_date'].required = True
         self.fields['finished'].widget.attrs.update({'class': 'btn-group-toggle', 'data-toggle': 'buttons'})
 
+        group_names = ['serport_members', 'super_members', 'maq_members', 'buzos_members']
+        groups = Group.objects.filter(name__in=group_names)
+        users = User.objects.filter(groups__in=groups).distinct()
+        self.fields['responsible'].queryset = users
+
 
 class ActFormNoSup(forms.ModelForm):
 

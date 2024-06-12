@@ -42,7 +42,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     def dispatch(self, request, *args, **kwargs):
         current_user = request.user
         if current_user.groups.filter(name='gerencia').exists():
-            return redirect('got:operation-list')
+            return redirect('got:asset-list')
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
