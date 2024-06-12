@@ -30,6 +30,11 @@
                         <a href="{% url 'got:ot-delete' ot.num_ot %}" class="btn btn-danger {% if has_activities %}disabled{% endif %}">Eliminar</a>
                     </div>
                 {% endif %}
+                {% if ot.state == 'x' %} 
+                <div class="btn-group" role="group">
+                    <a href="{% url 'got:create-solicitud-ot' ot.system.asset.abbreviation ot.num_ot %}" class="btn btn-primary">Nueva solicitud</a>
+                </div>
+                {% endif %}
                 {% if ot.task_set.all and all_tasks_finished and ot.state == 'x' %} 
                     <form style="display: inline;" method="post" action="{% url 'got:ot-detail' ot.num_ot %}">{% csrf_token %}
                         <div class="btn-group" role="group">
