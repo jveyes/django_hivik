@@ -206,21 +206,6 @@
     
     <hr>
 
-    <div style="text-align: center;">
-        {% if ot.failure_report.evidence %}
-            <div>
-                <img src="{{ ot.failure_report.evidence.url }}">
-            </div>
-        {% endif %}
-        {% for act in ot.task_set.all %}
-            {% if act.evidence %}
-                <div>
-                    <img src="{{ act.evidence.url }}" style="width: 500px; height: auto;">
-                </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-
     <table style=" border-collapse: collapse; margin-top: 10px;">
         <tr style="height: 60px;">
             <td style="padding-left: 5px; border: 0.5px solid black; text-align: center;">
