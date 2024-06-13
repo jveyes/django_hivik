@@ -14,7 +14,7 @@
             <tr>
                 <th scope="col">Fecha</th>
                 <th scope="col">Orden de trabajo</th>
-                <th scope="col">Solicitud</th>
+                <!-- <th scope="col">Solicitud</th> -->
                 <th scope="col">Centro de costos</th>
                 <th scope="col">Solicitante</th>
                 <th scope="col">Estado</th>
@@ -23,11 +23,16 @@
         <tbody>
             {% for rq in solicitud_list %}
 				<tr>
-					<td data-cell="Fecha" class="nowrap">{{ rq.creation_date|date:"d/m/Y H:i" }}</td>
-					<td data-cell="Orden de trabajo">{% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}</td>
-					<td data-cell="Solicitud">{{ rq.suministros|linebreaks }}</td>
+					<td data-cell="Fecha" class="nowrap">
+                        {{ rq.creation_date|date:"d/m/Y H:i" }}
+                        
+                    </td>
+					<td data-cell="Orden de trabajo">
+                        {% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}
+                    </td>
+					
 					<td data-cell="Centro de costo" class="nowrap">{{ rq.asset.name}}</td>
-					<td data-cell="Solicitante">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
+					<td data-cell="Solicitante" class="nowrap">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
 					<td data-cell="Estado">
                         <div class="dropdown">
 							<button class="btn status {% if rq.num_sc %}finished{% elif rq.approved %}pending{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -48,13 +53,11 @@
                     
                 
 				</tr>
-                {% if rq.suministro_set.all %}
-                <tr class="suministros-details">
-                    <td colspan="6">
-                        {% if rq.approval_date %}Aprobado: {{ rq.approval_date|date:"d/m/Y H:i" }}{% endif %}
-                        {% if rq.sc_change_date %}/Tramitado: {{ rq.sc_change_date|date:"d/m/Y H:i" }}{% endif %}
-                        <h5>Suministros:</h5>
-                        <ul>
+                
+                <tr>
+                    <td data-cell="Solicitud" colspan="3">
+                        {{ rq.suministros|linebreaks }}
+                        <ul style="list-style: none; padding-left: 0;">
                             {% for suministro in rq.suministro_set.all %}
                                 <li onclick="openModal{{ suministro.id }}()" style="cursor: pointer;">
                                     {{ suministro.cantidad }} {{ suministro.item.presentacion }} {{ suministro.item.name }} {{ suministro.item.reference }} - {{ suministro.item.code }}
@@ -84,8 +87,16 @@
                             {% endfor %}
                         </ul>
                     </td>
+                    <td colspan="2">
+                        {% if rq.approval_date %}Aprobado: {{ rq.approval_date|date:"d/m/Y H:i" }}{% endif %}<br>
+                        {% if rq.sc_change_date %}Tramitado: {{ rq.sc_change_date|date:"d/m/Y H:i" }}{% endif %}<br>
+                        {% if rq.num_sc %}SC: {{ rq.num_sc }}{% endif %}
+                    </td>
                 </tr>
-                {% endif %}
+
+
+
+
                 <div class="modal fade" id="editSolicitudModal{{ rq.id }}" tabindex="-1" aria-labelledby="editSolicitudModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">

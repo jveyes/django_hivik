@@ -1254,23 +1254,43 @@ def crear_ot_desde_ruta(request, ruta_id):
     return redirect('got:ot-detail', pk=nueva_ot.pk)
 
 # Reportes
+# def report_pdf(request, num_ot):
+#     '''
+#     Funcion para crear reportes pdf
+#     '''
+#     ot_info = Ot.objects.get(num_ot=num_ot)
+#     template_path = 'got/pdf_template.html'
+#     context = {'ot': ot_info}
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'filename="orden_de_trabajo.pdf'
+#     template = get_template(template_path)
+#     html = template.render(context)
+#     pisa_status = pisa.CreatePDF(html, dest=response)
+
+#     if pisa_status.err:
+#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
+#     return response
+
 def report_pdf(request, num_ot):
     '''
-    Funcion para crear reportes pdf
+    Funcion para crear y enviar reportes pdf directamente para descarga sin guardar en el servidor.
     '''
     ot_info = Ot.objects.get(num_ot=num_ot)
-    template_path = 'got/pdf_template.html'
     context = {'ot': ot_info}
+    template_path = 'got/pdf_template.html'
+    
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'filename="orden_de_trabajo.pdf'
+    response['Content-Disposition'] = f'attachment; filename="orden_de_trabajo_{num_ot}.pdf"'
+    
     template = get_template(template_path)
     html = template.render(context)
-    pisa_status = pisa.CreatePDF(html, dest=response)
-
+    
+    # Crear el PDF y enviarlo directamente a la respuesta HTTP
+    pisa_status = pisa.CreatePDF(html.encode("ISO-8859-1"), dest=response)
+    
     if pisa_status.err:
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
-
 
 @login_required
 def indicadores(request):
@@ -1677,9 +1697,7 @@ def generate_asset_pdf(request, asset_id):
     return response
 
 
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from .models import Asset, System, Ruta
+
 from django.template.loader import get_template
 from io import BytesIO
 import PyPDF2
