@@ -18,7 +18,7 @@
         <div class="ot-detail">
             <aside>
                 <div class="btn-group" role="group">
-                    <a href="{% url 'got:report' ot.num_ot %}" class="btn btn-primary">Reporte</a>
+                    <a href="{% url 'got:report' ot.num_ot %}" target="_blank" class="btn btn-primary">Reporte</a>
                 </div>
                 {% if perms.got.change_ot %}
                     <div class="btn-group" role="group">
