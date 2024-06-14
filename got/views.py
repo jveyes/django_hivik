@@ -248,6 +248,25 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
     model = Solicitud
     paginate_by = 15
 
+    def get_queryset(self):
+        queryset = Solicitud.objects.all()
+        state = self.request.GET.get('state')
+
+        if self.request.user.groups.filter(name='maq_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                supervisor=self.request.user)
+            queryset = queryset.filter(asset__in=supervised_assets)
+
+        if state == 'no_aprobada':
+            queryset = queryset.filter(approved=False)
+        elif state == 'aprobada':
+            queryset = queryset.filter(approved=True, num_sc__isnull=True)
+        elif state == 'tramitado':
+            queryset = queryset.filter(approved=True, num_sc__isnull=False)
+
+        return queryset
+
 
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 

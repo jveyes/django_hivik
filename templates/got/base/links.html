@@ -121,6 +121,33 @@
         cursor: pointer;
     }
 
+    .deta {
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 0.85em;
+        overflow: visible;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .deta th {
+        background-color: var(--color-primary);
+        padding: 10px;
+        color: white;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* Estilo para las primeras 2 filas de cada grupo de 4 */
+    .deta tbody tr:nth-child(4n+1), .deta tbody tr:nth-child(4n+2) {
+        background-color: #f2f2f2; /* Color claro */
+    }
+
+    /* Estilo para las siguientes 2 filas del mismo grupo */
+    .deta tbody tr:nth-child(4n+3), .deta tbody tr:nth-child(4n+4) {
+        background-color: #cccccc; /* Color oscuro */
+    }
+
+
     .table-list {
 		border-collapse: collapse;
         margin: 20px 0;
@@ -153,7 +180,7 @@
         color: #fff;
     }
 
-	.table-list th, .table-list td {
+	.table-list th, .table-list td, .deta th, .deta td{
 		padding: 8px;
 	}
 
@@ -421,6 +448,8 @@
         /* letter-spacing: 0.5px; */
         /* text-transform: uppercase; */
     }
+
+    
 
     .terminar:hover {
         color: var(--color-secondary);

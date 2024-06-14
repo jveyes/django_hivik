@@ -8,31 +8,42 @@
 
 {% block content %}
 
+    <div class="filter-bar">
+        <a href="{% url 'got:rq-list' %}?state=no_aprobada" class="btn btn-danger">No Aprobadas</a>
+        <a href="{% url 'got:rq-list' %}?state=aprobada" class="btn btn-info">Aprobadas</a>
+        <a href="{% url 'got:rq-list' %}?state=tramitado" class="btn btn-primary">Tramitadas</a>
+        <a href="{% url 'got:rq-list' %}" class="btn btn-primary">Mostrar todos</a>
+    </div>
 
-    <table class="table-list">
+    <table class="deta">
         <thead>
             <tr>
-                <th scope="col">Fecha</th>
-                <th scope="col">Orden de trabajo</th>
+                <th scope="col">Solicitud</th>
                 <!-- <th scope="col">Solicitud</th> -->
-                <th scope="col">Centro de costos</th>
+                <th scope="col" class="nowrap">Centro de costos</th>
                 <th scope="col">Solicitante</th>
+                <!-- <th scope="col">Fecha</th>  -->
+
                 <th scope="col">Estado</th>
             </tr>
         </thead>
         <tbody>
             {% for rq in solicitud_list %}
 				<tr>
-					<td data-cell="Fecha" class="nowrap">
-                        {{ rq.creation_date|date:"d/m/Y H:i" }}
-                        
-                    </td>
+					
 					<td data-cell="Orden de trabajo">
-                        {% if rq.ot %}{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}
+                        <h6>
+                            {% if rq.ot %}Orden de trabajo OT{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}
+                        </h6>
                     </td>
 					
-					<td data-cell="Centro de costo" class="nowrap">{{ rq.asset.name}}</td>
+					<td data-cell="Centro de costo" class="nowrap"><strong>{{ rq.asset.name }}</strong></td>
 					<td data-cell="Solicitante" class="nowrap">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
+
+                    <!-- <td data-cell="Fecha" class="nowrap">
+                        
+                    </td> -->
+
 					<td data-cell="Estado">
                         <div class="dropdown">
 							<button class="btn status {% if rq.num_sc %}finished{% elif rq.approved %}pending{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -55,7 +66,8 @@
 				</tr>
                 
                 <tr>
-                    <td data-cell="Solicitud" colspan="3">
+                    <!-- <td></td> -->
+                    <td data-cell="Solicitud" colspan="2">
                         {{ rq.suministros|linebreaks }}
                         <ul style="list-style: none; padding-left: 0;">
                             {% for suministro in rq.suministro_set.all %}
@@ -88,6 +100,7 @@
                         </ul>
                     </td>
                     <td colspan="2">
+                        Solicitado: {{ rq.creation_date|date:"d/m/Y H:i" }}<br>
                         {% if rq.approval_date %}Aprobado: {{ rq.approval_date|date:"d/m/Y H:i" }}{% endif %}<br>
                         {% if rq.sc_change_date %}Tramitado: {{ rq.sc_change_date|date:"d/m/Y H:i" }}{% endif %}<br>
                         {% if rq.num_sc %}SC: {{ rq.num_sc }}{% endif %}
