@@ -9,7 +9,7 @@
                 {% if perms.got.view_ot %}
                     <a href="{% url 'got:ot-list' %}?asset_id={{ ot.system.asset.abbreviation }}"><i class="bi bi-arrow-90deg-left add-more"></i></a>
                 {% endif %}
-                {{ ot.system.asset }}/
+                <a href="{% url 'got:asset-detail' ot.system.asset.abbreviation %}">{{ ot.system.asset }}/</a>
                 Orden de trabajo #{{ ot.num_ot }}
             </h1>
         </div>
@@ -77,10 +77,6 @@
                         <td>{{ot.description}}</td>
                     </tr>
                     <tr>
-                        <th>Suministros</th>
-                        <td>{{ot.suministros}}</td>
-                    </tr>
-                    <tr>
                         <th>Informe externo</th>
                         <td>
                             {% if ot.info_contratista_pdf %}
@@ -128,9 +124,52 @@
                                 {% endif %}   
                             </td>
                         </tr>
+                        {% if failure_report %}
+                            <tr>
+                                <th>
+                                    Falla reportada
+                                </th>
+                                <td>
+                                    {{ failure_report.moment }}/{{ failure_report.description }}<br>
+                                    {{ failure_report.causas }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    Responsable del reporte
+                                </th>
+                                <td>
+                                    {{ failure_report.reporter.first_name }} {{ failure_report.reporter.last_name }}
+                                </td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             {% endif %} 
+
+            <table class="table-list table-detail">
+                <thead>
+                    <tr>
+                        <th class="add" colspan="2">
+                            Suministros/servicios
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in ot.solicitud_set.all %}
+                    <tr>
+                        <th>
+                            {{ item.creation_date|date:"d/m/Y" }}
+                        </th>
+                        <td>
+                            {{ item.suministros|linebreaks }}<br>
+                            {% for suministro in item.suministro_set.all %}
+                                {{ suministro.cantidad }} {{ suministro.item.presentacion }} {{ suministro.item.name }} {{ suministro.item.reference }} - {{ suministro.item.code }}<br>
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
        <div class="tasks">     

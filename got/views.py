@@ -119,17 +119,6 @@ class CreateSolicitudOt(LoginRequiredMixin, View):
         asset = get_object_or_404(Asset, abbreviation=asset_id)
         ot = None if not ot_num else get_object_or_404(Ot, num_ot=ot_num)
         items = Item.objects.all()
-        # items_list = Item.objects.all()
-
-        # page = request.GET.get('page', 1)
-        # paginator = Paginator(items_list, 10)
-
-        # try:
-        #     items = paginator.page(page)
-        # except PageNotAnInteger:
-        #     items = paginator.page(1)
-        # except EmptyPage:
-        #     items = paginator.page(paginator.num_pages)
 
         return render(request, self.template_name, {
             'ot': ot,

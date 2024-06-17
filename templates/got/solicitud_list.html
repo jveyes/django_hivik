@@ -33,17 +33,12 @@
 					
 					<td data-cell="Orden de trabajo">
                         <h6>
-                            {% if rq.ot %}Orden de trabajo OT{{ rq.ot }}{% else %}{{ rq.get_seccion_display }}{% endif %}
+                            {% if rq.ot %}Orden de trabajo OT{{ rq.ot }}{% else %}Consumibles/Repuestos/Herramientas{% endif %}
                         </h6>
                     </td>
 					
 					<td data-cell="Centro de costo" class="nowrap"><strong>{{ rq.asset.name }}</strong></td>
 					<td data-cell="Solicitante" class="nowrap">{{ rq.solicitante.first_name }} {{ rq.solicitante.last_name}}</td>
-
-                    <!-- <td data-cell="Fecha" class="nowrap">
-                        
-                    </td> -->
-
 					<td data-cell="Estado">
                         <div class="dropdown">
 							<button class="btn status {% if rq.num_sc %}finished{% elif rq.approved %}pending{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">

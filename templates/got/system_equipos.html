@@ -3,7 +3,7 @@
 	<table class="table-list table-detail">
 		<thead>
 			<tr>
-				<th colspan="8">
+				<th colspan="9">
 					Rutinas de mantenimiento
 					{% if perms.got.add_ruta %}
 						<a href="{% url 'got:ruta-create' system.id %}"><i class="bi bi-plus-circle add-sys"></i></a>
@@ -15,6 +15,7 @@
 						<th scope="col">Equipo</th>
 						<th scope="col">Frecuencia</th>
 						<th scope="col">Control</th>
+						<th scope="col">Tiempo restante</th>
 						<th scope="col">Fecha de ultima intervención</th>
 						<th scope="col">Fecha proxima intervención</th>
 						<th scope="col">Ultima Orden de trabajo</th>
@@ -28,6 +29,7 @@
 							<td class="nowrap">{{ ruta.name }}</td>
 							<td>{{ ruta.frecuency }}</td>
 							<td>{{ ruta.get_control_display }}</td>
+							<td data-cell="Ultima intervención">{{ ruta.daysleft }}</td>
 							<td>{{ ruta.intervention_date|date:"d/m/Y" }}</td>
 							<td>{% if ruta.ot %}{{ ruta.next_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
 							<td><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>

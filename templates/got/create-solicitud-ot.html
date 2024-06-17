@@ -76,19 +76,13 @@
             {% endfor %}
         </div>
 
-        <!-- <div class="pagination">
-            {% if items.has_previous %}
-                <a href="?page=1&search={{ request.GET.search }}">Primero</a>
-                <a href="?page={{ items.previous_page_number }}&search={{ request.GET.search }}">Anterior</a>
-            {% endif %}
-            <span class="current">
-                Página {{ items.number }} de {{ items.paginator.num_pages }}.
-            </span>
-            {% if items.has_next %}
-                <a href="?page={{ items.next_page_number }}&search={{ request.GET.search }}">Siguiente</a>
-                <a href="?page={{ items.paginator.num_pages }}&search={{ request.GET.search }}">Último</a>
-            {% endif %}
-        </div> -->
+        <div class="pagination-controls">
+            <button type="button" onclick="changePage(-1)">Anterior</button>
+            <span id="page-info"></span>
+            <button type="button" onclick="changePage(1)">Siguiente</button>
+        </div>
+        
+        
     </form>
 
     <script>
@@ -141,28 +135,58 @@
                 const itemReference = card.getAttribute('data-reference');
                 if (itemName.includes(searchName) && itemReference.includes(searchReference)) {
                     card.style.display = '';
+                    card.classList.add('filtered');
                 } else {
                     card.style.display = 'none';
+                    card.classList.remove('filtered');
                 }
+            });
+
+            currentPage = 1;
+            setupPagination();
+        }
+
+        let currentPage = 1;
+        const itemsPerPage = 12; // Cambia este valor según cuántos ítems por página desees mostrar
+
+        function setupPagination() {
+            let items = document.querySelectorAll('.article-card.filtered');
+            if (items.length === 0) {  // Si no hay filtrados, toma todos los ítems
+                items = document.querySelectorAll('.article-card');
+            }
+            
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+            document.getElementById('page-info').textContent = `Página ${currentPage} de ${totalPages}`;
+
+            let itemIndex = 0;  // Índice para recorrer todos los ítems
+            items.forEach((item, index) => {
+                const start = (currentPage - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                if (itemIndex >= start && itemIndex < end) {
+                    item.style.display = '';  // Muestra los ítems de la página actual
+                } else {
+                    item.style.display = 'none';  // Oculta los demás ítems
+                }
+                itemIndex++;
             });
         }
 
-        // function updatePaginationLinks(searchName, searchReference) {
-        //     const paginationLinks = document.querySelectorAll('.pagination a');
-        //     paginationLinks.forEach(link => {
-        //         const url = new URL(link.href);
-        //         url.searchParams.set('searchName', searchName);
-        //         url.searchParams.set('searchReference', searchReference);
-        //         link.href = url.toString();
-        //     });
-        // }
 
-        // function filterItems() {
-        //     const searchName = document.getElementById('search-name-input').value.toLowerCase();
-        //     const searchReference = document.getElementById('search-reference-input').value.toLowerCase();
-        //     updatePaginationLinks(searchName, searchReference);
-        //     // Filtrado como antes...
-        // }
+        function changePage(step) {
+            const items = document.querySelectorAll('.article-card');
+            const totalPages = Math.ceil(items.length / itemsPerPage);
+            currentPage += step;
+
+            if (currentPage < 1) {
+                currentPage = 1;
+            } else if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            setupPagination();
+        }
+
+        document.addEventListener("DOMContentLoaded", setupPagination);
 
     </script>
 {% endblock %}

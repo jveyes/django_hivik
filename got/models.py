@@ -176,7 +176,7 @@ class Equipo(models.Model):
     horometro = models.IntegerField(default=0, null=True, blank=True)
     prom_hours = models.IntegerField(default=0, null=True, blank=True)
     lubricante = models.CharField(max_length=100, null=True, blank=True)
-    volumen = models.IntegerField(default=0, null=True, blank=True)
+    volumen = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='equipos')
     subsystem = models.CharField(max_length=100, null=True, blank=True)
@@ -485,7 +485,7 @@ class Solicitud(models.Model):
     solicitante = models.ForeignKey(User, on_delete=models.CASCADE)
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True)
-    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
+    seccion = models.CharField(max_length=1, choices=SECCION, default='r')
     suministros = models.TextField()
     num_sc = models.TextField(null=True, blank=True)
     approved = models.BooleanField(default=False)
