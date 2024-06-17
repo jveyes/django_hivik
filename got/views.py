@@ -1301,37 +1301,11 @@ def report_pdf(request, num_ot):
         return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
-# from django.http import StreamingHttpResponse
-
-# def fetch_pdf_stream(html):
-#     result = io.BytesIO()
-#     pdf = pisa.pisaDocument(io.BytesIO(html.encode("UTF-8")), result)
-#     if not pdf.err:
-#         return result.getvalue()
-#     return None
-
-# def report_pdf(request, num_ot):
-#     ot_info = Ot.objects.get(num_ot=num_ot)
-#     context = {'ot': ot_info}
-#     template_path = 'got/pdf_template.html'
-#     template = get_template(template_path)
-#     html = template.render(context)
-    
-#     pdf_content = fetch_pdf_stream(html)
-#     if pdf_content:
-#         response = StreamingHttpResponse(streaming_content=(chunk for chunk in pdf_content),
-#                                          content_type='application/pdf')
-#         response['Content-Disposition'] = f'attachment; filename="orden_de_trabajo_{num_ot}.pdf"'
-#         return response
-#     else:
-#         return HttpResponse('We had some errors during PDF generation')
-
-
 
 @login_required
 def indicadores(request):
 
-    m = 5
+    m = 6
 
     area_filter = request.GET.get('area', None)
 
@@ -1794,9 +1768,6 @@ def generate_system_pdf_with_attachments(request, asset_id, system_id):
     # Establecer el PDF combinado como la respuesta
     response.write(combined_pdf.getvalue())
     return response
-
-
-
 
 
 class DocumentCreateView(generic.View):
