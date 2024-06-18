@@ -22,7 +22,7 @@ def copiar_rutas_de_sistema(system_id):
                     suministros=ruta.suministros,
                     astillero=ruta.astillero,
                     system=sistema,
-                    equipo=ruta.equipo.code,
+                    # equipo=ruta.equipo.code,
                     dependencia=ruta.dependencia,
                 )
                 

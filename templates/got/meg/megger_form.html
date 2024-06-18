@@ -1,0 +1,78 @@
+{% extends "got/base_generic.html" %}
+
+{% block content %}
+<h1>Megger y mantenimiento eléctrico de motores y generadores</h1>
+
+<!-- Encabezado con OT y equipo -->
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Orden de Trabajo (OT)</th>
+            <th>Equipo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ megger.ot }}</td>
+            <td>{{ megger.equipo }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- Tabla para el modelo Estator -->
+<h2>Estator</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Campo</th>
+            <th>Valor PI</th>
+            <th>Valor PF</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Manually list each field -->
+        <tr>
+            <td>PI 1min L1 Tierra</td>
+            <td>{{ estator_form.pi_1min_l1_tierra }}</td>
+            <td>{{ estator_form.pf_1min_l1_tierra }}</td>
+        </tr>
+        <tr>
+            <td>PI 1min L2 Tierra</td>
+            <td>{{ estator_form.pi_1min_l2_tierra }}</td>
+            <td>{{ estator_form.pf_1min_l2_tierra }}</td>
+        </tr>
+        <!-- Add other fields following the pattern above -->
+    </tbody>
+</table>
+
+<!-- Modals for each field of Estator, example for pi_1min_l1_tierra -->
+<div class="modal fade" id="modalPi1minL1Tierra" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar PI 1min L1 Tierra</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ estator_form.pi_1min_l1_tierra }}
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Repeat modals for each field as necessary -->
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Add click handlers for modal opening if necessary
+});
+</script>
+
+{% endblock %}

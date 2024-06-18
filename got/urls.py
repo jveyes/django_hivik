@@ -68,10 +68,7 @@ urlpatterns = [
     # FORMULARIO ACTUALIZACION DE REPORTE DE FALLA
     path('report-failure/<int:pk>/update/', views.FailureReportUpdate.as_view(), name='failure-report-update'),
     path('report-failure/<int:fail_id>/crear_ot/', views.crear_ot_failure_report, name='failure-report-crear-ot'),
-    path('historial-cambios/', views.HistorialCambiosView.as_view(), name='historial-cambios'),
-    path('bitacora/<int:asset_id>/', views.BitacoraView.as_view(), name='bitacora'),
 
-    # ---------------------------- Operaciones ----------------------- #
     path("operations/", views.OperationListView, name="operation-list"),
     path('operation/<int:pk>/update/', views.OperationUpdate.as_view(), name='operation-update'),
     path("operation/<int:pk>/delete/", views.OperationDelete.as_view(), name="operation-delete"),
@@ -90,7 +87,10 @@ urlpatterns = [
 
     path('system/<str:asset_id>/<int:system_id>/pdf/', views.generate_system_pdf_with_attachments, name='generate-system-pdf'),
 
-
     path('nueva-solicitud/<str:asset_id>/', views.CreateSolicitudOt.as_view(), name='create-solicitud'),
     path('nueva-solicitud/<str:asset_id>/<int:ot_num>/', views.CreateSolicitudOt.as_view(), name='create-solicitud-ot'),
+
+    path('meg/<int:pk>/', views.megger_view, name='meg-detail'),
+    path('ots/<int:ot_id>/create_megger/', views.create_megger, name='create_megger'),
+
 ]

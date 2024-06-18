@@ -34,3 +34,7 @@ def get_impact_display(impact_code):
 def can_edit_task(user, task):
     return user == task.responsible or user.has_perm('myapp.can_modify_any_task')
 
+
+@register.filter
+def get_mapping_value(mapping, key):
+    return mapping.get(key, None)

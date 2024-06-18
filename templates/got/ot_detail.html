@@ -43,6 +43,40 @@
                         </div>
                     </form>
                 {% endif %}
+                {% if has_electric_motors %}
+                    <!-- Botón que activa el modal -->
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#electricMotorSelectionModal">
+                        Crear Registro Megger
+                    </button>
+
+                    <!-- Modal para seleccionar un motor eléctrico -->
+                    <div class="modal fade" id="electricMotorSelectionModal" tabindex="-1" aria-labelledby="electricMotorSelectionModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="electricMotorSelectionModalLabel">Seleccionar Motor Eléctrico</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post" action="{% url 'got:create_megger' ot.num_ot %}">
+                                        {% csrf_token %}
+                                        <div class="list-group">
+                                            {% for equipo in electric_motors %}
+                                                <label class="list-group-item">
+                                                    <input type="radio" class="form-check-input me-1" name="equipo" value="{{ equipo.code }}" required>
+                                                    {{ equipo.name }}
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mt-3">Crear Megger</button>
+                                    </form>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
             </aside>
             
             <table class="table-list table-detail">

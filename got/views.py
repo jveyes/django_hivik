@@ -19,25 +19,26 @@ from django.utils import timezone
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
-    Megger, Solicitud, Suministro, Item
+    Megger, Solicitud, Suministro, Item, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos,
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
-    DocumentForm, SolicitudForm, SuministroFormset, SolicitudAssetForm
+    DocumentForm, SolicitudForm, SuministroFormset, SolicitudAssetForm, MeggerForm, EstatorForm, ExcitatrizForm, RotorMainForm,
+    RotorAuxForm, RodamientosEscudosForm
 )
 
 from datetime import timedelta, date, datetime
 from xhtml2pdf import pisa
 from io import BytesIO
 import itertools
-import io
+import PyPDF2
 
 
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
     model = Task
-    template_name = 'got/assignedtasks_list_pendient.html'
+    template_name = 'got/task/assignedtasks_list_pendient.html'
     paginate_by = 20
 
     def dispatch(self, request, *args, **kwargs):
@@ -113,7 +114,7 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
     
 
 class CreateSolicitudOt(LoginRequiredMixin, View):
-    template_name = 'got/create-solicitud-ot.html'
+    template_name = 'got/solicitud/create-solicitud-ot.html'
 
     def get(self, request, asset_id, ot_num=None):
         asset = get_object_or_404(Asset, abbreviation=asset_id)
@@ -171,7 +172,7 @@ class ApproveSolicitudView(LoginRequiredMixin, View):
 
 @receiver(post_save, sender=Solicitud)
 def send_email_on_new_solicitud(sender, instance, created, **kwargs):
-    if created:  # Comprueba si se ha creado una nueva solicitud
+    if created:
         suministros = Suministro.objects.filter(Solicitud=instance)
         suministros_list = "\n".join([f"{suministro.item}: {suministro.cantidad}" for suministro in suministros])
         subject = f'Nueva Solicitud de Suministros: {instance}'
@@ -189,7 +190,7 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         {suministros_list}
 
         '''
-        recipient_list = ['c.mantenimiento@serport.co']  # Cambia a la dirección de correo deseada
+        recipient_list = ['c.mantenimiento@serport.co']
         send_mail(subject, message, settings.EMAIL_HOST_USER, recipient_list)
     
 
@@ -202,34 +203,6 @@ def update_sc(request, pk):
         solicitud.save()
         return redirect('got:rq-list')
     return redirect('got:rq-list') 
-
-class Reschedule_task(UpdateView):
-
-    model = Task
-    form_class = RescheduleTaskForm
-    template_name = 'got/task_reschedule.html'
-    success_url = reverse_lazy('got:my-tasks')
-
-    def form_valid(self, form):
-        return super().form_valid(form)
-
-
-# ---------------------------- Activos (Assets) ---------------------------- #
-class AssetsListView(LoginRequiredMixin, generic.ListView):
-
-    model = Asset
-    paginate_by = 20
-
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        area = self.request.GET.get('area')
-        user_groups = self.request.user.groups.values_list('name', flat=True)
-        if 'buzos_members' in user_groups:
-            queryset = queryset.filter(area='b')
-        if area:
-            queryset = queryset.filter(area=area)
-
-        return queryset
 
 
 class SolicitudesListView(LoginRequiredMixin, generic.ListView):
@@ -257,6 +230,34 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
         return queryset
 
 
+class Reschedule_task(UpdateView):
+
+    model = Task
+    form_class = RescheduleTaskForm
+    template_name = 'got/task/task_reschedule.html'
+    success_url = reverse_lazy('got:my-tasks')
+
+    def form_valid(self, form):
+        return super().form_valid(form)
+
+
+class AssetsListView(LoginRequiredMixin, generic.ListView):
+
+    model = Asset
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = Asset.objects.all()
+        area = self.request.GET.get('area')
+        user_groups = self.request.user.groups.values_list('name', flat=True)
+        if 'buzos_members' in user_groups:
+            queryset = queryset.filter(area='b')
+        if area:
+            queryset = queryset.filter(area=area)
+
+        return queryset
+
+##################################################################333
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Asset
@@ -344,7 +345,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
             return render(request, self.template_name, context)
 
 
-# ---------------------------- Systems -------------------------------------- #
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = System
@@ -356,7 +356,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         
         orders_list = Ot.objects.filter(system=system)
 
-        view_type = self.kwargs.get('view_type', 'sys')  # Default a 'history'
+        view_type = self.kwargs.get('view_type', 'sys')
         context['view_type'] = view_type
 
         if view_type == 'sys':
@@ -364,7 +364,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         else:
             paginator = Paginator(orders_list, 4)
 
-        page = self.request.GET.get('page')  # obtiene el número de página de GET request
+        page = self.request.GET.get('page')
         try:
             orders = paginator.page(page)
         except PageNotAnInteger:
@@ -390,6 +390,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         
         return context
 
+
 class SysDelete(DeleteView):
 
     model = System
@@ -408,21 +409,6 @@ class SysUpdate(UpdateView):
     template_name = 'got/system_form.html'
 
 
-def add_location(request):
-    if request.method == 'POST':
-        form = LocationForm(request.POST)
-        if form.is_valid():
-            location = form.save()
-            return redirect('view-location', pk=location.pk)  # Redirige a una URL de éxito
-    else:
-        form = LocationForm()
-    return render(request, 'got/add_location.html', {'form': form})
-
-def view_location(request, pk):
-    location = get_object_or_404(Location, pk=pk)
-    return render(request, 'got/view_location.html', {'location': location})
-
-# ---------------------------- Equipos ---------------------------- #
 class EquipoCreateView(CreateView):
 
     model = Equipo
@@ -435,6 +421,7 @@ class EquipoCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('got:sys-detail', kwargs={'pk': self.object.system.pk})
+
 
 class EquipoUpdate(UpdateView):
 
@@ -453,7 +440,6 @@ class EquipoDelete(DeleteView):
         success_url = reverse_lazy('got:sys-detail', kwargs={'pk': sys_code})
         return success_url
 
-# ---------------------------- Failure Report ---------------------------- #
 
 class FailureListView(LoginRequiredMixin, generic.ListView):
 
@@ -493,23 +479,20 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         email_template_name = 'got/failure_report_email.txt'
         
         email_body_html = render_to_string(email_template_name, context)
-        # email_body_plain = strip_tags(email_body_html)
         
         email = EmailMessage(
             subject,
-            # email_body_plain,
             email_body_html,
             settings.EMAIL_HOST_USER,
             [user.email for user in Group.objects.get(name='super_members').user_set.all()],
             reply_to=[settings.EMAIL_HOST_USER]
         )
-        # email.content_subtype = 'html'
         
         if self.object.evidence:
             mimetype = f'image/{self.object.evidence.name.split(".")[-1]}'
             email.attach(
                 'Evidencia.' + self.object.evidence.name.split(".")[-1],
-                self.object.evidence.read(),  # Leer el archivo directamente
+                self.object.evidence.read(),
                 mimetype
             )
         
@@ -536,7 +519,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
         asset = get_object_or_404(Asset, pk=asset_id)
         context['asset_main'] = asset
         if 'image_form' not in context:
-            context['image_form'] = UploadImages()  # Añadir el formulario de imágenes
+            context['image_form'] = UploadImages()
         return context
 
     def get_form(self, form_class=None):
@@ -556,7 +539,7 @@ class FailureReportForm(LoginRequiredMixin, CreateView):
             context = self.get_email_context()  
             self.send_email(context)
             for file in request.FILES.getlist('file_field'):
-                Image.objects.create(failure=self.object, image=file)  # Asociar las imágenes al reporte de falla
+                Image.objects.create(failure=self.object, image=file)
             return response
         else:
             return self.form_invalid(form)
@@ -599,35 +582,30 @@ def crear_ot_failure_report(request, fail_id):
     fail = get_object_or_404(FailureReport, pk=fail_id)
     nueva_ot = Ot(
         description=f"Reporte de falla - {fail.equipo}",
-        state='x',  # Ejecución
+        state='x',
         super=request.user,
         tipo_mtto='c',
         system=fail.equipo.system,
     )
     nueva_ot.save()
 
-    # Actualizar el campo OT de la Ruta con la nueva OT
     fail.related_ot = nueva_ot
     fail.save()
 
-    # Redirige a la vista de detalle de la nueva OT
     return redirect('got:ot-detail', pk=nueva_ot.pk)
 
 
-# --------------------------- Ordenes de trabajo --------------------------- #
 class OtListView(LoginRequiredMixin, generic.ListView):
 
     model = Ot
     paginate_by = 15
 
-    # Formulario para filtrar Ots según descripción
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.groups.filter(name='buzos_members').exists():
             info_filter = Asset.objects.filter(area='b')
         else:
-            # Todos los asset para usuarios que no son parte de buzos_members
             info_filter = Asset.objects.all()
         context['asset'] = info_filter
 
@@ -707,7 +685,10 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         for ruta in rutas:
             equipos.append(ruta.equipo)
         context['equipos'] = set(equipos)
-        # context['equipos_por_ruta'] = {ruta.code: [ruta.equipo] if ruta.equipo else [] for ruta in rutas}
+
+        system = ot.system
+        context['electric_motors'] = system.equipos.filter(tipo='e')
+        context['has_electric_motors'] = system.equipos.filter(tipo='e').exists()
 
         return context
 
@@ -821,9 +802,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
 
 class OtCreate(CreateView):
-    '''
-    Vista formulario para crear ordenes de trabajo (v1.0)
-    '''
+
     model = Ot
     http_method_names = ['get', 'post']
 
@@ -861,7 +840,6 @@ class OtUpdate(UpdateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        # Obtener la instancia actual de la orden de trabajo
         ot_instance = self.get_object()
         kwargs['asset'] = ot_instance.system.asset
         return kwargs
@@ -873,7 +851,6 @@ class OtDelete(DeleteView):
     success_url = reverse_lazy('got:ot-list')
 
 
-# --------------------------- Actividades --------------------------- #
 class Finish_task(UpdateView):
 
     model = Task
@@ -913,7 +890,6 @@ class Finish_task_ot(UpdateView):
     form_class = FinishTask
     template_name = 'got/task_finish_form.html'
     second_form_class = UploadImages
-    # success_url = reverse_lazy('got:my-tasks')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -928,28 +904,18 @@ class Finish_task_ot(UpdateView):
         if form.is_valid() and image_form.is_valid():
             return self.form_valid(form, image_form)
 
-            # response = super().form_valid(form)
-            # for img in request.FILES.getlist('file_field'):
-            #     Image.objects.create(task=self.object, image=img)
-            # return response
         else:
             return self.form_invalid(form)
 
     def form_valid(self, form, image_form):
         self.object = form.save()
 
-        # Guardar las imágenes
         for img in self.request.FILES.getlist('file_field'):
             Image.objects.create(task=self.object, image=img)
 
-        # Aquí se establece el success_url dinámicamente
         ot = self.object.ot
         success_url = reverse('got:ot-detail', kwargs={'pk': ot.pk})
         return HttpResponseRedirect(success_url)
-        # response = super().form_valid(form)
-        # ot = self.object.ot 
-        # self.success_url = reverse('got:ot-detail', kwargs={'pk': ot.pk})
-        # return response
 
     def form_invalid(self, form, **kwargs):
         return self.render_to_response(self.get_context_data(form=form, **kwargs))
@@ -996,43 +962,33 @@ class TaskUpdate(UpdateView):
 
 
 class TaskCreate(CreateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = Task
     http_method_names = ['get', 'post']
     form_class = RutActForm
 
     def form_valid(self, form):
-        # Obtener el valor del parámetro pk desde la URL
         pk = self.kwargs['pk']
         ruta = get_object_or_404(Ruta, pk=pk)
 
-        # Establecer el valor del campo system en el formulario
         form.instance.ruta = ruta
         form.instance.finished = False
 
-        # Llamar al método form_valid de la clase base
         return super().form_valid(form)
 
     def get_success_url(self):
         task = self.object
-        # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[task.ruta.system.id])
 
 
 class TaskDelete(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
+
     model = Task
     success_url = reverse_lazy('got:ot-list')
 
 
 class TaskUpdaterut(UpdateView):
-    '''
-    Vista formulario para actualizar una actividad
-    '''
+
     model = Task
     form_class = RutActForm
     template_name = 'got/task_form.html'
@@ -1060,7 +1016,6 @@ class TaskDeleterut(DeleteView):
         return render(request, 'got/task_confirm_delete.html', context)
 
 
-# --------------------------- Rutinas --------------------------- #
 @login_required
 def RutaListView(request):
 
@@ -1214,9 +1169,7 @@ class RutaUpdate(UpdateView):
 
 
 class RutaDelete(DeleteView):
-    '''
-    Vista formulario para eliminar actividades
-    '''
+
     model = Ruta
 
     def get_success_url(self):
@@ -1230,7 +1183,7 @@ def crear_ot_desde_ruta(request, ruta_id):
     ruta = get_object_or_404(Ruta, pk=ruta_id)
     nueva_ot = Ot(
         description=f"Rutina de mantenimiento con código {ruta.name}",
-        state='x',  # Ejecución
+        state='x',
         super=request.user,
         tipo_mtto='p',
         system=ruta.system,
@@ -1254,36 +1207,15 @@ def crear_ot_desde_ruta(request, ruta_id):
         ruta.ot = ot
         ruta.save()
 
-        # Llamada recursiva para rutas dependientes
         if ruta.dependencia:
             copiar_tasks_y_actualizar_ot(ruta.dependencia, ot)
 
-    # Llamar a la función auxiliar con la ruta inicial y la OT recién creada
     copiar_tasks_y_actualizar_ot(ruta, nueva_ot)
     return redirect('got:ot-detail', pk=nueva_ot.pk)
 
-# Reportes
-# def report_pdf(request, num_ot):
-#     '''
-#     Funcion para crear reportes pdf
-#     '''
-#     ot_info = Ot.objects.get(num_ot=num_ot)
-#     template_path = 'got/pdf_template.html'
-#     context = {'ot': ot_info}
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = 'filename="orden_de_trabajo.pdf'
-#     template = get_template(template_path)
-#     html = template.render(context)
-#     pisa_status = pisa.CreatePDF(html, dest=response)
-
-#     if pisa_status.err:
-#         return HttpResponse('We had some errors <pre>' + html + '</pre>')
-#     return response
 
 def report_pdf(request, num_ot):
-    '''
-    Funcion para crear y enviar reportes pdf directamente para descarga sin guardar en el servidor.
-    '''
+
     ot_info = Ot.objects.get(num_ot=num_ot)
     context = {'ot': ot_info}
     template_path = 'got/pdf_template.html'
@@ -1401,7 +1333,6 @@ def indicadores(request):
     return render(request, 'got/indicadores.html', context)
 
 
-# reporte de horas
 @login_required
 def reporthours(request, component):
 
@@ -1477,44 +1408,7 @@ def reportHoursAsset(request, asset_id):
     return render(request, 'got/hours_asset.html', context)
 
 
-class HistorialCambiosView(generic.TemplateView):
-    template_name = 'got/historial_cambios.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['modelo1'] = FailureReport.history.all()
-        context['modelo2'] = Ot.history.all()
-        context['modelo3'] = Ruta.history.all()
-        context['modelo4'] = Task.history.all()
-        context['modelo5'] = System.history.all()
-        # Agrega tantos contextos como modelos tengas
-        return context
-
-
-class BitacoraView(generic.TemplateView):
-    template_name = 'got/bitacora.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        asset_id = self.kwargs.get('asset_id')
-        asset = get_object_or_404(Asset, pk=asset_id)
-        
-        ots = Ot.objects.filter(system__asset=asset).order_by('-creation_date')
-        
-        # Fetching all historical records for systems related to this asset
-        # history_items = HistoricalSystem.objects.filter(asset_id=asset_id, history_change_reason__contains="location change")
-        history_items = System.history.filter(asset_id=asset_id, history_change_reason__contains="location change")
-
-        combined_items = list(ots) + list(history_items)
-        combined_items.sort(key=lambda x: x.history_date if hasattr(x, 'history_date') else x.creation_date, reverse=True)
-
-        context['combined_items'] = combined_items
-        context['asset'] = asset
-        return context
-
-
 def truncate_text(text, length=45):
-    """Trunca el texto a una longitud especificada y añade '...' si es necesario."""
     if len(text) > length:
         return text[:length] + '...'
     return text
@@ -1707,11 +1601,6 @@ def generate_asset_pdf(request, asset_id):
     return response
 
 
-
-from django.template.loader import get_template
-import PyPDF2
-from xhtml2pdf import pisa  # Asegúrate de tener esta librería instalada para generar PDF desde HTML
-
 def generate_system_pdf_with_attachments(request, asset_id, system_id):
     asset = get_object_or_404(Asset, pk=asset_id)
     system = get_object_or_404(System, pk=system_id, asset=asset)
@@ -1734,7 +1623,6 @@ def generate_system_pdf_with_attachments(request, asset_id, system_id):
         'rutas_data': rutas_data
     }
 
-    # Crear PDF principal del sistema
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="System_{system_id}_Asset_{asset_id}_with_attachments.pdf"'
     template = get_template('got/system_pdf_with_attachments_template.html')
@@ -1815,8 +1703,82 @@ class SolicitudCreate(CreateView):
         kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
         return kwargs
 
-# class Meggeado(LoginRequiredMixin, generic.ListView):
 
-#     model = Megger
-#     template_name = 'got/assignedtasks_list_pendient.html'
-#     paginate_by = 15
+def megger_view(request, pk):
+    megger = get_object_or_404(Megger, pk=pk)  # Obtener el Megger basado en el pk
+
+    if request.method == 'POST':
+        megger_form = MeggerForm(request.POST, instance=megger)
+        estator_form = EstatorForm(request.POST, instance=megger.estator_set.first())
+        excitatriz_form = ExcitatrizForm(request.POST, instance=megger.excitatriz_set.first())
+        rotor_main_form = RotorMainForm(request.POST, instance=megger.rotormain_set.first())
+        rotor_aux_form = RotorAuxForm(request.POST, instance=megger.rotoraux_set.first())
+        rodamientos_escudos_form = RodamientosEscudosForm(request.POST, instance=megger.rodamientosescudos_set.first())
+        if all([megger_form.is_valid(), estator_form.is_valid(), excitatriz_form.is_valid(), rotor_main_form.is_valid(),
+                rotor_aux_form.is_valid(), rodamientos_escudos_form.is_valid()]):
+            megger = megger_form.save()
+            estator_form.save()
+            excitatriz_form.save()
+            rotor_main_form.save()
+            rotor_aux_form.save()
+            rodamientos_escudos_form.save()
+            return redirect('got:meg-detail', pk=megger.pk)
+    else:
+        megger_form = MeggerForm(instance=megger)
+        estator_form = EstatorForm(instance=megger.estator_set.first())
+        excitatriz_form = ExcitatrizForm(instance=megger.excitatriz_set.first())
+        rotor_main_form = RotorMainForm(instance=megger.rotormain_set.first())
+        rotor_aux_form = RotorAuxForm(instance=megger.rotoraux_set.first())
+        rodamientos_escudos_form = RodamientosEscudosForm(instance=megger.rodamientosescudos_set.first())
+
+    pi_pf_mapping = {}
+    for field in estator_form:
+        if 'pi' in field.name:
+            pf_name = field.name.replace('pi', 'pf')
+            pi_pf_mapping[field.name] = pf_name
+
+    context = {
+        'megger': megger,
+        'megger_form': megger_form,
+        'estator_form': estator_form,
+        'excitatriz_form': excitatriz_form,
+        'rotor_main_form': rotor_main_form,
+        'rotor_aux_form': rotor_aux_form,
+        'rodamientos_escudos_form': rodamientos_escudos_form,
+        'pi_pf_mapping': pi_pf_mapping,
+    }
+    return render(request, 'got/meg/megger_form.html', context)
+
+
+def create_megger(request, ot_id):
+    if request.method == 'POST':
+        ot = get_object_or_404(Ot, num_ot=ot_id)
+        equipo_id = request.POST.get('equipo')
+        equipo = get_object_or_404(Equipo, code=equipo_id)
+
+        # Crear el registro Megger
+        megger = Megger.objects.create(ot=ot, equipo=equipo)
+
+        Estator.objects.create(megger=megger)
+        Excitatriz.objects.create(megger=megger)
+        RotorMain.objects.create(megger=megger)
+        RotorAux.objects.create(megger=megger)
+        RodamientosEscudos.objects.create(megger=megger)
+
+        # Redirigir a la vista de detalles de Megger con el ID del nuevo Megger
+        return redirect('got:meg-detail', pk=megger.pk)
+
+
+def add_location(request):
+    if request.method == 'POST':
+        form = LocationForm(request.POST)
+        if form.is_valid():
+            location = form.save()
+            return redirect('view-location', pk=location.pk)
+    else:
+        form = LocationForm()
+    return render(request, 'got/add_location.html', {'form': form})
+
+def view_location(request, pk):
+    location = get_object_or_404(Location, pk=pk)
+    return render(request, 'got/view_location.html', {'location': location})

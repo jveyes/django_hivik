@@ -158,6 +158,7 @@ class Equipo(models.Model):
     TIPO = (
         ('r', 'Rotativo'),
         ('nr', 'No rotativo'),
+        ('e', 'Motor eléctrico'),
     )
 
     name = models.CharField(max_length=50)
@@ -528,10 +529,9 @@ class Megger(models.Model):
 
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE)
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
-    fecha = models.DateField()
 
     def __str__(self):
-        return f"Prueba #{self.id}/{self.equipo} ({self.fecha})"
+        return f"Prueba #{self.id}/{self.equipo}"
 
 class Estator(models.Model):
 

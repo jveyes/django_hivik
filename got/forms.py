@@ -2,7 +2,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
-    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document, Megger, Solicitud, Suministro
+    Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document,
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro
     )
 
 
@@ -618,17 +619,32 @@ SuministroFormset = modelformset_factory(
 )
 
 
-# class MeggerForm(forms.ModelForm):
-#     class Meta:
-#         model = Megger
-#         fields = '__all__'
-#         widgets = {
-#             'fecha': XYZ_DateInput(format=['%Y-%m-%d'],),
-#             'estator_pi_1min_l1_tierra': forms.NumberInput(attrs={'class': 'form-control'}),
-#             # Añade widgets para los demás campos
-#         }
-#         labels = {
-#             'fecha': 'Fecha',
-#             'equipo': 'Nombre de equipo',
-#             'estator_pi_1min_l1_tierra': 'Prueba inicial',
-#         }
+class EstatorForm(forms.ModelForm):
+    class Meta:
+        model = Estator
+        fields = '__all__'
+
+class ExcitatrizForm(forms.ModelForm):
+    class Meta:
+        model = Excitatriz
+        fields = '__all__'
+
+class RotorMainForm(forms.ModelForm):
+    class Meta:
+        model = RotorMain
+        fields = '__all__'
+
+class RotorAuxForm(forms.ModelForm):
+    class Meta:
+        model = RotorAux
+        fields = '__all__'
+
+class RodamientosEscudosForm(forms.ModelForm):
+    class Meta:
+        model = RodamientosEscudos
+        fields = '__all__'
+
+class MeggerForm(forms.ModelForm):
+    class Meta:
+        model = Megger
+        fields = '__all__'
