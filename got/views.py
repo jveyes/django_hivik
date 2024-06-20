@@ -1034,11 +1034,24 @@ class TaskDeleterut(DeleteView):
         context = {'task': self.get_object()}
         return render(request, 'got/task_confirm_delete.html', context)
 
-
+from django.db.models import Prefetch, Q
 @login_required
 def RutaListView(request):
 
     location_filter = request.GET.get('location', None)
+
+    suministro_prefetch = Prefetch('suministros', queryset=Suministro.objects.all(), to_attr='all_suministros')
+    
+    # Define a Prefetch for Equipos, including only those that have Suministros
+    equipo_prefetch = Prefetch('equipos', queryset=Equipo.objects.prefetch_related(suministro_prefetch).annotate(num_suministros=Count('suministros')).filter(num_suministros__gt=0), to_attr='all_equipos')
+    
+    # Define a Prefetch for Systems, including only those that have Equipos with Suministros
+    system_prefetch = Prefetch('system_set', queryset=System.objects.prefetch_related(equipo_prefetch).annotate(num_equipos_with_suministros=Count('equipos__suministros')).filter(num_equipos_with_suministros__gt=0), to_attr='all_systems')
+
+    # Now filter Assets, including only those that have Systems with Equipos that have Suministros
+    assets = Asset.objects.filter(area='a').prefetch_related(system_prefetch).annotate(num_systems_with_equipos=Count('system__equipos__suministros')).filter(num_systems_with_equipos__gt=0)
+
+
 
     buceo = Asset.objects.filter(area='b')
     diques = Ruta.objects.filter(name__icontains='DIQUE')
@@ -1139,6 +1152,7 @@ def RutaListView(request):
         motores_data.append(motores_info)
 
     context = {
+        'assets': assets,
         'dique_rutinas': diques,
         'buceo': buceo_data,
         'barcos': barcos,

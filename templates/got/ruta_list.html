@@ -5,6 +5,40 @@
 
 {% block content %}
 
+{% for asset in assets %}
+    <h3>{{ asset.name }}</h3>
+    <table class="table-list">
+        <thead>
+            <tr>
+                <th>Equipo</th>
+                <th>Suministros</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for system in asset.all_systems %}
+                {% for equipo in system.all_equipos %}
+                    <tr>
+                        <td>{{ equipo.name }}</td>
+                        <td>
+                            <ul>
+                                {% for suministro in equipo.all_suministros %}
+                                    <li>{{ suministro.item }}: {{ suministro.cantidad }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% empty %}
+    <p>No assets with systems and equipment having suministros.</p>
+{% endfor %}
+
+
+
+
+
 <div class="wrapper">
 		<table class="mt-5">
 			<caption>
