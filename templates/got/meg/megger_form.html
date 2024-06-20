@@ -14,7 +14,7 @@
     <tbody>
         <tr>
             <td>{{ megger.ot }}</td>
-            <td>{{ megger.equipo }}</td>
+            <td>{{ megger.equipo.name }}</td>
         </tr>
     </tbody>
 </table>
@@ -24,48 +24,54 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Campo</th>
-            <th>Valor PI</th>
-            <th>Valor PF</th>
+            <th></th>
+            <th>Prueba inicial</th>
+            <th>Prueba final</th>
         </tr>
     </thead>
     <tbody>
-        <!-- Manually list each field -->
+        <!-- PI y PF a 1 minuto -->
         <tr>
             <td>PI 1min L1 Tierra</td>
-            <td>{{ estator_form.pi_1min_l1_tierra }}</td>
-            <td>{{ estator_form.pf_1min_l1_tierra }}</td>
+            <td>{{ estator_form.pi_1min_l1_tierra.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l1_tierra.value|default_if_none:"N/A" }}</td>
         </tr>
         <tr>
             <td>PI 1min L2 Tierra</td>
-            <td>{{ estator_form.pi_1min_l2_tierra }}</td>
-            <td>{{ estator_form.pf_1min_l2_tierra }}</td>
+            <td>{{ estator_form.pi_1min_l2_tierra.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l2_tierra.value|default_if_none:"N/A" }}</td>
         </tr>
-        <!-- Add other fields following the pattern above -->
+        <tr>
+            <td>PI 1min L3 Tierra</td>
+            <td>{{ estator_form.pi_1min_l3_tierra.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l3_tierra.value|default_if_none:"N/A" }}</td>
+        </tr>
+        <tr>
+            <td>PI 1min L1-L2</td>
+            <td>{{ estator_form.pi_1min_l1_l2.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l1_l2.value|default_if_none:"N/A" }}</td>
+        </tr>
+        <tr>
+            <td>PI 1min L2-L3</td>
+            <td>{{ estator_form.pi_1min_l2_l3.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l2_l3.value|default_if_none:"N/A" }}</td>
+        </tr>
+        <tr>
+            <td>PI 1min L3-L1</td>
+            <td>{{ estator_form.pi_1min_l3_l1.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_1min_l3_l1.value|default_if_none:"N/A" }}</td>
+        </tr>
+        <!-- PI y PF a 10 minutos -->
+        <tr>
+            <td>PI 10min L1 Tierra</td>
+            <td>{{ estator_form.pi_10min_l1_tierra.value|default_if_none:"N/A" }}</td>
+            <td>{{ estator_form.pf_10min_l1_tierra.value|default_if_none:"N/A" }}</td>
+        </tr>
+        <!-- Continúa con los demás campos siguiendo el mismo patrón -->
     </tbody>
 </table>
 
-<!-- Modals for each field of Estator, example for pi_1min_l1_tierra -->
-<div class="modal fade" id="modalPi1minL1Tierra" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar PI 1min L1 Tierra</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ estator_form.pi_1min_l1_tierra }}
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Repeat modals for each field as necessary -->
+{% endblock %}
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
@@ -74,5 +80,3 @@ $(document).ready(function() {
     // Add click handlers for modal opening if necessary
 });
 </script>
-
-{% endblock %}

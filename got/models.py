@@ -535,7 +535,7 @@ class Megger(models.Model):
 
 class Estator(models.Model):
 
-    megger = models.ForeignKey(Megger, on_delete=models.CASCADE)
+    megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
     pi_1min_l1_tierra = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     pi_1min_l2_tierra = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     pi_1min_l3_tierra = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
@@ -581,7 +581,7 @@ class Estator(models.Model):
 
 class Excitatriz(models.Model):
 
-    megger = models.ForeignKey(Megger, on_delete=models.CASCADE)
+    megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
     pi_1min_l_tierra = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     pi_10min_l_tierra = models.DecimalField(max_digits=8, decimal_places=4, null=True, blank=True)
     pi_obs_l_tierra = models.TextField(null=True, blank=True)
@@ -593,7 +593,7 @@ class Excitatriz(models.Model):
 
 class RotorMain(models.Model):
 
-    megger = models.ForeignKey(Megger, on_delete=models.CASCADE)
+    megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
     pi_1min_l_tierra = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     pi_10min_l_tierra = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     pi_obs_l_tierra = models.TextField(null=True, blank=True)
@@ -604,7 +604,7 @@ class RotorMain(models.Model):
 
 class RotorAux(models.Model):
 
-    megger = models.ForeignKey(Megger, on_delete=models.CASCADE)
+    megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
     pi_1min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     pi_10min_l_tierra = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     pi_obs_l_tierra = models.TextField(null=True, blank=True)
@@ -616,7 +616,7 @@ class RotorAux(models.Model):
 
 class RodamientosEscudos(models.Model):
 
-    megger = models.ForeignKey(Megger, on_delete=models.CASCADE)
+    megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
     rodamientoas = models.TextField(null=True, blank=True)
     rodamientobs = models.TextField(null=True, blank=True)
     escudoas = models.TextField(null=True, blank=True)

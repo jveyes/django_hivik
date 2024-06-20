@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
-    Megger, Solicitud, Suministro, Item, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos,
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
@@ -1683,19 +1683,15 @@ class SolicitudCreate(CreateView):
     form_class = SolicitudForm
 
     def form_valid(self, form):
-        # Obtener el valor del parámetro pk desde la URL
         pk = self.kwargs['pk']
         system = get_object_or_404(System, pk=pk)
 
-        # Establecer el valor del campo system en el formulario
         form.instance.system = system
 
-        # Llamar al método form_valid de la clase base
         return super().form_valid(form)
 
     def get_success_url(self):
         ruta = self.object
-        # Redirigir a la vista de detalle del objeto recién creado
         return reverse('got:sys-detail', args=[ruta.system.id])
 
     def get_form_kwargs(self):
@@ -1705,49 +1701,14 @@ class SolicitudCreate(CreateView):
 
 
 def megger_view(request, pk):
-    megger = get_object_or_404(Megger, pk=pk)  # Obtener el Megger basado en el pk
-
-    if request.method == 'POST':
-        megger_form = MeggerForm(request.POST, instance=megger)
-        estator_form = EstatorForm(request.POST, instance=megger.estator_set.first())
-        excitatriz_form = ExcitatrizForm(request.POST, instance=megger.excitatriz_set.first())
-        rotor_main_form = RotorMainForm(request.POST, instance=megger.rotormain_set.first())
-        rotor_aux_form = RotorAuxForm(request.POST, instance=megger.rotoraux_set.first())
-        rodamientos_escudos_form = RodamientosEscudosForm(request.POST, instance=megger.rodamientosescudos_set.first())
-        if all([megger_form.is_valid(), estator_form.is_valid(), excitatriz_form.is_valid(), rotor_main_form.is_valid(),
-                rotor_aux_form.is_valid(), rodamientos_escudos_form.is_valid()]):
-            megger = megger_form.save()
-            estator_form.save()
-            excitatriz_form.save()
-            rotor_main_form.save()
-            rotor_aux_form.save()
-            rodamientos_escudos_form.save()
-            return redirect('got:meg-detail', pk=megger.pk)
-    else:
-        megger_form = MeggerForm(instance=megger)
-        estator_form = EstatorForm(instance=megger.estator_set.first())
-        excitatriz_form = ExcitatrizForm(instance=megger.excitatriz_set.first())
-        rotor_main_form = RotorMainForm(instance=megger.rotormain_set.first())
-        rotor_aux_form = RotorAuxForm(instance=megger.rotoraux_set.first())
-        rodamientos_escudos_form = RodamientosEscudosForm(instance=megger.rodamientosescudos_set.first())
-
-    pi_pf_mapping = {}
-    for field in estator_form:
-        if 'pi' in field.name:
-            pf_name = field.name.replace('pi', 'pf')
-            pi_pf_mapping[field.name] = pf_name
+    megger = get_object_or_404(Megger, pk=pk) 
 
     context = {
         'megger': megger,
-        'megger_form': megger_form,
-        'estator_form': estator_form,
-        'excitatriz_form': excitatriz_form,
-        'rotor_main_form': rotor_main_form,
-        'rotor_aux_form': rotor_aux_form,
-        'rodamientos_escudos_form': rodamientos_escudos_form,
-        'pi_pf_mapping': pi_pf_mapping,
     }
     return render(request, 'got/meg/megger_form.html', context)
+
+
 
 
 def create_megger(request, ot_id):
@@ -1767,6 +1728,7 @@ def create_megger(request, ot_id):
 
         # Redirigir a la vista de detalles de Megger con el ID del nuevo Megger
         return redirect('got:meg-detail', pk=megger.pk)
+
 
 
 def add_location(request):
