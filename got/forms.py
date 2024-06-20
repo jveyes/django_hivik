@@ -6,6 +6,9 @@ from .models import (
     Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro
     )
 
+from django.forms import modelformset_factory
+
+
 
 # ---------------- Widgets ------------------- #
 class UserChoiceField(forms.ModelChoiceField):
@@ -600,13 +603,14 @@ class SolicitudAssetForm(forms.ModelForm):
             'suminsitros': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
-from django.forms import inlineformset_factory
-from django.forms import modelformset_factory
-
-# Considerando que ya tienes importado SolicitudForm y tus modelos
-# SuministroFormset = inlineformset_factory(
-#     Solicitud, Suministro, fields=('item', 'cantidad'), extra=1, can_delete=True
-# )
+class SuministrosEquipoForm(forms.ModelForm):
+    class Meta:
+        model = Suministro
+        fields = ['item', 'cantidad']
+        labels = {
+            'item': 'Articulo',
+            'cantidad': 'Cantidad'
+        }
 
 SuministroFormset = modelformset_factory(
     Suministro,

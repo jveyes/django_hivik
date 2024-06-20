@@ -519,7 +519,9 @@ class Suministro(models.Model):
 
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
-    Solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE)
+    Solicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE, null=True, blank=True)
+
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.item} ({self.cantidad})"

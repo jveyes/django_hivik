@@ -368,10 +368,8 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         try:
             orders = paginator.page(page)
         except PageNotAnInteger:
-            # Si la página no es un entero, entregar la primera página.
             orders = paginator.page(1)
         except EmptyPage:
-            # Si la página está fuera de rango, entregar la última página de resultados.
             orders = paginator.page(paginator.num_pages)
 
         context['orders'] = orders
@@ -379,6 +377,7 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
         try:
             equipment = Equipo.objects.get(code=view_type)
             context['equipo'] = equipment
+            context['suministros'] = Suministro.objects.filter(equipo=equipment)
         except Equipo.DoesNotExist:
             equipments = Equipo.objects.filter(system=system, subsystem=view_type)
             context['equipos'] = equipments
@@ -387,8 +386,28 @@ class SysDetailView(LoginRequiredMixin, generic.DetailView):
 
         # Usar set para eliminar duplicados, si el distinct no está funcionando como se espera
         context['unique_subsystems'] = list(set(subsystems))
-        
+        context['items'] = Item.objects.all()
         return context
+
+from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
+from .models import Equipo, Suministro, Item
+from .forms import SuministrosEquipoForm
+
+def add_supply_to_equipment(request, code):
+    equipo = get_object_or_404(Equipo, code=code)
+    if request.method == 'POST':
+        form = SuministrosEquipoForm(request.POST)
+        if form.is_valid():
+            suministro = form.save(commit=False)
+            suministro.equipo = equipo
+            suministro.save()
+            return redirect(reverse('got:sys-detail-view', args=[equipo.system.id, equipo.code]))
+    else:
+        form = SuministrosEquipoForm()
+        items = Item.objects.all()  # Asegúrate de filtrar o ajustar esto según tus necesidades
+    return render(request, 'got/equipment_detail.html', {'form': form, 'equipo': equipo, 'items': items})
+
 
 
 class SysDelete(DeleteView):
@@ -1386,14 +1405,14 @@ def reportHoursAsset(request, asset_id):
 
     equipos_data = []
     for equipo in equipos_rotativos:
-        horas_reportadas = {date: 0 for date in dates}  # Prepara un diccionario con las fechas y horas iniciales a 0
+        horas_reportadas = {date: 0 for date in dates}
         for hour in equipo.hours.filter(report_date__range=(dates[-1], today)):
             if hour.report_date in horas_reportadas:
                 horas_reportadas[hour.report_date] += hour.hour
 
         equipos_data.append({
             'equipo': equipo,
-            'horas': [horas_reportadas[date] for date in dates]  # Listar horas por cada fecha para el equipo
+            'horas': [horas_reportadas[date] for date in dates]
         })
 
     context = { 

@@ -93,4 +93,6 @@ urlpatterns = [
     path('meg/<int:pk>/', views.megger_view, name='meg-detail'),
     path('ots/<int:ot_id>/create_megger/', views.create_megger, name='create_megger'),
 
+    path('equipment/<str:code>/add_supply/', views.add_supply_to_equipment, name='supply'),
+
 ]
