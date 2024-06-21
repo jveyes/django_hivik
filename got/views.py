@@ -208,11 +208,21 @@ def update_sc(request, pk):
 class SolicitudesListView(LoginRequiredMixin, generic.ListView):
     
     model = Solicitud
-    paginate_by = 15
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['assets'] = Asset.objects.all()  # Agrega todos los assets para el dropdown
+        return context
 
     def get_queryset(self):
         queryset = Solicitud.objects.all()
         state = self.request.GET.get('state')
+
+        asset_filter = self.request.GET.get('asset')
+
+        if asset_filter:
+            queryset = queryset.filter(asset__abbreviation=asset_filter)
 
         if self.request.user.groups.filter(name='maq_members').exists():
             # Obtén el/los asset(s) supervisado(s) por el usuario
@@ -223,9 +233,9 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
         if state == 'no_aprobada':
             queryset = queryset.filter(approved=False)
         elif state == 'aprobada':
-            queryset = queryset.filter(approved=True, num_sc__isnull=True)
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=True)
         elif state == 'tramitado':
-            queryset = queryset.filter(approved=True, num_sc__isnull=False)
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
 
         return queryset
 

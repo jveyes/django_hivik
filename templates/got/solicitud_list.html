@@ -8,11 +8,35 @@
 
 {% block content %}
 
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Filtrar por equipo
+    </button>
+    <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="{% url 'got:rq-list' %}">Mostrar todas</a></li>
+        {% for a in assets %}
+            <li><a class="dropdown-item" href="{% url 'got:rq-list' %}?asset={{ a.abbreviation }}">{{ a.name }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="btn-group" role="group">
+    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        Estado
+    </button>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'got:rq-list' %}" class="dropdown-item">Mostrar todos</a></li>
+        <li><a href="{% url 'got:rq-list' %}?state=no_aprobada" class="dropdown-item">No Aprobadas</a></li>
+        <li><a href="{% url 'got:rq-list' %}?state=tramitado" class="dropdown-item">Tramitadas</a></li>
+        <li><a href="{% url 'got:rq-list' %}?state=aprobada" class="dropdown-item">Aprobadas</a></li>
+    </ul>
+</div>
+
     <div class="filter-bar">
-        <a href="{% url 'got:rq-list' %}?state=no_aprobada" class="btn btn-danger">No Aprobadas</a>
-        <a href="{% url 'got:rq-list' %}?state=aprobada" class="btn btn-info">Aprobadas</a>
-        <a href="{% url 'got:rq-list' %}?state=tramitado" class="btn btn-primary">Tramitadas</a>
-        <a href="{% url 'got:rq-list' %}" class="btn btn-primary">Mostrar todos</a>
+        
+        
+        
+        
     </div>
 
     <table class="deta">
