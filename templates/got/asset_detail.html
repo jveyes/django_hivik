@@ -144,7 +144,7 @@
                         <td data-cell="Mantenimiento">{% if sys.maintenance_percentage %}{{ sys.maintenance_percentage }}%{% endif %}</td>
                         <td data-cell="Estado">
                             <div class="dropdown">
-                                <button class="btn status {% if sys.state == 'o' %}finished{% elif sys.state == 'm' %}pending{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn status {% if sys.state == 'o' %}finished{% elif sys.state == 'm' %}pending{% elif sys.state == 's' %}shipped{% else %}close{% endif %} btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ sys.get_state_display }}
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
@@ -191,6 +191,15 @@
 
     </div>
 
+    <!-- {% if asset.area == 'b' %}
+        <div class="filter-bar">
+            {% for location in locations %}
+                <a href="?location={{ location }}" class="btn btn-info">{{ location }}</a>
+            {% endfor %}
+            <a href="{% url 'got:asset-detail' asset.abbreviation %}" class="btn btn-primary">Mostrar todos</a>
+        </div>
+    {% endif %} -->
+
 	<div class="rutinas">
 		<table class="table-list table-detail">
 			<thead>
@@ -211,14 +220,14 @@
         	<tbody>
 		    	{% for ruta in page_obj_rutas %}
 					<tr data-href="{% url 'got:sys-detail-view' ruta.system.id 'sys' %}" class="{% if ruta.maintenance_status == 'c' %}table-success{%elif ruta.maintenance_status == 'p' %}table-warning{%elif ruta.maintenance_status == 'e' %}table-secondary{% else %}table-danger{% endif %}">
-					    <td scope="row" data-cell="Equipo">{% if ruta.equipo %}{{ ruta.equipo.name }}{% else %}{{ ruta.system.name }}{% endif %}</td>
+					    <td scope="row" data-cell="Equipo" class="nowrap">{% if ruta.equipo %}{{ ruta.equipo.name }}{% else %}{{ ruta.system.name }}{% endif %}</td>
 					    <td scope="row" data-cell="Codigo" class="nowrap">{{ ruta.name }}</td>
 					    <td data-cell="Frecuencia">{{ ruta.frecuency }}</td>
 					    <td data-cell="Control">{{ ruta.get_control_display }}</td>
                         <td data-cell="Ultima intervención">{{ ruta.daysleft }}</td>
 					    <td data-cell="Ultima intervención">{% if ruta.ot %}{{ ruta.intervention_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
 						<td data-cell="Proxima Intervención">{% if ruta.ot %}{{ ruta.next_date|date:"d/m/Y" }}{% else %}---{% endif %}</td>
-					    <td data-cell="Orden de trabajo"><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
+					    <td data-cell="Orden de trabajo" class="nowrap"><a href="{{  ruta.ot.get_absolute_url }}"><i class="bi bi-pen">OT - {{ ruta.ot.num_ot }}</i></a></td>
 				    </tr>
                 {% empty %}
                     <tr>

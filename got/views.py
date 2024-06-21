@@ -185,8 +185,6 @@ def send_email_on_new_solicitud(sender, instance, created, **kwargs):
         Detalles de los Suministros Solicitados: 
         
         {instance.suministros}
-
-        
         {suministros_list}
 
         '''
@@ -212,7 +210,7 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['assets'] = Asset.objects.all()  # Agrega todos los assets para el dropdown
+        context['assets'] = Asset.objects.all()
         return context
 
     def get_queryset(self):
@@ -267,25 +265,32 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
 
         return queryset
 
-##################################################################333
+
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Asset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         asset = self.get_object()
-
         rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
+        sys = asset.system_set.all() # 
 
-        if self.request.user.groups.filter(name='santamarta_station').exists():
-            sys = asset.system_set.filter(location='Santa Marta').exclude(state='x')
-        elif self.request.user.groups.filter(name='ctg_station').exists():
-            sys = asset.system_set.filter(location='Cartagena').exclude(state='x')
-        elif self.request.user.groups.filter(name='guyana_station').exists():
-            sys = asset.system_set.filter(location='Guyana').exclude(state='x')
-        else:
-            sys = asset.system_set.all()
+        # location_filter = self.request.GET.get('location', None)
+        # if asset.area == 'b' and location_filter:
+        #     systems_query = systems_query.exclude(location=location_filter)
+
+        if self.request.user.groups.filter(name='buzos_members').exists():
+            location_filters = {
+                'santamarta_station': 'Santa Marta',
+                'ctg_station': 'Cartagena',
+                'guyana_station': 'Guyana',
+            }
+            locations = [loc for group, loc in location_filters.items() if self.request.user.groups.filter(name=group).exists()]
+            if locations:
+                return asset.system_set.filter(area='b', location__in=locations)
+            return asset.system_set.all()
 
         other_asset_systems = System.objects.filter(location=asset.name).exclude(asset=asset)
         combined_systems = (sys.union(other_asset_systems)).order_by('group')
@@ -310,29 +315,21 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         current_month_name_en = datetime.now().strftime("%B")
         current_month_name_es = month_names_es[current_month_name_en]
 
-        # Filtrar las rutas que cumplen con la condición del mes y año actuales
         filtered_rutas = []
-        for ruta in Ruta.objects.filter(system__in=sys):
+        for ruta in Ruta.objects.filter(system__in=sys).exclude(system__state__in=['x', 's']):
             if (ruta.next_date.month <= current_month and ruta.next_date.year <= current_year) or (ruta.intervention_date.month == current_month and ruta.intervention_date.year == current_year) or (ruta.ot and ruta.ot.state == 'x'):
                 filtered_rutas.append(ruta)
 
-        # Ordenar las rutas filtradas por next_date
         filtered_rutas.sort(key=lambda t: t.next_date)
-
-        # rutas = sorted(Ruta.objects.filter(system__in=sys), key=lambda t: t.next_date)
-        
-        # Limitar a mostrar 10 sistemas
         paginator = Paginator(combined_systems, 10)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        # paginator_rutas = Paginator(rutas, 10)
-        page_number_rutas = self.request.GET.get('page_rutas')
-        # page_obj_rutas = paginator_rutas.get_page(page_number_rutas)
+        if asset.area == 'b':
+            context['locations'] = System.objects.filter(asset=asset).values_list('location', flat=True).distinct()
 
         context['sys_form'] = SysForm()
         context['page_obj'] = page_obj
-        # context['page_obj_rutas'] = page_obj_rutas
         context['page_obj_rutas'] = filtered_rutas
         context['mes'] = current_month_name_es
         context['rotativos'] = rotativos
@@ -1048,8 +1045,6 @@ from django.db.models import Prefetch, Q
 @login_required
 def RutaListView(request):
 
-    location_filter = request.GET.get('location', None)
-
     suministro_prefetch = Prefetch('suministros', queryset=Suministro.objects.all(), to_attr='all_suministros')
     
     # Define a Prefetch for Equipos, including only those that have Suministros
@@ -1061,40 +1056,8 @@ def RutaListView(request):
     # Now filter Assets, including only those that have Systems with Equipos that have Suministros
     assets = Asset.objects.filter(area='a').prefetch_related(system_prefetch).annotate(num_systems_with_equipos=Count('system__equipos__suministros')).filter(num_systems_with_equipos__gt=0)
 
-
-
-    buceo = Asset.objects.filter(area='b')
     diques = Ruta.objects.filter(name__icontains='DIQUE')
     barcos = Asset.objects.filter(area='a')
-
-    buceo_rowspan = len(buceo) + 1
-    total_oks = 0
-    total_non_dashes = 0
-
-    buceo_data = []
-    for asset in buceo:
-        mensual = asset.check_ruta_status(30, location_filter)
-        trimestral = asset.check_ruta_status(90, location_filter)
-        semestral = asset.check_ruta_status(180, location_filter)
-        anual = asset.check_ruta_status(365, location_filter)
-        bianual = asset.check_ruta_status(730, location_filter)
-
-        for status in [mensual, trimestral, semestral, anual, bianual]:
-            if status == "Ok":
-                total_oks += 1
-            if status != "---":
-                total_non_dashes += 1
-
-        buceo_data.append({
-            'asset': asset,
-            'mensual': mensual,
-            'trimestral': trimestral,
-            'semestral': semestral,
-            'anual': anual,
-            'bianual': bianual,
-        })
-
-    ind_mtto = round((total_oks*100)/total_non_dashes, 2)
 
 
     motores_data = []
@@ -1164,11 +1127,9 @@ def RutaListView(request):
     context = {
         'assets': assets,
         'dique_rutinas': diques,
-        'buceo': buceo_data,
         'barcos': barcos,
         'motores_data': motores_data,
-        'ind_mtto': ind_mtto,
-        'buceo_rowspan': buceo_rowspan,
+        
     }
     return render(request, 'got/ruta_list.html', context)
 
@@ -1752,8 +1713,6 @@ def megger_view(request, pk):
     return render(request, 'got/meg/megger_form.html', context)
 
 
-
-
 def create_megger(request, ot_id):
     if request.method == 'POST':
         ot = get_object_or_404(Ot, num_ot=ot_id)
@@ -1769,9 +1728,7 @@ def create_megger(request, ot_id):
         RotorAux.objects.create(megger=megger)
         RodamientosEscudos.objects.create(megger=megger)
 
-        # Redirigir a la vista de detalles de Megger con el ID del nuevo Megger
         return redirect('got:meg-detail', pk=megger.pk)
-
 
 
 def add_location(request):
@@ -1787,3 +1744,46 @@ def add_location(request):
 def view_location(request, pk):
     location = get_object_or_404(Location, pk=pk)
     return render(request, 'got/view_location.html', {'location': location})
+
+
+def buceomtto(request):
+
+    location_filter = request.GET.get('location', None)
+    buceo = Asset.objects.filter(area='b')
+
+    buceo_rowspan = len(buceo) + 1
+    total_oks = 0
+    total_non_dashes = 0
+
+    buceo_data = []
+    for asset in buceo:
+        mensual = asset.check_ruta_status(30, location_filter)
+        trimestral = asset.check_ruta_status(90, location_filter)
+        semestral = asset.check_ruta_status(180, location_filter)
+        anual = asset.check_ruta_status(365, location_filter)
+        bianual = asset.check_ruta_status(730, location_filter)
+
+        for status in [mensual, trimestral, semestral, anual, bianual]:
+            if status == "Ok":
+                total_oks += 1
+            if status != "---":
+                total_non_dashes += 1
+
+        buceo_data.append({
+            'asset': asset,
+            'mensual': mensual,
+            'trimestral': trimestral,
+            'semestral': semestral,
+            'anual': anual,
+            'bianual': bianual,
+            'buceo': buceo_data,
+        })
+    
+    ind_mtto = round((total_oks*100)/total_non_dashes, 2)
+
+    context = {
+        'buceo': buceo_data,
+        'ind_mtto': ind_mtto,
+        'buceo_rowspan': buceo_rowspan,
+    }
+    return render(request, 'got/buceomtto.html', context)

@@ -95,4 +95,7 @@ urlpatterns = [
 
     path('equipment/<str:code>/add_supply/', views.add_supply_to_equipment, name='supply'),
 
+
+    path('buceo/', views.buceomtto, name='buceomtto'),
+
 ]

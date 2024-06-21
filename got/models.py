@@ -110,7 +110,8 @@ class System(models.Model):
     STATUS = (
         ('m', 'Mantenimiento'),
         ('o', 'Operativo'),
-        ('x', 'Fuera de servicio')
+        ('x', 'Fuera de servicio'),
+        ('s', 'Stand by')
     )
 
     name = models.CharField(max_length=50)
