@@ -7,69 +7,222 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Orden de Trabajo (OT)</th>
+            <th>Orden de Trabajo</th>
+            <th>Centro de costos</th>
             <th>Equipo</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>{{ megger.ot }}</td>
-            <td>{{ megger.equipo.name }}</td>
+            <td>{{ megger.ot.system.asset }}</td>
+            <td>{{ megger.equipo }}</td>
         </tr>
     </tbody>
 </table>
 
-<!-- Tabla para el modelo Estator -->
 <h2>Estator</h2>
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th></th>
-            <th>Prueba inicial</th>
-            <th>Prueba final</th>
+            <th rowspan="2"></th>
+            <th colspan="3" style="text-align: center;">Prueba inicial</th>
+            <th colspan="3" style="text-align: center;">Prueba final</th>
+        </tr>
+        <tr>
+            <th>1min/ 500VDC</th>
+            <th>10min/ 500VDC</th>
+            <th>Observaciones</th>
+
+            <th>1min/ 500VDC</th>
+            <th>10min/ 500VDC</th>
+            <th>Observaciones</th>
         </tr>
     </thead>
     <tbody>
         <!-- PI y PF a 1 minuto -->
         <tr>
-            <td>1min L1 Tierra</td>
-            <td>{{ megger.estator.pi_1min_l1_tierra }}</td>
-            <td>{{ estator_form.pf_1min_l1_tierra.value|default_if_none:"N/A" }}</td>
+            <td>L1 + Tierra</td>
+            <td>{{ megger.estator.pi_1min_l1_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l1_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l1_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l1_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l1_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l1_tierra|default_if_none:"---" }}</td>
         </tr>
         <tr>
-            <td>PI 1min L2 Tierra</td>
-            <td>{{ estator_form.pi_1min_l2_tierra.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_1min_l2_tierra.value|default_if_none:"N/A" }}</td>
+            <td>L2 + Tierra</td>
+            <td>{{ megger.estator.pi_1min_l2_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l2_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l2_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l2_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l2_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l2_tierra|default_if_none:"---" }}</td>
         </tr>
         <tr>
-            <td>PI 1min L3 Tierra</td>
-            <td>{{ estator_form.pi_1min_l3_tierra.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_1min_l3_tierra.value|default_if_none:"N/A" }}</td>
+            <td>L3 + Tierra</td>
+            <td>{{ megger.estator.pi_1min_l3_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l3_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l3_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l3_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l3_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l3_tierra|default_if_none:"---" }}</td>
         </tr>
         <tr>
-            <td>PI 1min L1-L2</td>
-            <td>{{ estator_form.pi_1min_l1_l2.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_1min_l1_l2.value|default_if_none:"N/A" }}</td>
+            <td>L1 + L2</td>
+            <td>{{ megger.estator.pi_1min_l1_l2|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l1_l2|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l1_l2|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l1_l2|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l1_l2|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l1_l2|default_if_none:"---" }}</td>
         </tr>
         <tr>
-            <td>PI 1min L2-L3</td>
-            <td>{{ estator_form.pi_1min_l2_l3.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_1min_l2_l3.value|default_if_none:"N/A" }}</td>
+            <td>L2 + L3</td>
+            <td>{{ megger.estator.pi_1min_l2_l3|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l2_l3|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l2_l3|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l2_l3|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l2_l3|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l2_l3|default_if_none:"---" }}</td>
         </tr>
         <tr>
-            <td>PI 1min L3-L1</td>
-            <td>{{ estator_form.pi_1min_l3_l1.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_1min_l3_l1.value|default_if_none:"N/A" }}</td>
+            <td>L3 + L1</td>
+            <td>{{ megger.estator.pi_1min_l3_l1|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_10min_l3_l1|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pi_obs_l3_l1|default_if_none:"---" }}</td>
+
+            <td>{{ megger.estator.pf_1min_l3_l1|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_10min_l3_l1|default_if_none:"---" }}</td>
+            <td>{{ megger.estator.pf_obs_l3_l1|default_if_none:"---" }}</td>
         </tr>
-        <!-- PI y PF a 10 minutos -->
-        <tr>
-            <td>PI 10min L1 Tierra</td>
-            <td>{{ estator_form.pi_10min_l1_tierra.value|default_if_none:"N/A" }}</td>
-            <td>{{ estator_form.pf_10min_l1_tierra.value|default_if_none:"N/A" }}</td>
-        </tr>
-        <!-- Continúa con los demás campos siguiendo el mismo patrón -->
     </tbody>
 </table>
+
+<h2>Excitatriz</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2"></th>
+            <th colspan="3" style="text-align: center;">Prueba inicial</th>
+            <th colspan="3" style="text-align: center;">Prueba final</th>
+        </tr>
+        <tr>
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>L + Tierra</td>
+            <td>{{ megger.excitatriz.pi_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.excitatriz.pi_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.excitatriz.pi_obs_l_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.excitatriz.pf_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.excitatriz.pf_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.excitatriz.pf_obs_l_tierra|default_if_none:"---" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<h2>Rotor principal</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2"></th>
+            <th colspan="3" style="text-align: center;">Prueba inicial</th>
+            <th colspan="3" style="text-align: center;">Prueba final</th>
+        </tr>
+        <tr>
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>L + Tierra</td>
+            <td>{{ megger.rotormain.pi_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotormain.pi_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotormain.pi_obs_l_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.rotormain.pf_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotormain.pf_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotormain.pf_obs_l_tierra|default_if_none:"---" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Rotor auxiliar</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th rowspan="2"></th>
+            <th colspan="3" style="text-align: center;">Prueba inicial</th>
+            <th colspan="3" style="text-align: center;">Prueba final</th>
+        </tr>
+        <tr>
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+
+            <th>1min</th>
+            <th>10min</th>
+            <th>Observaciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>L + Tierra</td>
+            <td>{{ megger.rotoraux.pi_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotoraux.pi_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotoraux.pi_obs_l_tierra|default_if_none:"---" }}</td>
+
+            <td>{{ megger.rotoraux.pf_1min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotoraux.pf_10min_l_tierra|default_if_none:"---" }}</td>
+            <td>{{ megger.rotoraux.pf_obs_l_tierra|default_if_none:"---" }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Rodamientos y escudos</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            <th style="text-align: center;">Rodamiento AS</th>
+            <th style="text-align: center;">Rodamiento BS</th>
+            <th style="text-align: center;">Escudo AS</th>
+            <th style="text-align: center;">Escudo BS</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Serial/Estado</td>
+            <td>{{ megger.rodamientosescudos.rodamientoas|default_if_none:"---" }}</td>
+            <td>{{ megger.rodamientosescudos.rodamientobs|default_if_none:"---" }}</td>
+            <td>{{ megger.rodamientosescudos.escudoas|default_if_none:"---" }}</td>
+            <td>{{ megger.rodamientosescudos.escudobs|default_if_none:"---" }}</td>
+        </tr>
+    </tbody>
+</table>
+
 
 {% endblock %}
 

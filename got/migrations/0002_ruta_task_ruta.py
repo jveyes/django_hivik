@@ -124,8 +124,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('cantidad', models.IntegerField()),
-                ('Solicitud', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.solicitud')),
+                ('Solicitud', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='got.solicitud')),
                 ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='got.item')),
+                ('equipo', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='suministros', to='got.equipo'),),
             ],
         ),
 

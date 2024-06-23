@@ -180,6 +180,8 @@ class Equipo(models.Model):
     lubricante = models.CharField(max_length=100, null=True, blank=True)
     volumen = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
+    potencia  = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='equipos')
     subsystem = models.CharField(max_length=100, null=True, blank=True)
 
@@ -252,7 +254,6 @@ class Ot(models.Model):
     tipo_mtto = models.CharField(choices=TIPO_MTTO, max_length=1)
     info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)
     ot_aprobada = models.FileField(upload_to=get_upload_path,null=True, blank=True)
-    suministros = models.TextField(default="", blank=True, null=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE)
 
@@ -277,6 +278,7 @@ class Ruta(models.Model):
     CONTROL = (
         ('d', 'Días'),
         ('h', 'Horas'),
+        ('k', 'Kilómetros')
     )
 
     code = models.AutoField(primary_key=True)
@@ -284,7 +286,6 @@ class Ruta(models.Model):
     control = models.CharField(choices=CONTROL, max_length=1)
     frecuency = models.IntegerField()
     intervention_date = models.DateField()
-    suministros = models.TextField(default="", blank=True, null=True)
 
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
     equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')

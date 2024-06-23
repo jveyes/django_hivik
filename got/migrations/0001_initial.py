@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('group', models.IntegerField()),
                 ('location', models.CharField(blank=True, default='Cartagena', max_length=50, null=True)),
-                ('state', models.CharField(choices=[('m', 'Mantenimiento'), ('o', 'Operativo'), ('x', 'Fuera de servicio')], default='m', max_length=1)),
+                ('state', models.CharField(choices=[('m', 'Mantenimiento'), ('o', 'Operativo'), ('x', 'Fuera de servicio'), ('s', 'Stand by')], default='m', max_length=1)),
                 ('asset', models.ForeignKey(to='got.asset', on_delete=models.CASCADE)),
             ],
             options={
