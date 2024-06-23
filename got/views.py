@@ -1,21 +1,20 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
+from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Group, User
 from django.core.mail import EmailMessage, send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
-from django.conf import settings
+from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import get_template, render_to_string
-
-
-from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
-from django.db.models.signals import post_save
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.views import generic, View
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
@@ -33,6 +32,11 @@ from xhtml2pdf import pisa
 from io import BytesIO
 import itertools
 import PyPDF2
+import smtplib
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
@@ -796,7 +800,14 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
                         'application/pdf'
                         )
 
-                email.send()
+                try:
+                    # Preparar y enviar el correo electrónico
+                    email.send()
+                except smtplib.SMTPSenderRefused as e:
+                    # Manejar adecuadamente el error
+                    logger.error(f"Error al enviar correo: {str(e)}")
+                    messages.error(request, "No se pudo enviar el correo. El tamaño del mensaje excede el límite permitido.")
+                    return redirect(ot.get_absolute_url())
 
             return redirect(ot.get_absolute_url())
 
