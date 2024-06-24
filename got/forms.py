@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
     Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document,
-    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Consumibles,
+    Control
     )
 
 from django.forms import modelformset_factory
@@ -652,3 +653,21 @@ class MeggerForm(forms.ModelForm):
     class Meta:
         model = Megger
         fields = '__all__'
+
+
+class ConsumibleForm(forms.ModelForm):
+    class Meta:
+        model = Consumibles
+        fields = ['item', 'cant_in', 'cant_out']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['item'].widget = forms.HiddenInput()
+
+ConsumibleFormSet = forms.inlineformset_factory(
+    parent_model=Control,
+    model=Consumibles,
+    form=ConsumibleForm,
+    extra=0,  # No extra forms
+    can_delete=False
+)

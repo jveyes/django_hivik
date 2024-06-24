@@ -11,6 +11,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+
 def get_upload_path(instance, filename):
     ext = filename.split('.')[-1]
     filename = f"media/{datetime.now():%Y%m%d%H%M%S}-{uuid.uuid4()}.{ext}"
@@ -103,6 +104,57 @@ class Asset(models.Model):
     class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
         ordering = ['area', 'name']
+
+
+class Item(models.Model):
+
+    SECCION = (
+        ('c', 'Consumibles'),
+        ('h', 'Herramientas'),
+        ('r', 'Repuestos'),
+    )
+
+    name = models.CharField(max_length=50)
+    reference = models.CharField(max_length=100, null=True, blank=True)
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    presentacion = models.CharField(max_length=10)
+    code = models.CharField(max_length=50, null=True, blank=True)
+    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
+
+    def __str__(self):
+        return f"{self.name} {self.reference}"
+
+    class Meta:
+        ordering = ['name', 'reference']
+
+class Control(models.Model):
+
+    report_date = models.DateField(auto_now_add=True)
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+
+
+class Consumibles(models.Model):
+
+    cant_in = models.IntegerField(default=0)
+    cant_out = models.IntegerField(default=0)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+
+    control = models.ForeignKey(Control, on_delete=models.CASCADE, null=True, blank=True)
+
+    @property
+    def sto(self):
+        return self.cant_in - self.cant_out
+
+
+class Stock(models.Model):
+
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    cantidad = models.IntegerField(default=0)
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('item', 'asset')
 
 
 class System(models.Model):
@@ -452,28 +504,6 @@ class Operation(models.Model):
 
     def __str__(self):
         return f"{self.proyecto}/{self.asset} ({self.start} - {self.start})"
-    
-
-class Item(models.Model):
-
-    SECCION = (
-        ('c', 'Consumibles'),
-        ('h', 'Herramientas'),
-        ('r', 'Repuestos'),
-    )
-
-    name = models.CharField(max_length=50)
-    reference = models.CharField(max_length=100, null=True, blank=True)
-    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
-    presentacion = models.CharField(max_length=10)
-    code = models.CharField(max_length=50, null=True, blank=True)
-    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
-
-    def __str__(self):
-        return f"{self.name} {self.reference} ({self.presentacion})"
-
-    class Meta:
-        ordering = ['name', 'reference']
 
 
 class Solicitud(models.Model):

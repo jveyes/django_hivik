@@ -188,17 +188,43 @@
                     </ul>
                 </nav>
             {% endif %}
+        
 
+            <div class="btn-group" role="group">
+                <a href="{% url 'got:asset-consumibles' asset.abbreviation %}" target="_blank" class="btn btn-primary">Reporte</a>
+            </div>
+        <table class="table-list table-detail">
+            <thead>
+                <tr>
+                    <th colspan="2">Lubricantes y filtros</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad</th>
+                </tr>
+                {% for subsystem, items in items_by_subsystem.items %}
+                    <tr>
+                        <th colspan="2">{{ subsystem }}</th>
+                    </tr>
+                    {% for item in items %}
+                        <tr>
+                            <td>{{ item }}</td>
+                            <td><!-- Colocar la cantidad si está disponible --></td>
+                        </tr>
+                    {% endfor %}
+                {% empty %}
+                    <tr>
+                        <td colspan="2">No hay artículos disponibles.</td>
+                    </tr>
+                {% endfor %}
+
+
+
+            </tbody>
+        </table>
     </div>
-
-    <!-- {% if asset.area == 'b' %}
-        <div class="filter-bar">
-            {% for location in locations %}
-                <a href="?location={{ location }}" class="btn btn-info">{{ location }}</a>
-            {% endfor %}
-            <a href="{% url 'got:asset-detail' asset.abbreviation %}" class="btn btn-primary">Mostrar todos</a>
-        </div>
-    {% endif %} -->
 
 	<div class="rutinas">
 		<table class="table-list table-detail">

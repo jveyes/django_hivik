@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField
+from django.db.models import Count, Q, Min, OuterRef, Subquery, F, ExpressionWrapper, DateField, Prefetch
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -18,13 +18,14 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
-    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item, Consumibles,
+    Control, Stock
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
     DocumentForm, SolicitudForm, SuministroFormset, SolicitudAssetForm, MeggerForm, EstatorForm, ExcitatrizForm, RotorMainForm,
-    RotorAuxForm, RodamientosEscudosForm
+    RotorAuxForm, RodamientosEscudosForm, ConsumibleFormSet, ConsumibleForm
 )
 
 from datetime import timedelta, date, datetime
@@ -37,7 +38,6 @@ import logging
 
 
 logger = logging.getLogger(__name__)
-
 
 class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
 
@@ -269,21 +269,43 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
 
         return queryset
 
-
+from collections import defaultdict
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Asset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         asset = self.get_object()
         rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
-        sys = asset.system_set.all() # 
+        sys = asset.system_set.all()
 
-        # location_filter = self.request.GET.get('location', None)
-        # if asset.area == 'b' and location_filter:
-        #     systems_query = systems_query.exclude(location=location_filter)
+        equipos = Equipo.objects.filter(system__asset=asset).prefetch_related('suministros__item')
+
+        item_subsystems = defaultdict(set)
+        items_by_subsystem = defaultdict(set)
+
+        for equipo in equipos:
+            subsystem = equipo.subsystem if equipo.subsystem else "General"
+            for suministro in equipo.suministros.all():
+                item_subsystems[suministro.item].add(subsystem)
+
+        # Determinar los ítems duplicados: aquellos que aparecen en más de un subsystem.
+        duplicated_items = {item for item, subsystems in item_subsystems.items() if len(subsystems) > 1}
+
+        item_names = [item.id for item in duplicated_items]
+        for equipo in equipos:
+            subsystem = equipo.subsystem if equipo.subsystem else "General"
+            for suministro in equipo.suministros.all():
+                # print(suministro.item.id)
+                if suministro.item.id in item_names:
+                    items_by_subsystem["General"].add(suministro.item)
+                else:
+                    items_by_subsystem[subsystem].add(suministro.item)
+
+        items_by_subsystem = {k: list(v) for k, v in items_by_subsystem.items() if v}
+        context['items_by_subsystem'] = items_by_subsystem
+
 
         if self.request.user.groups.filter(name='buzos_members').exists():
             location_filters = {
@@ -345,7 +367,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
     def post(self, request, *args, **kwargs):
         asset = self.get_object()
         sys_form = SysForm(request.POST)
-        # Formulario para crear nuevo sistema
         if sys_form.is_valid():
             sys = sys_form.save(commit=False)
             sys.asset = asset
@@ -354,6 +375,53 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         else:
             context = {'asset': asset, 'sys_form': sys_form}
             return render(request, self.template_name, context)
+
+from django.db import transaction
+from django.forms import modelformset_factory
+class ConsumiblesView(View):
+    template_name = 'got/reporte-consumos.html'
+
+    def get(self, request, pk):
+        asset = get_object_or_404(Asset, abbreviation=pk)
+        ConsumibleFormSet = modelformset_factory(Consumibles, form=ConsumibleForm, extra=0)
+        items_by_subsystem = self.get_items_by_subsystem(asset)
+        formset = ConsumibleFormSet(queryset=Consumibles.objects.filter(item__id__in=[item.id for items in items_by_subsystem.values() for item in items]))
+        return render(request, self.template_name, {'formset': formset, 'asset': asset, 'items_by_subsystem': items_by_subsystem})
+
+    def post(self, request, pk):
+        asset = get_object_or_404(Asset, abbreviation=pk)
+        formset = ConsumibleFormSet(request.POST)
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    control = Control(report_date=timezone.now(), reporter=request.user, asset=asset)
+                    control.save()
+                    for form in formset:
+                        consumible = form.save(commit=False)
+                        consumible.control = control
+                        consumible.save()
+                        stock, created = Stock.objects.get_or_create(item=consumible.item, asset=asset)
+                        stock.cantidad += consumible.cant_in - consumible.cant_out
+                        stock.save()
+                messages.success(request, "Datos guardados correctamente.")
+                return redirect(reverse('got:asset-detail', args=[asset.abbreviation]))
+            except Exception as e:
+                messages.error(request, f"Error al guardar los datos: {str(e)}")
+        else:
+            messages.error(request, "Error en el formulario.")
+        items_by_subsystem = self.get_items_by_subsystem(asset)
+        return render(request, self.template_name, {'formset': formset, 'asset': asset, 'items_by_subsystem': items_by_subsystem})
+    
+    def get_items_by_subsystem(self, asset):
+        """ Helper function to fetch items by subsystem """
+        sys = asset.system_set.all()
+        equipos = Equipo.objects.filter(system__asset=asset).prefetch_related('suministros__item')
+        items_by_subsystem = defaultdict(set)
+        for equipo in equipos:
+            subsystem = equipo.subsystem if equipo.subsystem else "General"
+            for suministro in equipo.suministros.all():
+                items_by_subsystem[subsystem].add(suministro.item)
+        return {k: list(v) for k, v in items_by_subsystem.items() if v}
 
 
 class SysDetailView(LoginRequiredMixin, generic.DetailView):
@@ -1052,19 +1120,12 @@ class TaskDeleterut(DeleteView):
         context = {'task': self.get_object()}
         return render(request, 'got/task_confirm_delete.html', context)
 
-from django.db.models import Prefetch, Q
 @login_required
 def RutaListView(request):
 
     suministro_prefetch = Prefetch('suministros', queryset=Suministro.objects.all(), to_attr='all_suministros')
-    
-    # Define a Prefetch for Equipos, including only those that have Suministros
     equipo_prefetch = Prefetch('equipos', queryset=Equipo.objects.prefetch_related(suministro_prefetch).annotate(num_suministros=Count('suministros')).filter(num_suministros__gt=0), to_attr='all_equipos')
-    
-    # Define a Prefetch for Systems, including only those that have Equipos with Suministros
     system_prefetch = Prefetch('system_set', queryset=System.objects.prefetch_related(equipo_prefetch).annotate(num_equipos_with_suministros=Count('equipos__suministros')).filter(num_equipos_with_suministros__gt=0), to_attr='all_systems')
-
-    # Now filter Assets, including only those that have Systems with Equipos that have Suministros
     assets = Asset.objects.filter(area='a').prefetch_related(system_prefetch).annotate(num_systems_with_equipos=Count('system__equipos__suministros')).filter(num_systems_with_equipos__gt=0)
 
     diques = Ruta.objects.filter(name__icontains='DIQUE')
@@ -1140,7 +1201,6 @@ def RutaListView(request):
         'dique_rutinas': diques,
         'barcos': barcos,
         'motores_data': motores_data,
-        
     }
     return render(request, 'got/ruta_list.html', context)
 
