@@ -19,7 +19,6 @@ def copiar_rutas_de_sistema(system_id):
                     control=ruta.control,
                     frecuency=ruta.frecuency,
                     intervention_date=ruta.intervention_date,
-                    suministros=ruta.suministros,
                     astillero=ruta.astillero,
                     system=sistema,
                     # equipo=ruta.equipo.code,

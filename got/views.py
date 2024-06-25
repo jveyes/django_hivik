@@ -117,6 +117,41 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return queryset.none() 
     
 
+class SolicitudesListView(LoginRequiredMixin, generic.ListView):
+    
+    model = Solicitud
+    paginate_by = 20
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['assets'] = Asset.objects.all()
+        return context
+
+    def get_queryset(self):
+        queryset = Solicitud.objects.all()
+        state = self.request.GET.get('state')
+
+        asset_filter = self.request.GET.get('asset')
+
+        if asset_filter:
+            queryset = queryset.filter(asset__abbreviation=asset_filter)
+
+        if self.request.user.groups.filter(name='maq_members').exists():
+            # Obtén el/los asset(s) supervisado(s) por el usuario
+            supervised_assets = Asset.objects.filter(
+                supervisor=self.request.user)
+            queryset = queryset.filter(asset__in=supervised_assets)
+
+        if state == 'no_aprobada':
+            queryset = queryset.filter(approved=False)
+        elif state == 'aprobada':
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=True)
+        elif state == 'tramitado':
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
+
+        return queryset
+
+
 class CreateSolicitudOt(LoginRequiredMixin, View):
     template_name = 'got/solicitud/create-solicitud-ot.html'
 
@@ -205,52 +240,6 @@ def update_sc(request, pk):
         solicitud.save()
         return redirect('got:rq-list')
     return redirect('got:rq-list') 
-
-
-class SolicitudesListView(LoginRequiredMixin, generic.ListView):
-    
-    model = Solicitud
-    paginate_by = 20
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['assets'] = Asset.objects.all()
-        return context
-
-    def get_queryset(self):
-        queryset = Solicitud.objects.all()
-        state = self.request.GET.get('state')
-
-        asset_filter = self.request.GET.get('asset')
-
-        if asset_filter:
-            queryset = queryset.filter(asset__abbreviation=asset_filter)
-
-        if self.request.user.groups.filter(name='maq_members').exists():
-            # Obtén el/los asset(s) supervisado(s) por el usuario
-            supervised_assets = Asset.objects.filter(
-                supervisor=self.request.user)
-            queryset = queryset.filter(asset__in=supervised_assets)
-
-        if state == 'no_aprobada':
-            queryset = queryset.filter(approved=False)
-        elif state == 'aprobada':
-            queryset = queryset.filter(approved=True, sc_change_date__isnull=True)
-        elif state == 'tramitado':
-            queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
-
-        return queryset
-
-
-class Reschedule_task(UpdateView):
-
-    model = Task
-    form_class = RescheduleTaskForm
-    template_name = 'got/task/task_reschedule.html'
-    success_url = reverse_lazy('got:my-tasks')
-
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 
 class AssetsListView(LoginRequiredMixin, generic.ListView):
@@ -987,6 +976,17 @@ class Finish_task(UpdateView):
 
     def form_invalid(self, form, **kwargs):
         return self.render_to_response(self.get_context_data(form=form, **kwargs))
+
+
+class Reschedule_task(UpdateView):
+
+    model = Task
+    form_class = RescheduleTaskForm
+    template_name = 'got/task/task_reschedule.html'
+    success_url = reverse_lazy('got:my-tasks')
+
+    def form_valid(self, form):
+        return super().form_valid(form)
     
 
 class Finish_task_ot(UpdateView):

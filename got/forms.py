@@ -84,7 +84,7 @@ class EquipoForm(forms.ModelForm):
         exclude = ['system', 'horometro', 'prom_hours']
         labels = {
             'name': 'Nombre',
-            'date_inv': 'Fecha de ingreso al inventario',
+            # 'date_inv': 'Fecha de ingreso al inventario',
             'code': 'Codigo interno',
             'model': 'Modelo',
             'serial': '# Serial',
@@ -100,7 +100,7 @@ class EquipoForm(forms.ModelForm):
             'subsystem': 'Categoria (Si aplica)'
             }
         widgets = {
-            'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
+            # 'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
