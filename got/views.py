@@ -29,6 +29,7 @@ from .forms import (
 )
 
 from datetime import timedelta, date, datetime
+from collections import defaultdict
 from xhtml2pdf import pisa
 from io import BytesIO
 import itertools
@@ -137,7 +138,6 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(asset__abbreviation=asset_filter)
 
         if self.request.user.groups.filter(name='maq_members').exists():
-            # Obtén el/los asset(s) supervisado(s) por el usuario
             supervised_assets = Asset.objects.filter(
                 supervisor=self.request.user)
             queryset = queryset.filter(asset__in=supervised_assets)
@@ -257,8 +257,8 @@ class AssetsListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(area=area)
 
         return queryset
+    
 
-from collections import defaultdict
 class AssetDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Asset
@@ -740,7 +740,6 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
 
     model = Ot
 
-    # Formulario para crear, modificar o eliminar actividades
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.groups.filter(name='super_members').exists():
@@ -750,7 +749,6 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         context['state_form'] = FinishOtForm()
         context['image_form'] = UploadImages()
 
-        # Agregar lógica para determinar el estado global de las tareas
         ot = self.get_object()
         all_tasks_finished = ot.task_set.filter(finished=False).exists()
         context['all_tasks_finished'] = not all_tasks_finished
@@ -776,6 +774,7 @@ class OtDetailView(LoginRequiredMixin, generic.DetailView):
         system = ot.system
         context['electric_motors'] = system.equipos.filter(tipo='e')
         context['has_electric_motors'] = system.equipos.filter(tipo='e').exists()
+        context['megger_tests'] = Megger.objects.filter(ot=ot)
 
         return context
 
@@ -1100,9 +1099,7 @@ class TaskUpdaterut(UpdateView):
     http_method_names = ['get', 'post']
 
     def get_success_url(self):
-        # Obtén el ID del sistema al que pertenece la tarea eliminada
         sys_id = self.object.ruta.system.id
-        # Retorna la URL de detalle del sistema con el ID correspondiente
         return reverse_lazy('got:sys-detail', kwargs={'pk': sys_id})
 
 
@@ -1111,14 +1108,13 @@ class TaskDeleterut(DeleteView):
     model = Task
 
     def get_success_url(self):
-        # Obtén el ID del sistema al que pertenece la tarea eliminada
         sys_id = self.object.ruta.system.id
-        # Retorna la URL de detalle del sistema con el ID correspondiente
         return reverse_lazy('got:sys-detail', kwargs={'pk': sys_id})
 
     def get(self, request, *args, **kwargs):
         context = {'task': self.get_object()}
         return render(request, 'got/task_confirm_delete.html', context)
+
 
 @login_required
 def RutaListView(request):
@@ -1425,7 +1421,6 @@ def reporthours(request, component):
             instance.save()
             return redirect(request.path)
     else:
-        # Si es una solicitud GET, mostrar el formulario vacío
         form = ReportHours()
 
     context = {
@@ -1525,13 +1520,7 @@ def schedule(request, pk):
         'rgba(255, 159, 64, 0.2)',   # naranja
     ])
 
-    # sta = [0 for i in tasks]
     n = 0
-    # for ot in ots:
-    #     sta[n] = calculate_status_code(ot)
-    #     n += 1
-
-    # Mapear cada responsable a un color
     responsibles = set(task.responsible.username for task in tasks if task.responsible)
     responsible_colors = {res: next(color_palette) for res in responsibles}
 
@@ -1550,32 +1539,11 @@ def schedule(request, pk):
             'final_date': task.final_date,
             'description': truncate_text(task.ot.description),
             'name': f"{task.responsible.first_name} {task.responsible.last_name}",
-            # 'status': task.finished,
             'activity_description': task.description,
             'background_color': color,
             'border_color': border_color,
-            # 'status_code': sta[n],
         })
         n += 1
-    
-    # Agregar actividades desde las rutas
-    # green_soft = 'rgba(75, 192, 192, 0.2)'    # verde suave
-    # green_hard = 'rgba(75, 192, 192, 1)'     # verde fuerte
-    # for system in systems:
-    #     rutas = Ruta.objects.filter(system=system)
-    #     for ruta in rutas:
-    #         tasks_ruta = ruta.task_set.all()
-    #         for task_ruta in tasks_ruta:
-    #             chart_data.append({
-    #                 'description': system.name,
-    #                 'activity_description': ruta.name,
-    #                 'start_date': ruta.next_date,
-    #                 'final_date': ruta.next_date + timedelta(days=1),
-    #                 'name': {task_ruta.responsible},
-    #                 'status': 'preventivo',
-    #                 'background_color': green_soft,
-    #                 'border_color': green_hard
-    #             })
 
     context = {
         'tasks': chart_data,
@@ -1752,34 +1720,44 @@ class DocumentCreateView(generic.View):
         return render(request, self.template_name, {'form': form})
     
 
-class SolicitudCreate(CreateView):
+# class SolicitudCreate(CreateView):
 
-    model = Solicitud
-    form_class = SolicitudForm
+#     model = Solicitud
+#     form_class = SolicitudForm
 
-    def form_valid(self, form):
-        pk = self.kwargs['pk']
-        system = get_object_or_404(System, pk=pk)
+#     def form_valid(self, form):
+#         pk = self.kwargs['pk']
+#         system = get_object_or_404(System, pk=pk)
 
-        form.instance.system = system
+#         form.instance.system = system
 
-        return super().form_valid(form)
+#         return super().form_valid(form)
 
-    def get_success_url(self):
-        ruta = self.object
-        return reverse('got:sys-detail', args=[ruta.system.id])
+#     def get_success_url(self):
+#         ruta = self.object
+#         return reverse('got:sys-detail', args=[ruta.system.id])
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
-        return kwargs
+#     def get_form_kwargs(self):
+#         kwargs = super().get_form_kwargs()
+#         kwargs['system'] = System.objects.get(pk=self.kwargs['pk'])
+#         return kwargs
 
 
 def megger_view(request, pk):
     megger = get_object_or_404(Megger, pk=pk) 
+    estator = get_object_or_404(Estator, megger=megger)
+    estator_form = EstatorForm(instance=estator)
+
+    if request.method == 'POST':
+        estator_form = EstatorForm(request.POST, instance=estator)
+        if estator_form.is_valid():
+            estator_form.save()
+    else:
+        estator_form = EstatorForm(instance=estator)
 
     context = {
         'megger': megger,
+        'estator_form': estator_form,
     }
     return render(request, 'got/meg/megger_form.html', context)
 

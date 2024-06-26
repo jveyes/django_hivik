@@ -295,6 +295,22 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="megger-section">
+                <h2>Pruebas de Megger</h2>
+                {% if megger_tests %}
+                    <ul class="list-group">
+                        {% for megger in megger_tests %}
+                            <li class="list-group-item">
+                                Prueba Megger #{{ megger.id }} para el equipo {{ megger.equipo.name }}
+                                <a href="{% url 'got:meg-detail' megger.pk %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No hay pruebas de Megger asociadas con esta OT.</p>
+                {% endif %}
+            </div>
         </div>
         
         {% if perms.got.add_task %}

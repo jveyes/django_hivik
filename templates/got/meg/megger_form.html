@@ -22,7 +22,7 @@
 </table>
 
 <h2>Estator</h2>
-<table class="table table-bordered">
+<table class="table table-bordered" id="estator-table">
     <thead>
         <tr>
             <th rowspan="2"></th>
@@ -103,6 +103,26 @@
         </tr>
     </tbody>
 </table>
+
+<!-- Modal para editar el estator -->
+<div class="modal fade" id="estatorModal" tabindex="-1" aria-labelledby="estatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="estatorModalLabel">Editar Estator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Formulario de estator -->
+                <form id="estator-form" method="post">
+                    {% csrf_token %}
+                    {{ estator_form }}
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <h2>Excitatriz</h2>
 <table class="table table-bordered">
@@ -223,13 +243,18 @@
     </tbody>
 </table>
 
-
-{% endblock %}
-
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script>
-$(document).ready(function() {
-    // Add click handlers for modal opening if necessary
-});
+    $(document).ready(function() {
+        // Activar modal al hacer clic en cualquier celda de la tabla de estator
+        $('#estator-table td').on('click', function() {
+            $('#estatorModal').modal('show');
+        });
+    });
 </script>
+
+
+{% endblock %}
+
+
