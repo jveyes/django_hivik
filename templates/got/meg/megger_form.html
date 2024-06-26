@@ -1,131 +1,363 @@
 {% extends "got/base_generic.html" %}
 
 {% block content %}
-<h1>Megger y mantenimiento eléctrico de motores y generadores</h1>
+    <h1>Megger y mantenimiento eléctrico de motores y generadores</h1>
 
-<!-- Encabezado con OT y equipo -->
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Orden de Trabajo</th>
-            <th>Centro de costos</th>
-            <th>Equipo</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ megger.ot }}</td>
-            <td>{{ megger.ot.system.asset }}</td>
-            <td>{{ megger.equipo }}</td>
-        </tr>
-    </tbody>
-</table>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Orden de Trabajo</th>
+                <th>Centro de costos</th>
+                <th>Equipo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ megger.ot }}</td>
+                <td>{{ megger.ot.system.asset }}</td>
+                <td>{{ megger.equipo }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-<h2>Estator</h2>
-<table class="table table-bordered" id="estator-table">
-    <thead>
-        <tr>
-            <th rowspan="2"></th>
-            <th colspan="3" style="text-align: center;">Prueba inicial</th>
-            <th colspan="3" style="text-align: center;">Prueba final</th>
-        </tr>
-        <tr>
-            <th>1min/ 500VDC</th>
-            <th>10min/ 500VDC</th>
-            <th>Observaciones</th>
+    <h2>Estator</h2>
+    <table class="table table-bordered" id="estator-table">
+        <thead>
+            <tr>
+                <th rowspan="2"></th>
+                <th colspan="3" style="text-align: center;">Prueba inicial</th>
+                <th colspan="3" style="text-align: center;">Prueba final</th>
+            </tr>
+            <tr>
+                <th>1min/ 500VDC</th>
+                <th>10min/ 500VDC</th>
+                <th>Observaciones</th>
 
-            <th>1min/ 500VDC</th>
-            <th>10min/ 500VDC</th>
-            <th>Observaciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- PI y PF a 1 minuto -->
-        <tr>
-            <td>L1 + Tierra</td>
-            <td>{{ megger.estator.pi_1min_l1_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l1_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l1_tierra|default_if_none:"---" }}</td>
+                <th>1min/ 500VDC</th>
+                <th>10min/ 500VDC</th>
+                <th>Observaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>L1 + Tierra</td>
+                <td>{{ megger.estator.pi_1min_l1_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l1_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l1_tierra|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l1_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l1_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l1_tierra|default_if_none:"---" }}</td>
-        </tr>
-        <tr>
-            <td>L2 + Tierra</td>
-            <td>{{ megger.estator.pi_1min_l2_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l2_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l2_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_1min_l1_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l1_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l1_tierra|default_if_none:"---" }}</td>
+            </tr>
+            <tr>
+                <td>L2 + Tierra</td>
+                <td>{{ megger.estator.pi_1min_l2_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l2_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l2_tierra|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l2_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l2_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l2_tierra|default_if_none:"---" }}</td>
-        </tr>
-        <tr>
-            <td>L3 + Tierra</td>
-            <td>{{ megger.estator.pi_1min_l3_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l3_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l3_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_1min_l2_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l2_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l2_tierra|default_if_none:"---" }}</td>
+            </tr>
+            <tr>
+                <td>L3 + Tierra</td>
+                <td>{{ megger.estator.pi_1min_l3_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l3_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l3_tierra|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l3_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l3_tierra|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l3_tierra|default_if_none:"---" }}</td>
-        </tr>
-        <tr>
-            <td>L1 + L2</td>
-            <td>{{ megger.estator.pi_1min_l1_l2|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l1_l2|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l1_l2|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_1min_l3_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l3_tierra|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l3_tierra|default_if_none:"---" }}</td>
+            </tr>
+            <tr>
+                <td>L1 + L2</td>
+                <td>{{ megger.estator.pi_1min_l1_l2|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l1_l2|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l1_l2|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l1_l2|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l1_l2|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l1_l2|default_if_none:"---" }}</td>
-        </tr>
-        <tr>
-            <td>L2 + L3</td>
-            <td>{{ megger.estator.pi_1min_l2_l3|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l2_l3|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l2_l3|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_1min_l1_l2|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l1_l2|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l1_l2|default_if_none:"---" }}</td>
+            </tr>
+            <tr>
+                <td>L2 + L3</td>
+                <td>{{ megger.estator.pi_1min_l2_l3|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l2_l3|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l2_l3|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l2_l3|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l2_l3|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l2_l3|default_if_none:"---" }}</td>
-        </tr>
-        <tr>
-            <td>L3 + L1</td>
-            <td>{{ megger.estator.pi_1min_l3_l1|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_10min_l3_l1|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pi_obs_l3_l1|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_1min_l2_l3|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l2_l3|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l2_l3|default_if_none:"---" }}</td>
+            </tr>
+            <tr>
+                <td>L3 + L1</td>
+                <td>{{ megger.estator.pi_1min_l3_l1|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_10min_l3_l1|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pi_obs_l3_l1|default_if_none:"---" }}</td>
 
-            <td>{{ megger.estator.pf_1min_l3_l1|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_10min_l3_l1|default_if_none:"---" }}</td>
-            <td>{{ megger.estator.pf_obs_l3_l1|default_if_none:"---" }}</td>
-        </tr>
-    </tbody>
-</table>
+                <td>{{ megger.estator.pf_1min_l3_l1|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_10min_l3_l1|default_if_none:"---" }}</td>
+                <td>{{ megger.estator.pf_obs_l3_l1|default_if_none:"---" }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-<!-- Modal para editar el estator -->
-<div class="modal fade" id="estatorModal" tabindex="-1" aria-labelledby="estatorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="estatorModalLabel">Editar Estator</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Formulario de estator -->
-                <form id="estator-form" method="post">
-                    {% csrf_token %}
-                    {{ estator_form }}
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
+    <div class="modal fade" id="estatorModal" tabindex="-1" aria-labelledby="estatorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="estatorModalLabel">Estator: Prueba inicial</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="estator-form" method="post">{% csrf_token %}
+                        <table>
+                            <tr><th>L1 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l1_tierra }}</td>
+                                <td>{{ estator_form.pi_10min_l1_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l1_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L2 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l2_tierra }}</td>
+                                <td>{{ estator_form.pi_10min_l2_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l2_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L3 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l3_tierra }}</td>
+                                <td>{{ estator_form.pi_10min_l3_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l3_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L1 + L2</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l1_l2 }}</td>
+                                <td>{{ estator_form.pi_10min_l1_l2 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l1_l2 }}</td>
+                            </tr>
+
+                            <tr><th>L1 + L3</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l2_l3 }}</td>
+                                <td>{{ estator_form.pi_10min_l2_l3 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l2_l3 }}</td>
+                            </tr>
+
+                            <tr><th>L3 + L1</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pi_1min_l3_l1 }}</td>
+                                <td>{{ estator_form.pi_10min_l3_l1 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pi_obs_l3_l1 }}</td>
+                            </tr>
+                        </table>
+
+                        <!-- Campos ocultos para mantener valores de prueba final -->
+                        <input type="hidden" name="pf_1min_l1_tierra" value="{{ estator_form.pf_1min_l1_tierra.value }}">
+                        <input type="hidden" name="pf_10min_l1_tierra" value="{{ estator_form.pf_10min_l1_tierra.value }}">
+                        <input type="hidden" name="pf_obs_l1_tierra" value="{{ estator_form.pf_obs_l1_tierra.value }}">
+
+                        <input type="hidden" name="pf_1min_l2_tierra" value="{{ estator_form.pf_1min_l2_tierra.value }}">
+                        <input type="hidden" name="pf_10min_l2_tierra" value="{{ estator_form.pf_10min_l2_tierra.value }}">
+                        <input type="hidden" name="pf_obs_l2_tierra" value="{{ estator_form.pf_obs_l2_tierra.value }}">
+
+                        <input type="hidden" name="pf_1min_l3_tierra" value="{{ estator_form.pf_1min_l3_tierra.value }}">
+                        <input type="hidden" name="pf_10min_l3_tierra" value="{{ estator_form.pf_10min_l3_tierra.value }}">
+                        <input type="hidden" name="pf_obs_l3_tierra" value="{{ estator_form.pf_obs_l3_tierra.value }}">
+
+                        <input type="hidden" name="pf_1min_l1_l2" value="{{ estator_form.pf_1min_l1_l2.value }}">
+                        <input type="hidden" name="pf_10min_l1_l2" value="{{ estator_form.pf_10min_l1_l2.value }}">
+                        <input type="hidden" name="pf_obs_l1_l2" value="{{ estator_form.pf_obs_l1_l2.value }}">
+
+                        <input type="hidden" name="pf_1min_l2_l3" value="{{ estator_form.pf_1min_l2_l3.value }}">
+                        <input type="hidden" name="pf_10min_l2_l3" value="{{ estator_form.pf_10min_l2_l3.value }}">
+                        <input type="hidden" name="pf_obs_l2_l3" value="{{ estator_form.pf_obs_l2_l3.value }}">
+
+                        <input type="hidden" name="pf_1min_l3_l1" value="{{ estator_form.pf_1min_l3_l1.value }}">
+                        <input type="hidden" name="pf_10min_l3_l1" value="{{ estator_form.pf_10min_l3_l1.value }}">
+                        <input type="hidden" name="pf_obs_l3_l1" value="{{ estator_form.pf_obs_l3_l1.value }}">
+
+                        <button type="submit" class="btn btn-primary" name="submit_estator">Guardar Cambios</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="modal fade" id="estatorFinalModal" tabindex="-1" aria-labelledby="estatorFinalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="estatorModalLabel">Estator: Prueba final</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="estator-form" method="post">{% csrf_token %}
+                        <table>
+                            <tr><th>L1 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l1_tierra }}</td>
+                                <td>{{ estator_form.pf_10min_l1_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l1_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L2 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l2_tierra }}</td>
+                                <td>{{ estator_form.pf_10min_l2_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l2_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L3 + Tierra</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l3_tierra }}</td>
+                                <td>{{ estator_form.pf_10min_l3_tierra }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l3_tierra }}</td>
+                            </tr>
+
+                            <tr><th>L1 + L2</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l1_l2 }}</td>
+                                <td>{{ estator_form.pf_10min_l1_l2 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l1_l2 }}</td>
+                            </tr>
+
+                            <tr><th>L1 + L3</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l2_l3 }}</td>
+                                <td>{{ estator_form.pf_10min_l2_l3 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l2_l3 }}</td>
+                            </tr>
+
+                            <tr><th>L3 + L1</th></tr>
+                            <tr>
+                                <td>1 min/ 500 VDC</td>
+                                <td>10 min/ 500 VDC</td>
+                            </tr>
+                            <tr>
+                                <td>{{ estator_form.pf_1min_l3_l1 }}</td>
+                                <td>{{ estator_form.pf_10min_l3_l1 }}</td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">{{ estator_form.pf_obs_l3_l1 }}</td>
+                            </tr>
+                        </table>
+
+                        <input type="hidden" name="pi_1min_l1_tierra" value="{{ estator_form.pi_1min_l1_tierra.value }}">
+                        <input type="hidden" name="pi_10min_l1_tierra" value="{{ estator_form.pi_10min_l1_tierra.value }}">
+                        <input type="hidden" name="pi_obs_l1_tierra" value="{{ estator_form.pi_obs_l1_tierra.value }}">
+
+                        <input type="hidden" name="pi_1min_l2_tierra" value="{{ estator_form.pi_1min_l2_tierra.value }}">
+                        <input type="hidden" name="pi_10min_l2_tierra" value="{{ estator_form.pi_10min_l2_tierra.value }}">
+                        <input type="hidden" name="pi_obs_l2_tierra" value="{{ estator_form.pi_obs_l2_tierra.value }}">
+
+                        <input type="hidden" name="pi_1min_l3_tierra" value="{{ estator_form.pi_1min_l3_tierra.value }}">
+                        <input type="hidden" name="pi_10min_l3_tierra" value="{{ estator_form.pi_10min_l3_tierra.value }}">
+                        <input type="hidden" name="pi_obs_l3_tierra" value="{{ estator_form.pi_obs_l3_tierra.value }}">
+
+                        <input type="hidden" name="pi_1min_l1_l2" value="{{ estator_form.pi_1min_l1_l2.value }}">
+                        <input type="hidden" name="pi_10min_l1_l2" value="{{ estator_form.pi_10min_l1_l2.value }}">
+                        <input type="hidden" name="pi_obs_l1_l2" value="{{ estator_form.pi_obs_l1_l2.value }}">
+
+                        <input type="hidden" name="pi_1min_l2_l3" value="{{ estator_form.pi_1min_l2_l3.value }}">
+                        <input type="hidden" name="pi_10min_l2_l3" value="{{ estator_form.pi_10min_l2_l3.value }}">
+                        <input type="hidden" name="pi_obs_l2_l3" value="{{ estator_form.pi_obs_l2_l3.value }}">
+
+                        <input type="hidden" name="pi_1min_l3_l1" value="{{ estator_form.pi_1min_l3_l1.value }}">
+                        <input type="hidden" name="pi_10min_l3_l1" value="{{ estator_form.pi_10min_l3_l1.value }}">
+                        <input type="hidden" name="pi_obs_l3_l1" value="{{ estator_form.pi_obs_l3_l1.value }}">
+
+
+                        <button type="submit" class="btn btn-primary" name="submit_estator">Guardar Cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <h2>Excitatriz</h2>
-<table class="table table-bordered">
+<table class="table table-bordered" id="excitatriz-table">
     <thead>
         <tr>
             <th rowspan="2"></th>
@@ -156,9 +388,66 @@
     </tbody>
 </table>
 
+<div class="modal fade" id="excitatrizModal" tabindex="-1" aria-labelledby="excitatrizModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="excitatrizModalLabel">Excitatriz</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="excitatriz-form" method="post">{% csrf_token %}
+                    <table>
+                        <tr><th colspan="2">Prueba inicial L + Tierra</th></tr>
+                        <tr>
+                            <td>1 min</td>
+                            <td>10 min</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ excitatriz_form.pi_1min_l_tierra }}
+                            </td>
+                            <td>
+                                {{ excitatriz_form.pi_10min_l_tierra }}
+                            </td>
+                        </tr>
+                        <tr><th colspan="2">Observaciones</th></tr>
+                        <tr>
+                            <td colspan="2">
+                                {{ excitatriz_form.pi_obs_l_tierra }}
+                            </td>
+                        </tr>
+
+                        <tr><th colspan="2">Prueba final L + Tierra</th></tr>
+                        <tr>
+                            <td>1 min</td>
+                            <td>10 min</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ excitatriz_form.pf_1min_l_tierra }}
+                            </td>
+                            <td>
+                                {{ excitatriz_form.pf_10min_l_tierra }}
+                            </td>
+                        </tr>
+                        <tr><th colspan="2">Observaciones</th></tr>
+                        <tr>
+                            <td colspan="2">
+                                {{ excitatriz_form.pf_obs_l_tierra }}
+                            </td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="btn btn-primary" name="submit_excitatriz">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <h2>Rotor principal</h2>
-<table class="table table-bordered">
+<table class="table table-bordered" id="rotormain-table">
     <thead>
         <tr>
             <th rowspan="2"></th>
@@ -190,7 +479,7 @@
 </table>
 
 <h2>Rotor auxiliar</h2>
-<table class="table table-bordered">
+<table class="table table-bordered" id="rotoraux-table">
     <thead>
         <tr>
             <th rowspan="2"></th>
@@ -222,7 +511,7 @@
 </table>
 
 <h2>Rodamientos y escudos</h2>
-<table class="table table-bordered">
+<table class="table table-bordered" id="rodamientosescudos-table">
     <thead>
         <tr>
             <th></th>
@@ -243,17 +532,209 @@
     </tbody>
 </table>
 
+<!-- Modal for RotorMain -->
+<div class="modal fade" id="rotormainModal" tabindex="-1" aria-labelledby="rotormainModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rotormainModalLabel">Rotor Principal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rotormain-form" method="post">{% csrf_token %}
+                        <table>
+                            <tr><th colspan="2">Prueba inicial L + Tierra</th></tr>
+                            <tr>
+                                <td>1 min</td>
+                                <td>10 min</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ rotormain_form.pi_1min_l_tierra }}
+                                </td>
+                                <td>
+                                    {{ rotormain_form.pi_10min_l_tierra }}
+                                </td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">
+                                    {{ rotormain_form.pi_obs_l_tierra }}
+                                </td>
+                            </tr>
+    
+                            <tr><th colspan="2">Prueba final L + Tierra</th></tr>
+                            <tr>
+                                <td>1 min</td>
+                                <td>10 min</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ rotormain_form.pf_1min_l_tierra }}
+                                </td>
+                                <td>
+                                    {{ rotormain_form.pf_10min_l_tierra }}
+                                </td>
+                            </tr>
+                            <tr><th colspan="2">Observaciones</th></tr>
+                            <tr>
+                                <td colspan="2">
+                                    {{ rotormain_form.pf_obs_l_tierra }}
+                                </td>
+                            </tr>
+                        </table>
+                    <button type="submit" class="btn btn-primary" name="submit_rotormain">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for RotorAux -->
+<div class="modal fade" id="rotorauxModal" tabindex="-1" aria-labelledby="rotorauxModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rotorauxModalLabel">Rotor Auxiliar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rotoraux-form" method="post">{% csrf_token %}
+                    <table>
+                        <tr><th colspan="2">Prueba inicial L + Tierra</th></tr>
+                        <tr>
+                            <td>1 min</td>
+                            <td>10 min</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rotoraux_form.pi_1min_l_tierra }}
+                            </td>
+                            <td>
+                                {{ rotoraux_form.pi_10min_l_tierra }}
+                            </td>
+                        </tr>
+                        <tr><th colspan="2">Observaciones</th></tr>
+                        <tr>
+                            <td colspan="2">
+                                {{ rotoraux_form.pi_obs_l_tierra }}
+                            </td>
+                        </tr>
+
+                        <tr><th colspan="2">Prueba final L + Tierra</th></tr>
+                        <tr>
+                            <td>1 min</td>
+                            <td>10 min</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rotoraux_form.pf_1min_l_tierra }}
+                            </td>
+                            <td>
+                                {{ rotoraux_form.pf_10min_l_tierra }}
+                            </td>
+                        </tr>
+                        <tr><th colspan="2">Observaciones</th></tr>
+                        <tr>
+                            <td colspan="2">
+                                {{ rotoraux_form.pf_obs_l_tierra }}
+                            </td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="btn btn-primary" name="submit_rotoraux">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for RodamientosEscudos -->
+<div class="modal fade" id="rodamientosescudosModal" tabindex="-1" aria-labelledby="rodamientosescudosModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rodamientosescudosModalLabel">Rodamientos y Escudos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="rodamientosescudos-form" method="post">{% csrf_token %}
+                    <table>
+                        <tr>
+                            <th>Rodamiento AS (Serial/Estado)</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rodamientosescudos_form.rodamientoas }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Rodamiento BS (Serial/Estado)</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rodamientosescudos_form.rodamientobs }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Escudo AS (Estado)</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rodamientosescudos_form.escudoas }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Escudo BS (Estado)</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                {{ rodamientosescudos_form.escudobs }}
+                            </td>
+                        </tr>
+                    </table>
+                    <button type="submit" class="btn btn-primary" name="submit_rodamientosescudos">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Activar modal al hacer clic en cualquier celda de la tabla de estator
+        // Modales para Estator
         $('#estator-table td').on('click', function() {
-            $('#estatorModal').modal('show');
+            var columnIndex = $(this).index();
+            if (columnIndex >= 1 && columnIndex <= 3) {
+                $('#estatorModal').modal('show');
+            } else if (columnIndex >= 4 && columnIndex <= 6) {
+                $('#estatorFinalModal').modal('show');
+            }
+        });
+
+        // Modal para Excitatriz
+        $('#excitatriz-table td').on('click', function() {
+            $('#excitatrizModal').modal('show');
+        });
+
+        // Modales para Rotor Principal
+        $('#rotormain-table td').on('click', function() {
+            $('#rotormainModal').modal('show');
+        });
+
+        // Modales para Rotor Auxiliar
+        $('#rotoraux-table td').on('click', function() {
+            $('#rotorauxModal').modal('show');
+        });
+
+        // Modales para Rodamientos y Escudos
+        $('#rodamientosescudos-table td').on('click', function() {
+            $('#rodamientosescudosModal').modal('show');
         });
     });
 </script>
-
 
 {% endblock %}
 

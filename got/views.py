@@ -1746,18 +1746,49 @@ class DocumentCreateView(generic.View):
 def megger_view(request, pk):
     megger = get_object_or_404(Megger, pk=pk) 
     estator = get_object_or_404(Estator, megger=megger)
+    excitatriz = get_object_or_404(Excitatriz, megger=megger)
+    rotormain = get_object_or_404(RotorMain, megger=megger)
+    rotoraux = get_object_or_404(RotorAux, megger=megger)
+    rodamientosescudos = get_object_or_404(RodamientosEscudos, megger=megger)
+
     estator_form = EstatorForm(instance=estator)
+    excitatriz_form = ExcitatrizForm(instance=excitatriz)
+    rotormain_form = RotorMainForm(instance=rotormain)
+    rotoraux_form = RotorAuxForm(instance=rotoraux)
+    rodamientosescudos_form = RodamientosEscudosForm(instance=rodamientosescudos)
 
     if request.method == 'POST':
-        estator_form = EstatorForm(request.POST, instance=estator)
-        if estator_form.is_valid():
-            estator_form.save()
+        if 'submit_estator' in request.POST:
+            estator_form = EstatorForm(request.POST, instance=estator)
+            if estator_form.is_valid():
+                estator_form.save()
+        elif 'submit_excitatriz' in request.POST:
+            excitatriz_form = ExcitatrizForm(request.POST, instance=excitatriz)
+            if excitatriz_form.is_valid():
+                excitatriz_form.save()
+        elif 'submit_rotormain' in request.POST:
+            rotormain_form = RotorMainForm(request.POST, instance=rotormain)
+            if rotormain_form.is_valid():
+                rotormain_form.save()
+        elif 'submit_rotoraux' in request.POST:
+            rotoraux_form = RotorAuxForm(request.POST, instance=rotoraux)
+            if rotoraux_form.is_valid():
+                rotoraux_form.save()
+        elif 'submit_rodamientosescudos' in request.POST:
+            rodamientosescudos_form = RodamientosEscudosForm(request.POST, instance=rodamientosescudos)
+            if rodamientosescudos_form.is_valid():
+                rodamientosescudos_form.save()
+
     else:
         estator_form = EstatorForm(instance=estator)
 
     context = {
         'megger': megger,
         'estator_form': estator_form,
+        'excitatriz_form': excitatriz_form,
+        'rotormain_form': rotormain_form,
+        'rotoraux_form': rotoraux_form,
+        'rodamientosescudos_form': rodamientosescudos_form,
     }
     return render(request, 'got/meg/megger_form.html', context)
 
