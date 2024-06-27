@@ -126,12 +126,18 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['assets'] = Asset.objects.all()
+
+        asset_filter = self.request.GET.get('asset')
+        context['asset'] = Asset.objects.filter(abbreviation=asset_filter).first() if asset_filter else None
+
+        context['current_asset'] = self.request.GET.get('asset', '')
+        context['current_state'] = self.request.GET.get('state', '')
+        context['current_keyword'] = self.request.GET.get('keyword', '')
         return context
 
     def get_queryset(self):
         queryset = Solicitud.objects.all()
         state = self.request.GET.get('state')
-
         asset_filter = self.request.GET.get('asset')
 
         if asset_filter:
@@ -142,6 +148,10 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
                 supervisor=self.request.user)
             queryset = queryset.filter(asset__in=supervised_assets)
 
+        keyword = self.request.GET.get('keyword')
+        if keyword:
+            queryset = queryset.filter(suministros__icontains=keyword)
+
         if state == 'no_aprobada':
             queryset = queryset.filter(approved=False)
         elif state == 'aprobada':
@@ -150,6 +160,97 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
 
         return queryset
+
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
+import io
+from django.http import HttpResponse
+from .models import Solicitud  # Asegúrate de tener el import correcto para tus modelos
+
+def download_pdf(request):
+    # Obtenemos los parámetros del filtro desde la solicitud
+    state = request.GET.get('state', '')
+    asset_filter = request.GET.get('asset', '')
+    keyword = request.GET.get('keyword', '')
+
+    queryset = Solicitud.objects.all()
+
+    # Aplicamos filtros similares a los de la vista de lista
+    if asset_filter:
+        queryset = queryset.filter(asset__abbreviation=asset_filter)
+
+    if state:
+        if state == 'no_aprobada':
+            queryset = queryset.filter(approved=False)
+        elif state == 'aprobada':
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=True)
+        elif state == 'tramitado':
+            queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
+
+    if keyword:
+        queryset = queryset.filter(suministros__icontains=keyword)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="solicitudes_report.pdf"'
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=60, leftMargin=60, topMargin=60, bottomMargin=60)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    style_normal = styles['BodyText']
+    style_normal.fontSize = 9
+    style_heading = styles['Heading2']
+    style_heading.alignment = 1  # Alineación al centro
+    style_heading.fontSize = 12
+
+    elements.append(Paragraph('<b>REPORTE DE SOLICITUDES</b>', style_heading))
+    elements.append(Spacer(1, 20))
+
+    # Datos de la tabla
+    solicitudes_data = [['#OT', 'Centro de costos', 'Solicitante', 'Estado', 'Suministros', 'Fechas']]
+    for solicitud in queryset:
+        ot_display = solicitud.ot.num_ot if solicitud.ot else "Consumibles/Repuestos/Herramientas"
+        fechas = f"Solicitado: {solicitud.creation_date.strftime('%d/%m/%Y')}"
+        if solicitud.approval_date:
+            fechas += f", Aprobado: {solicitud.approval_date.strftime('%d/%m/%Y')}"
+        if solicitud.sc_change_date:
+            fechas += f", Tramitado: {solicitud.sc_change_date.strftime('%d/%m/%Y')}"
+
+        row = [
+            Paragraph(str(ot_display), style_normal),
+            Paragraph(solicitud.asset.name if solicitud.asset else '---', style_normal),
+            Paragraph(f"{solicitud.solicitante.first_name} {solicitud.solicitante.last_name}", style_normal),
+            Paragraph('Aprobado' if solicitud.approved else 'No aprobado', style_normal),
+            Paragraph(solicitud.suministros, style_normal),
+            Paragraph(fechas, style_normal)
+        ]
+        solicitudes_data.append(row)
+
+    table = Table(solicitudes_data, colWidths=[0.9 * inch, 1.2 * inch, 1.5 * inch, 1 * inch, 2.2 * inch, 1.5 * inch], repeatRows=1)
+    table.setStyle(TableStyle([
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),  # Líneas más delgadas y menos negras
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),  # Texto del encabezado en negro
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('FONTSIZE', (0, 0), (-1, -1), 9)
+    ]))
+    elements.append(table)
+
+    doc.build(elements)
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
 
 
 class CreateSolicitudOt(LoginRequiredMixin, View):
@@ -707,7 +808,6 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         state = self.request.GET.get('state')
         asset_id = self.request.GET.get('asset_id')
         responsable_id = self.request.GET.get('responsable')
-        keyword = self.request.GET.get('keyword')
 
         if self.request.user.groups.filter(name='maq_members').exists():
             # Obtén el/los asset(s) supervisado(s) por el usuario
@@ -724,6 +824,7 @@ class OtListView(LoginRequiredMixin, generic.ListView):
         if state:
             queryset = queryset.filter(state=state)
 
+        keyword = self.request.GET.get('keyword')
         if keyword:
             queryset = Ot.objects.filter(description__icontains=keyword)
             return queryset
@@ -1751,36 +1852,42 @@ def megger_view(request, pk):
     rotoraux = get_object_or_404(RotorAux, megger=megger)
     rodamientosescudos = get_object_or_404(RodamientosEscudos, megger=megger)
 
-    estator_form = EstatorForm(instance=estator)
-    excitatriz_form = ExcitatrizForm(instance=excitatriz)
-    rotormain_form = RotorMainForm(instance=rotormain)
-    rotoraux_form = RotorAuxForm(instance=rotoraux)
-    rodamientosescudos_form = RodamientosEscudosForm(instance=rodamientosescudos)
+    estator_form = EstatorForm(request.POST or None, instance=estator)
+    excitatriz_form = ExcitatrizForm(request.POST or None, instance=excitatriz)
+    rotormain_form = RotorMainForm(request.POST or None, instance=rotormain)
+    rotoraux_form = RotorAuxForm(request.POST or None, instance=rotoraux)
+    rodamientosescudos_form = RodamientosEscudosForm(request.POST or None, instance=rodamientosescudos)
 
     if request.method == 'POST':
+        estator_form = EstatorForm(request.POST, instance=estator)
+        excitatriz_form = ExcitatrizForm(request.POST, instance=excitatriz)
+        rotormain_form = RotorMainForm(request.POST, instance=rotormain)
+        rotoraux_form = RotorAuxForm(request.POST, instance=rotoraux)
+        rodamientosescudos_form = RodamientosEscudosForm(request.POST, instance=rodamientosescudos)
+
         if 'submit_estator' in request.POST:
-            estator_form = EstatorForm(request.POST, instance=estator)
             if estator_form.is_valid():
                 estator_form.save()
+                return redirect('got:meg-detail', pk=megger.pk)
         elif 'submit_excitatriz' in request.POST:
-            excitatriz_form = ExcitatrizForm(request.POST, instance=excitatriz)
             if excitatriz_form.is_valid():
                 excitatriz_form.save()
+                return redirect('got:meg-detail', pk=megger.pk)
         elif 'submit_rotormain' in request.POST:
-            rotormain_form = RotorMainForm(request.POST, instance=rotormain)
             if rotormain_form.is_valid():
                 rotormain_form.save()
+                return redirect('got:meg-detail', pk=megger.pk)
         elif 'submit_rotoraux' in request.POST:
-            rotoraux_form = RotorAuxForm(request.POST, instance=rotoraux)
             if rotoraux_form.is_valid():
                 rotoraux_form.save()
+                return redirect('got:meg-detail', pk=megger.pk)
         elif 'submit_rodamientosescudos' in request.POST:
-            rodamientosescudos_form = RodamientosEscudosForm(request.POST, instance=rodamientosescudos)
             if rodamientosescudos_form.is_valid():
                 rodamientosescudos_form.save()
+                return redirect('got:meg-detail', pk=megger.pk)
 
-    else:
-        estator_form = EstatorForm(instance=estator)
+    # else:
+    #     estator_form = EstatorForm(instance=estator)
 
     context = {
         'megger': megger,
