@@ -300,6 +300,8 @@ class Ot(models.Model):
 
     creation_date = models.DateField(auto_now_add=True)
     num_ot = models.AutoField(primary_key=True)
+
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
     description = models.TextField()
     super = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     state = models.CharField(choices=STATUS, default='x', max_length=1)
@@ -307,7 +309,6 @@ class Ot(models.Model):
     info_contratista_pdf = models.FileField(upload_to=get_upload_path,null=True, blank=True)
     ot_aprobada = models.FileField(upload_to=get_upload_path,null=True, blank=True)
 
-    system = models.ForeignKey(System, on_delete=models.CASCADE)
 
     def all_tasks_finished(self):
         related_tasks = self.task_set.all()

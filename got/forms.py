@@ -53,7 +53,6 @@ class UploadImages(forms.Form):
         self.fields['file_field'].widget.attrs.update({'multiple': True})
 
 
-# ---------------- Systems ------------------- #
 class SysForm(forms.ModelForm):
 
     class Meta:
@@ -67,7 +66,6 @@ class SysForm(forms.ModelForm):
         }
 
 
-# ---------------- Equipos ------------------- #
 class EquipoForm(forms.ModelForm):
 
     def clean_code(self):
@@ -84,7 +82,6 @@ class EquipoForm(forms.ModelForm):
         exclude = ['system', 'horometro', 'prom_hours']
         labels = {
             'name': 'Nombre',
-            # 'date_inv': 'Fecha de ingreso al inventario',
             'code': 'Codigo interno',
             'model': 'Modelo',
             'serial': '# Serial',
@@ -100,7 +97,6 @@ class EquipoForm(forms.ModelForm):
             'subsystem': 'Categoria (Si aplica)'
             }
         widgets = {
-            # 'date_inv': XYZ_DateInput(format=['%Y-%m-%d'],),
             'feature': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
             'manual_pdf': forms.FileInput(attrs={'class': 'form-control'}),
@@ -146,17 +142,18 @@ class OtForm(forms.ModelForm):
 
     class Meta:
         model = Ot
-        exclude = ['creations_date', 'num_ot']
+        exclude = ['creations_date', 'num_ot', 'ot_aprobada']
         labels = {
             'description': 'Description',
             'system': 'Sistema',
             'state': 'Estado',
             'tipo_mtto': 'Tipo de mantenimiento',
             'info_contratista_pdf': 'Informe externo',
-            'ot_aprobada': 'OT aprobada',
+            # 'ot_aprobada': 'OT aprobada',
             'suministros': 'Suministros'
         }
         widgets = {
+            'description': forms.Textarea(attrs={'rows': 4, 'class': 'form-control'}),
             'info_contratista_pdf': forms.FileInput(attrs={'class': 'form-control'}),
             'tipo_mtto': forms.Select(attrs={'class': 'form-control'}),
             'system': forms.Select(attrs={'class': 'form-control'}),

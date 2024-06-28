@@ -1,16 +1,27 @@
 {% extends "got/base_generic.html" %}
 
-{% block title %}Ots{% endblock %}
-
-{% block headtag %}{% endblock %}
+{% block headtag %}
+<style>
+    .field-container {
+        margin-bottom: 20px;  /* Ajusta este valor según necesites */
+    }
+</style>
+{% endblock %}
 
 {% block content %}
     <hr>
     <div class="container">
-        <form action="" method="post" enctype="multipart/form-data">{% csrf_token %}
-            <table>
-            {{ form.as_table }}
-            </table>
+        <h1>Nueva orden de trabajo</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-container">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                    {{ field.help_text }}
+                </div>
+            {% endfor %}
             <input type="submit" value="Generar" class="btn btn-primary" />
         </form>
     </div>

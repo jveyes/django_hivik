@@ -112,14 +112,6 @@
 <!-- <table class="table-list table-detail mt-4">
     <thead>
         <tr>
-            <th colspan="8">
-                Rutinas de mantenimiento
-                {% if perms.got.add_ruta %}
-                    <a href="{% url 'got:ruta-create' system.id %}"><i class="bi bi-plus-circle add-sys"></i></a>
-                {% endif %}
-            </th>
-        </tr>
-        <tr>
             <th scope="col">Codigo</th>
             <th scope="col">Frecuencia</th>
             <th scope="col">Control</th>
@@ -185,18 +177,6 @@
             	<tr id="details{{forloop.counter}}" class="detail-row" style="display:none;">
                 	<td colspan="8">
                     	<table style="width:100%;">
-                        	<tr>
-                            	<th colspan="2">
-                                	Actividades
-                                	{% if perms.got.add_equipo %}
-										<a href="{% url 'got:task-create' ruta.code %}"><i class="bi bi-clipboard2-plus-fill add-more"></i></a>
-									{% endif %}
-                                	{% if ruta.dependencia %}
-										(Relación con rutina {{ ruta.dependencia.name }})
-									{% endif %}
-                            	</th>
-                            	<td></td>
-                        	</tr>
                         	{% for task in ruta.task_set.all %}
                             	<tr>
                                 	<td>{{forloop.counter}}.</td>
