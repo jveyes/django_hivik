@@ -367,6 +367,9 @@ class Ruta(models.Model):
                 ndays = int(inv/self.equipo.prom_hours)
             except (ZeroDivisionError, AttributeError):
                 ndays = int(inv/1)
+
+        if self.control == 'k':
+            ndays = self.frecuency
         
         return date.today() + timedelta(days=ndays)
 
