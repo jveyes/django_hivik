@@ -343,7 +343,7 @@ class Ruta(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE, related_name='rutas')
     equipo = models.ForeignKey(Equipo, on_delete=models.SET_NULL, null=True, blank=True, related_name='equipos')
     ot = models.ForeignKey(Ot, on_delete=models.SET_NULL, null=True, blank=True)
-    dependencia = models.OneToOneField('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='dependiente')
+    dependencia = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='dependiente')
     astillero = models.CharField(max_length=50, null=True, blank=True)
 
 
