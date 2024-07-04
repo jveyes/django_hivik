@@ -3,8 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User, Group
 from .models import (
     Task, Ot, System, Equipo, Ruta, HistoryHour, FailureReport, Operation, Asset, Location, Document,
-    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Consumibles,
-    Control
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro
     )
 
 from django.forms import modelformset_factory
@@ -589,18 +588,6 @@ class ScForm(forms.ModelForm):
         }
 
 
-class SolicitudAssetForm(forms.ModelForm):
-    class Meta:
-        model = Solicitud
-        fields = ['suministros', 'seccion']
-        labels = {
-            'suministros': 'Solicitud',
-            'seccion': 'Sección'
-        }
-        widgets = {
-            'suminsitros': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
-
 class SuministrosEquipoForm(forms.ModelForm):
     class Meta:
         model = Suministro
@@ -702,19 +689,32 @@ class MeggerForm(forms.ModelForm):
         fields = '__all__'
 
 
-class ConsumibleForm(forms.ModelForm):
+# class ConsumibleForm(forms.ModelForm):
+#     class Meta:
+#         model = Consumibles
+#         fields = ['item', 'cant_in', 'cant_out']
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['item'].widget = forms.HiddenInput()
+
+# ConsumibleFormSet = forms.inlineformset_factory(
+#     parent_model=Control,
+#     model=Consumibles,
+#     form=ConsumibleForm,
+#     extra=0,  # No extra forms
+#     can_delete=False
+# )
+
+
+from .models import TransaccionSuministro
+
+class TransaccionSuministroForm(forms.ModelForm):
     class Meta:
-        model = Consumibles
-        fields = ['item', 'cant_in', 'cant_out']
+        model = TransaccionSuministro
+        fields = ['cantidad_ingresada', 'cantidad_consumida']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['item'].widget = forms.HiddenInput()
-
-ConsumibleFormSet = forms.inlineformset_factory(
-    parent_model=Control,
-    model=Consumibles,
-    form=ConsumibleForm,
-    extra=0,  # No extra forms
-    can_delete=False
-)
+        self.fields['cantidad_ingresada'].widget.attrs.update({'class': 'form-control'})
+        self.fields['cantidad_consumida'].widget.attrs.update({'class': 'form-control'})

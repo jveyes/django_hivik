@@ -86,9 +86,9 @@
 									{% endif %}
 	
 									{% if ruta.task_set.all %}
-										<ol>
+										<ul>
 											{% for task in ruta.task_set.all %}
-												<li>{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
+												<li style="margin-bottom: 5px; list-style-type: disc;">{{ task.description }} ({{ task.responsible.first_name }} {{ task.responsible.last_name }})
 	
 													{% if perms.got.add_equipo %}
 														<a href="{% url 'got:update-task' task.id %}"><i class="bi bi-pen"></i></a>
@@ -107,7 +107,7 @@
 													{% endif %}
 												</ul>
 											{% endfor %}
-										</ol>
+										</ul>
 										<hr>
 									{% else %}
 										<p>No hay actividades registradas.</p>

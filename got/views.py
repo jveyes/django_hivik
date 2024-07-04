@@ -18,14 +18,13 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
-    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item, Consumibles,
-    Control, Stock
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
-    DocumentForm, SolicitudForm, SuministroFormset, SolicitudAssetForm, MeggerForm, EstatorForm, ExcitatrizForm, RotorMainForm,
-    RotorAuxForm, RodamientosEscudosForm, ConsumibleFormSet, ConsumibleForm
+    DocumentForm, SolicitudForm, SuministroFormset, MeggerForm, EstatorForm, ExcitatrizForm, RotorMainForm,
+    RotorAuxForm, RodamientosEscudosForm, #ConsumibleFormSet, ConsumibleForm
 )
 
 from datetime import timedelta, date, datetime
@@ -160,6 +159,42 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
 
         return queryset
+    
+
+from django.forms import modelformset_factory
+from .models import TransaccionSuministro
+
+# Crear un formset para las transacciones de suministro
+TransaccionSuministroFormset = modelformset_factory(
+    TransaccionSuministro,
+    fields=('cantidad_ingresada', 'cantidad_consumida', 'suministro'),
+    extra=0,  # No agregar formularios extra automáticamente
+    can_delete=True  # Permitir la eliminación de transacciones
+)
+
+
+from django.shortcuts import render, redirect
+from django.views import View
+from .models import Suministro, Asset
+
+class ReporteTransaccionView(View):
+    template_name = 'reporte_transaccion.html'
+
+    def get(self, request, *args, **kwargs):
+        asset_id = self.kwargs.get('asset_id')
+        initial_data = [{'suministro': suministro.id} for suministro in Suministro.objects.filter(asset__id=asset_id)]
+        formset = TransaccionSuministroFormset(queryset=Suministro.objects.none(), initial=initial_data)  # Inicializar con suministros
+        return render(request, self.template_name, {'formset': formset})
+
+    def post(self, request, *args, **kwargs):
+        formset = TransaccionSuministroFormset(request.POST)
+        if formset.is_valid():
+            formset.save()  # Guardar todas las transacciones de una vez
+            return redirect(self.get_success_url())
+        return render(request, self.template_name, {'formset': formset})
+
+    def get_success_url(self):
+        return '/ruta-de-exito/'  # Ajustar a la URL deseada después del éxito
 
 
 from reportlab.lib import colors
@@ -465,53 +500,6 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         else:
             context = {'asset': asset, 'sys_form': sys_form}
             return render(request, self.template_name, context)
-
-from django.db import transaction
-from django.forms import modelformset_factory
-class ConsumiblesView(View):
-    template_name = 'got/reporte-consumos.html'
-
-    def get(self, request, pk):
-        asset = get_object_or_404(Asset, abbreviation=pk)
-        ConsumibleFormSet = modelformset_factory(Consumibles, form=ConsumibleForm, extra=0)
-        items_by_subsystem = self.get_items_by_subsystem(asset)
-        formset = ConsumibleFormSet(queryset=Consumibles.objects.filter(item__id__in=[item.id for items in items_by_subsystem.values() for item in items]))
-        return render(request, self.template_name, {'formset': formset, 'asset': asset, 'items_by_subsystem': items_by_subsystem})
-
-    def post(self, request, pk):
-        asset = get_object_or_404(Asset, abbreviation=pk)
-        formset = ConsumibleFormSet(request.POST)
-        if formset.is_valid():
-            try:
-                with transaction.atomic():
-                    control = Control(report_date=timezone.now(), reporter=request.user, asset=asset)
-                    control.save()
-                    for form in formset:
-                        consumible = form.save(commit=False)
-                        consumible.control = control
-                        consumible.save()
-                        stock, created = Stock.objects.get_or_create(item=consumible.item, asset=asset)
-                        stock.cantidad += consumible.cant_in - consumible.cant_out
-                        stock.save()
-                messages.success(request, "Datos guardados correctamente.")
-                return redirect(reverse('got:asset-detail', args=[asset.abbreviation]))
-            except Exception as e:
-                messages.error(request, f"Error al guardar los datos: {str(e)}")
-        else:
-            messages.error(request, "Error en el formulario.")
-        items_by_subsystem = self.get_items_by_subsystem(asset)
-        return render(request, self.template_name, {'formset': formset, 'asset': asset, 'items_by_subsystem': items_by_subsystem})
-    
-    def get_items_by_subsystem(self, asset):
-        """ Helper function to fetch items by subsystem """
-        sys = asset.system_set.all()
-        equipos = Equipo.objects.filter(system__asset=asset).prefetch_related('suministros__item')
-        items_by_subsystem = defaultdict(set)
-        for equipo in equipos:
-            subsystem = equipo.subsystem if equipo.subsystem else "General"
-            for suministro in equipo.suministros.all():
-                items_by_subsystem[subsystem].add(suministro.item)
-        return {k: list(v) for k, v in items_by_subsystem.items() if v}
 
 
 class SysDetailView(LoginRequiredMixin, generic.DetailView):

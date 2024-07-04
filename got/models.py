@@ -127,35 +127,6 @@ class Item(models.Model):
     class Meta:
         ordering = ['name', 'reference']
 
-class Control(models.Model):
-
-    report_date = models.DateField(auto_now_add=True)
-    reporter = models.ForeignKey(User, on_delete=models.CASCADE)
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-
-
-class Consumibles(models.Model):
-
-    cant_in = models.IntegerField(default=0)
-    cant_out = models.IntegerField(default=0)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-
-    control = models.ForeignKey(Control, on_delete=models.CASCADE, null=True, blank=True)
-
-    @property
-    def sto(self):
-        return self.cant_in - self.cant_out
-
-
-class Stock(models.Model):
-
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    cantidad = models.IntegerField(default=0)
-    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('item', 'asset')
-
 
 class System(models.Model):
 
@@ -512,17 +483,10 @@ class Operation(models.Model):
 
 class Solicitud(models.Model):
 
-    SECCION = (
-        ('c', 'Consumibles'),
-        ('h', 'Herramientas'),
-        ('r', 'Repuestos'),
-    )
-
     creation_date = models.DateTimeField(auto_now_add=True)
     solicitante = models.ForeignKey(User, on_delete=models.CASCADE)
     ot = models.ForeignKey(Ot, on_delete=models.CASCADE, null=True, blank=True)
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True)
-    seccion = models.CharField(max_length=1, choices=SECCION, default='r')
     suministros = models.TextField()
     num_sc = models.TextField(null=True, blank=True)
     approved = models.BooleanField(default=False)
@@ -536,6 +500,7 @@ class Solicitud(models.Model):
     class Meta:
         permissions = (('can_approve', 'Aprobar solicitudes'),)
         ordering = ['-creation_date']
+
 
 @receiver(pre_save, sender=Solicitud)
 def update_solicitud_dates(sender, instance, **kwargs):
@@ -559,8 +524,21 @@ class Suministro(models.Model):
 
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE, null=True, blank=True, related_name='suministros')
 
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE, null=True, blank=True, related_name='suministros')
+
     def __str__(self):
         return f"{self.item} ({self.cantidad})"
+
+
+class TransaccionSuministro(models.Model):
+    suministro = models.ForeignKey(Suministro, on_delete=models.CASCADE, related_name='transacciones')
+    cantidad_ingresada = models.IntegerField(default=0, help_text="Cantidad que se añade al inventario")
+    cantidad_consumida = models.IntegerField(default=0, help_text="Cantidad que se consume del inventario")
+    fecha = models.DateTimeField(auto_now_add=True)
+    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return f"{self.suministro.item.name}: +{self.cantidad_ingresada}/-{self.cantidad_consumida} el {self.fecha.strftime('%Y-%m-%d')}"
 
 
 class Megger(models.Model):
@@ -570,6 +548,7 @@ class Megger(models.Model):
 
     def __str__(self):
         return f"Prueba #{self.id}/{self.equipo}"
+
 
 class Estator(models.Model):
 
@@ -640,6 +619,7 @@ class RotorMain(models.Model):
     pf_10min_l_tierra = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
     pf_obs_l_tierra = models.TextField(null=True, blank=True)
 
+
 class RotorAux(models.Model):
 
     megger = models.OneToOneField(Megger, on_delete=models.CASCADE)
@@ -659,7 +639,6 @@ class RodamientosEscudos(models.Model):
     rodamientobs = models.TextField(null=True, blank=True)
     escudoas = models.TextField(null=True, blank=True)
     escudobs = models.TextField(null=True, blank=True)
-
 
 
 class Image(models.Model):

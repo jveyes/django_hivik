@@ -83,7 +83,7 @@ urlpatterns = [
 
 
     path('buceo/', views.buceomtto, name='buceomtto'),
-    path('asset/<str:pk>/consumibles/', views.ConsumiblesView.as_view(), name='asset-consumibles'),
+    # path('asset/<str:pk>/consumibles/', views.ConsumiblesView.as_view(), name='asset-consumibles'),
 
     path('solicitudes/download_pdf/', views.download_pdf, name='download_pdf'),
 
