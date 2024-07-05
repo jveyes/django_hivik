@@ -1397,7 +1397,7 @@ def report_pdf(request, num_ot):
 @login_required
 def indicadores(request):
 
-    m = 6
+    m = 7
 
     area_filter = request.GET.get('area', None)
 

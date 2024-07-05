@@ -24,6 +24,28 @@ def get_upload_pdfs(instance, filename):
     return filename
 
 
+class Item(models.Model):
+
+    SECCION = (
+        ('c', 'Consumibles'),
+        ('h', 'Herramientas'),
+        ('r', 'Repuestos'),
+    )
+
+    name = models.CharField(max_length=50)
+    reference = models.CharField(max_length=100, null=True, blank=True)
+    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
+    presentacion = models.CharField(max_length=10)
+    code = models.CharField(max_length=50, null=True, blank=True)
+    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
+
+    def __str__(self):
+        return f"{self.name} {self.reference}"
+
+    class Meta:
+        ordering = ['name', 'reference']
+        
+
 class Asset(models.Model):
 
     AREA = (
@@ -41,7 +63,6 @@ class Asset(models.Model):
     supervisor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
 
-    # Propiedades adicionales para barcos
     bandera = models.CharField(default='Colombia', max_length=50, null=True, blank=True)
     eslora = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
     manga = models.DecimalField(default=0, max_digits=8, decimal_places=2, null=True, blank=True)
@@ -104,28 +125,6 @@ class Asset(models.Model):
     class Meta:
         permissions = (('can_see_completely', 'Access to completely info'),)
         ordering = ['area', 'name']
-
-
-class Item(models.Model):
-
-    SECCION = (
-        ('c', 'Consumibles'),
-        ('h', 'Herramientas'),
-        ('r', 'Repuestos'),
-    )
-
-    name = models.CharField(max_length=50)
-    reference = models.CharField(max_length=100, null=True, blank=True)
-    imagen = models.ImageField(upload_to=get_upload_path, null=True, blank=True)
-    presentacion = models.CharField(max_length=10)
-    code = models.CharField(max_length=50, null=True, blank=True)
-    seccion = models.CharField(max_length=1, choices=SECCION, default='c')
-
-    def __str__(self):
-        return f"{self.name} {self.reference}"
-
-    class Meta:
-        ordering = ['name', 'reference']
 
 
 class System(models.Model):
