@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Location, Operation, Solicitud, Item,
-    Megger
+    Megger, Suministro
 )
 
 
@@ -53,6 +53,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Asset)
+admin.site.register(Suministro)
 admin.site.register(Megger)
 admin.site.register(Operation)
 admin.site.register(FailureReport)

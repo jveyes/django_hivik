@@ -13,6 +13,7 @@
             {{ asset.name }}
         </h1>
 
+
         <ul class="nav nav-justified" style="font-size: 0.9rem;">
             <li class="nav-item">
                 <form action="{% url 'got:generate_asset_pdf' asset.abbreviation %}" method="POST">{% csrf_token %}
@@ -26,6 +27,9 @@
                 <a class="nav-link {% if not rotativos %}disabled{% endif %}" href="{% url 'got:horas-asset' asset.abbreviation %}">
                     Reporte de horas
                 </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'got:asset-suministros' asset.abbreviation %}">Reporte de Consumos</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'got:failure-report-create' asset.abbreviation %}">Reportar falla</a>
@@ -193,31 +197,32 @@
         <table class="table-list table-detail">
             <thead>
                 <tr>
-                    <th colspan="2">Lubricantes y filtros</th>
+                    <th colspan="3">Lubricantes y filtros</th>
+                </tr>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Cantidad total utilizada</th>
+                    <th>Cantidad en inventario</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th>Descripción</th>
-                    <th>Cantidad</th>
-                </tr>
-                {% for subsystem, items in items_by_subsystem.items %}
+                
+                {% for subsystem, items_with_quantities in items_by_subsystem.items %}
                     <tr>
-                        <th colspan="2">{{ subsystem }}</th>
+                        <th colspan="3">{{ subsystem }}</th>
                     </tr>
-                    {% for item in items %}
+                    {% for item, quantity, inventory in items_with_quantities %}
                         <tr>
                             <td>{{ item }}</td>
-                            <td><!-- Colocar la cantidad si está disponible --></td>
+                            <td>{{ quantity }}</td>
+                            <td>{{ inventory }}</td>
                         </tr>
                     {% endfor %}
                 {% empty %}
                     <tr>
-                        <td colspan="2">No hay artículos disponibles.</td>
+                        <td colspan="3">No hay artículos disponibles.</td>
                     </tr>
                 {% endfor %}
-
-
 
             </tbody>
         </table>

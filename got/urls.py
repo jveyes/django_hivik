@@ -87,4 +87,6 @@ urlpatterns = [
 
     path('solicitudes/download_pdf/', views.download_pdf, name='download_pdf'),
 
+    path('asset/<str:abbreviation>/suministros/', views.asset_suministros_report, name='asset-suministros'),
+
 ]

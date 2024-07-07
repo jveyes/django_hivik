@@ -1,0 +1,35 @@
+{% extends "got/base/base_detail.html" %}
+
+
+{% block content %}
+
+<div class="container">
+    <h1>Reporte de Consumos de lubricantes y filtros para {{ asset.name }}</h1>
+
+    <form method="post">{% csrf_token %}
+        <table class="table-list table-detail">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th class="nowrap">Cantidad Actual</th>
+                    <th>Cantidad Consumida</th>
+                    <th>Cantidad Ingresada</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for suministro in suministros %}
+                <tr>
+                    <td>{{ suministro.item }}</td>
+                    <td>{{ suministro.cantidad }}</td>
+                    <td><input type="number" name="consumido_{{ suministro.id }}" value="0" min="0"></td>
+                    <td><input type="number" name="ingresado_{{ suministro.id }}" value="0" min="0"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Actualizar Consumos</button>
+    </form>
+</div>
+
+
+{% endblock %}

@@ -18,13 +18,13 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from .models import (
     Asset, System, Ot, Task, Equipo, Ruta, HistoryHour, FailureReport, Image, Operation, Location, Document,
-    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item
+    Megger, Estator, Excitatriz, RotorMain, RotorAux, RodamientosEscudos, Solicitud, Suministro, Item, TransaccionSuministro
 )
 from .forms import (
     RescheduleTaskForm, OtForm, ActForm, FinishTask, SysForm, EquipoForm, FinishOtForm, RutaForm, RutActForm, ReportHours,
     ReportHoursAsset, failureForm,EquipoFormUpdate, OtFormNoSup, ActFormNoSup, UploadImages, OperationForm, LocationForm,
     DocumentForm, SolicitudForm, SuministroFormset, MeggerForm, EstatorForm, ExcitatrizForm, RotorMainForm,
-    RotorAuxForm, RodamientosEscudosForm, #ConsumibleFormSet, ConsumibleForm
+    RotorAuxForm, RodamientosEscudosForm
 )
 
 from datetime import timedelta, date, datetime
@@ -35,6 +35,7 @@ import itertools
 import PyPDF2
 import smtplib
 import logging
+from reportlab.lib import colors
 
 
 logger = logging.getLogger(__name__)
@@ -117,6 +118,32 @@ class AssignedTaskByUserListView(LoginRequiredMixin, generic.ListView):
         return queryset.none() 
     
 
+def asset_suministros_report(request, abbreviation):
+    asset = get_object_or_404(Asset, abbreviation=abbreviation)
+    suministros = Suministro.objects.filter(asset=asset)
+
+    if request.method == 'POST':
+        for suministro in suministros:
+            cantidad_consumida = int(request.POST.get(f'consumido_{suministro.id}', 0))
+            cantidad_ingresada = int(request.POST.get(f'ingresado_{suministro.id}', 0))
+            
+            # Actualizar cantidades en los suministros
+            suministro.cantidad -= cantidad_consumida
+            suministro.cantidad += cantidad_ingresada
+            suministro.save()
+
+            # Registrar transacción de suministro
+            TransaccionSuministro.objects.create(
+                suministro=suministro,
+                cantidad_ingresada=cantidad_ingresada,
+                cantidad_consumida=cantidad_consumida,
+                usuario=request.user
+            )
+        return redirect(reverse('got:asset-detail', kwargs={'pk': asset.abbreviation}))
+
+    return render(request, 'got/asset_suministros_report.html', {'asset': asset, 'suministros': suministros})
+
+
 class SolicitudesListView(LoginRequiredMixin, generic.ListView):
     
     model = Solicitud
@@ -159,45 +186,8 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
             queryset = queryset.filter(approved=True, sc_change_date__isnull=False)
 
         return queryset
-    
+   
 
-from django.forms import modelformset_factory
-from .models import TransaccionSuministro
-
-# Crear un formset para las transacciones de suministro
-TransaccionSuministroFormset = modelformset_factory(
-    TransaccionSuministro,
-    fields=('cantidad_ingresada', 'cantidad_consumida', 'suministro'),
-    extra=0,  # No agregar formularios extra automáticamente
-    can_delete=True  # Permitir la eliminación de transacciones
-)
-
-
-from django.shortcuts import render, redirect
-from django.views import View
-from .models import Suministro, Asset
-
-class ReporteTransaccionView(View):
-    template_name = 'reporte_transaccion.html'
-
-    def get(self, request, *args, **kwargs):
-        asset_id = self.kwargs.get('asset_id')
-        initial_data = [{'suministro': suministro.id} for suministro in Suministro.objects.filter(asset__id=asset_id)]
-        formset = TransaccionSuministroFormset(queryset=Suministro.objects.none(), initial=initial_data)  # Inicializar con suministros
-        return render(request, self.template_name, {'formset': formset})
-
-    def post(self, request, *args, **kwargs):
-        formset = TransaccionSuministroFormset(request.POST)
-        if formset.is_valid():
-            formset.save()  # Guardar todas las transacciones de una vez
-            return redirect(self.get_success_url())
-        return render(request, self.template_name, {'formset': formset})
-
-    def get_success_url(self):
-        return '/ruta-de-exito/'  # Ajustar a la URL deseada después del éxito
-
-
-from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -402,18 +392,29 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         asset = self.get_object()
-        rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
         sys = asset.system_set.all()
 
         equipos = Equipo.objects.filter(system__asset=asset).prefetch_related('suministros__item')
 
         item_subsystems = defaultdict(set)
         items_by_subsystem = defaultdict(set)
+        item_cant = defaultdict(set)
+
+        inventory_counts = defaultdict(int)
+        suministros = Suministro.objects.filter(asset=asset)
+        for suministro in suministros:
+            inventory_counts[suministro.item] += suministro.cantidad
 
         for equipo in equipos:
             subsystem = equipo.subsystem if equipo.subsystem else "General"
             for suministro in equipo.suministros.all():
                 item_subsystems[suministro.item].add(subsystem)
+                if suministro.item in item_cant:
+                    item_cant[suministro.item] += suministro.cantidad
+                else:
+                    item_cant[suministro.item] = suministro.cantidad
+        
+        context['item_cant'] = item_cant
 
         # Determinar los ítems duplicados: aquellos que aparecen en más de un subsystem.
         duplicated_items = {item for item, subsystems in item_subsystems.items() if len(subsystems) > 1}
@@ -422,11 +423,11 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         for equipo in equipos:
             subsystem = equipo.subsystem if equipo.subsystem else "General"
             for suministro in equipo.suministros.all():
-                # print(suministro.item.id)
-                if suministro.item.id in item_names:
-                    items_by_subsystem["General"].add(suministro.item)
+                item_tuple = (suministro.item, item_cant[suministro.item], inventory_counts[suministro.item])
+                if suministro.item in duplicated_items:
+                    items_by_subsystem["General"].add(item_tuple)
                 else:
-                    items_by_subsystem[subsystem].add(suministro.item)
+                    items_by_subsystem[subsystem].add(item_tuple)
 
         items_by_subsystem = {k: list(v) for k, v in items_by_subsystem.items() if v}
         context['items_by_subsystem'] = items_by_subsystem
@@ -483,6 +484,8 @@ class AssetDetailView(LoginRequiredMixin, generic.DetailView):
         context['page_obj'] = page_obj
         context['page_obj_rutas'] = filtered_rutas
         context['mes'] = current_month_name_es
+
+        rotativos = Equipo.objects.filter(system__asset=asset, tipo='r').exists()
         context['rotativos'] = rotativos
         context['other_asset_systems'] = other_asset_systems
         context['add_sys'] = combined_systems
