@@ -35,7 +35,9 @@ import itertools
 import PyPDF2
 import smtplib
 import logging
+
 from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
 
 
 logger = logging.getLogger(__name__)
@@ -188,7 +190,6 @@ class SolicitudesListView(LoginRequiredMixin, generic.ListView):
         return queryset
    
 
-from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch

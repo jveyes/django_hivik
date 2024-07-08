@@ -15,7 +15,7 @@
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                 <!-- Muestra el enlace directo al equipo del supervisor -->
-                {% if request.user|has_group:"maq_members" %}
+                {% if asset_del_supervisor %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == asset_del_supervisor.get_absolute_url %}active{% endif %}" href="{{ asset_del_supervisor.get_absolute_url }}">
                             {{ asset_del_supervisor.name }}

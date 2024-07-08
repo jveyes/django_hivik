@@ -11,12 +11,21 @@ register = template.Library()
 def obtener_asset_del_supervisor(context):
     request = context['request']
     user = request.user
-    if user.groups.filter(name='maq_members').exists():
+    target_groups = ['maq_members', 'serport_members']
+    user_groups = user.groups.filter(name__in=target_groups).values_list('name', flat=True)
+
+    if user_groups:
         try:
             return Asset.objects.get(supervisor=user)
         except Asset.DoesNotExist:
-            pass
-    return False
+            return None
+    return None
+    # if user.groups.filter(name='maq_members').exists():
+    #     try:
+    #         return Asset.objects.get(supervisor=user)
+    #     except Asset.DoesNotExist:
+    #         pass
+    # return False
 
 
 @register.filter(name='has_group')
