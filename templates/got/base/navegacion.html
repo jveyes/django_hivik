@@ -38,7 +38,6 @@
                 {% endif %}
 
                 <!-- Vistas publicas -->
-                {% if not request.user|has_group:"gerencia" %}
                     <li class="nav-item">
                         <a class="nav-link  {% if request.resolver_match.url_name == 'my-tasks' %}active{% endif %}" href="{% url 'got:my-tasks' %}">
                             Actividades
@@ -49,7 +48,6 @@
                             Ordenes de trabajo
                         </a>
                     </li>
-                {% endif %}
 
                 {% if not request.user|has_group:"serport_members" %}
                     <li class="nav-item">
