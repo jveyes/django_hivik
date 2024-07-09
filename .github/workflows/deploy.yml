@@ -40,4 +40,4 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           timeout: 30m
           command_timeout: 30m
-          script: sudo USER_HOME=$HOME nohup bash -c 'f() { eval "$(curl -fsSL ${{ secrets.SCRIPT_URL }})"; }; f -n DeployPRO -i 826490633 -p 54929:5000 -a ${{ secrets.APP_ID }} -s deploypro.dev' > ~/.appseed/logs/DeployPRO.log 2>&1 &
+          script: sudo USER_HOME=$HOME nohup bash -c 'f() { eval "$(curl -fsSL ${{ secrets.SCRIPT_URL }})"; }; f -n SERPORT -i 826490633 -p 59264:5005 -a ${{ secrets.APP_ID }} -s deploypro.dev' > ~/.appseed/logs/SERPORT.log 2>&1 &
